@@ -1,25 +1,16 @@
 @import "tailwindcss";
+
 /* =========================================
-   LENIS FIRST SCROLL LAG FIX
+   LENIS SMOOTH SCROLL PRODUCTION FIX
 ========================================= */
 html, body {
-  scroll-behavior: auto !important; /* Native smooth scroll ko jabardasti off karna */
-  overscroll-behavior: none; /* Page ko top ya bottom par bounce hone se rokna */
+  scroll-behavior: auto !important;
+  overscroll-behavior-y: none;
 }
 
-@layer base {
-  body {
-    background-color: #FDFBF7; /* Fresh Light Golden/Cream */
-    color: #2C2A29; /* Warm Charcoal instead of harsh black */
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-}
-
-/* --- Lenis Smooth Scroll Base Fixes --- */
 html.lenis, html.lenis body {
   height: auto;
-  width: 100vw;
+  width: 100%; /* 100vw ko 100% kiya taaki scrollbar jump na kare */
 }
 
 .lenis.lenis-smooth {
@@ -38,37 +29,42 @@ html.lenis, html.lenis body {
   pointer-events: none;
 }
 
+@layer base {
+  body {
+    background-color: #FDFBF7;
+    color: #2C2A29;
+    width: 100%;
+    overflow-x: hidden; /* Sirf body par horizontal scroll hide kiya */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
 /* =========================================
    SCROLLBAR STYLING & FIXES
 ========================================= */
 
-/* 1. Horizontal Scrollbar ko humesha ke liye chupana */
-html, body {
-  max-width: 100%;
-  overflow-x: hidden;
-}
-
-/* 2. Chrome, Edge, aur Safari ke liye Vertical Scrollbar */
+/* Chrome, Edge, Safari */
 ::-webkit-scrollbar {
-  width: 6px; /* Scrollbar ko patla kiya gaya hai */
-  height: 0px; /* Horizontal scrollbar ki height 0 kar di */
+  width: 6px;
+  height: 0px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #F8F5F0; /* Website ke background color se match */
+  background: #F8F5F0;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #C19A6B; /* Thos (Solid) Golden Brand Color */
-  border-radius: 10px; /* Gol aur smooth edges */
+  background: #C19A6B;
+  border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #3A332C; /* Mouse aane par dark brown color */
+  background: #3A332C;
 }
 
-/* 3. Firefox ke liye Scrollbar */
+/* Firefox */
 * {
-  scrollbar-width: thin; /* Patla scrollbar */
-  scrollbar-color: #C19A6B #F8F5F0; /* Thumb aur Track ka color */
+  scrollbar-width: thin;
+  scrollbar-color: #C19A6B #F8F5F0;
 }
