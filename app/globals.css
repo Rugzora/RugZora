@@ -1,4 +1,11 @@
 @import "tailwindcss";
+/* =========================================
+   LENIS FIRST SCROLL LAG FIX
+========================================= */
+html, body {
+  scroll-behavior: auto !important; /* Native smooth scroll ko jabardasti off karna */
+  overscroll-behavior: none; /* Page ko top ya bottom par bounce hone se rokna */
+}
 
 @layer base {
   body {
@@ -7,4 +14,61 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+}
+
+/* --- Lenis Smooth Scroll Base Fixes --- */
+html.lenis, html.lenis body {
+  height: auto;
+  width: 100vw;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
+}
+
+/* =========================================
+   SCROLLBAR STYLING & FIXES
+========================================= */
+
+/* 1. Horizontal Scrollbar ko humesha ke liye chupana */
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* 2. Chrome, Edge, aur Safari ke liye Vertical Scrollbar */
+::-webkit-scrollbar {
+  width: 6px; /* Scrollbar ko patla kiya gaya hai */
+  height: 0px; /* Horizontal scrollbar ki height 0 kar di */
+}
+
+::-webkit-scrollbar-track {
+  background: #F8F5F0; /* Website ke background color se match */
+}
+
+::-webkit-scrollbar-thumb {
+  background: #C19A6B; /* Thos (Solid) Golden Brand Color */
+  border-radius: 10px; /* Gol aur smooth edges */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3A332C; /* Mouse aane par dark brown color */
+}
+
+/* 3. Firefox ke liye Scrollbar */
+* {
+  scrollbar-width: thin; /* Patla scrollbar */
+  scrollbar-color: #C19A6B #F8F5F0; /* Thumb aur Track ka color */
 }
