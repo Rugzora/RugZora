@@ -157,6 +157,24 @@ export default function Navbar() {
           </nav>
           
           <div className="flex items-center space-x-6 text-[#6B6054]">
+
+
+
+            {/* 🌟 ADMIN & EDIT WEB BUTTONS */}
+<div className="hidden sm:flex items-center gap-2 mr-2">
+  <Link
+    href="/admin"
+    className="px-3 py-1 text-[11px] uppercase tracking-widest font-semibold text-[#3A332C] border border-[#DFD8CC] hover:border-[#C19A6B] hover:text-[#C19A6B] rounded-sm transition-colors"
+  >
+    Admin
+  </Link>
+  <Link
+    href="/admin/content"
+    className="px-3 py-1 text-[11px] uppercase tracking-widest font-semibold bg-[#3A332C] text-[#F8F5F0] hover:bg-[#C19A6B] rounded-sm transition-colors shadow-sm"
+  >
+    Edit Web
+  </Link>
+</div>
             
             {/* CURRENCY SWITCHER */}
             <div className="relative">
