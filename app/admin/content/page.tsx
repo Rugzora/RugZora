@@ -199,29 +199,24 @@ const defaultData: Record<string, any> = {
   },
   about: {
     hero: {
-      tag: "Conscious Luxury",
-      title: "Sustainable Innovation Meets Indian Heritage",
-      description: "RugZora was established to prove that high-end floor coverings do not require shearing sheep or producing virgin synthetic plastics.",
-      bgImage: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1600&auto=format&fit=crop"
-    },
-    mission: {
-      title: "Our Circular Fiber Philosophy",
-      text: "Every square meter of a RugZora rug diverts dozens of plastic bottles from landfill ecosystems. Micro-spun to achieve pure wool-grade tactile softness, our carpets remain hypoallergenic, itch-free, and effortlessly washable.",
-      image: "https://images.unsplash.com/photo-1615876234886-fd1a8f947122?q=80&w=1000&auto=format&fit=crop"
+      tag: "Our Heritage",
+      title: "Crafted in Bhadohi",
+      para1: "RugZora represents the pinnacle of modern carpet manufacturing, rooted in the rich textile heritage of Bhadohi, Uttar Pradesh. We bring the fresh, golden warmth of artisanal design directly from our production house to your floors.",
+      para2: "As direct manufacturers, we operate our own specialized setup. Utilizing precision straight-stitch machinery and advanced zigzag sewing techniques, our artisans meticulously shape both the rugged, natural beauty of Jute and the smooth, luxurious finish of Cut-Pile carpets.",
+      para3: "By maintaining complete control over our manufacturing, we ensure that every thread aligns with our standard of premium elegance, offering you unparalleled quality and authentic craftsmanship without the retail markup.",
+      image: "https://images.unsplash.com/photo-1581428982868-e410dd047a90?auto=format&fit=crop&q=80&w=1200"
     }
   },
   contact: {
     header: {
-      tag: "Get In Touch",
-      title: "Bespoke Consultations & Direct Inquiries",
-      description: "Direct communication with our manufacturing workshop in Bhadohi, Uttar Pradesh. Let's design your ideal rug together.",
-      bgImage: "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?q=80&w=1600&auto=format&fit=crop"
+      title: "Connect With Us",
+      description: "For bespoke dimensions, bulk orders, or manufacturing inquiries directly from our Bhadohi unit.",
+      btnText: "Send Inquiry"
     },
     info: {
       address: "Bhadohi Nagar Palika, Uttar Pradesh, India - 221401",
       email: "concierge@rugzora.com",
-      phone: "+91 98765 43210",
-      hours: "Monday – Saturday: 9:00 AM – 7:00 PM IST"
+      phone: "+91 98765 43210"
     }
   }
 };
@@ -1356,75 +1351,62 @@ export default function SiteContentAdmin() {
         {activeTab === "about" && (
           <div className="space-y-10">
             <div className="bg-white p-8 border border-[#EBE5DA] rounded-sm shadow-sm">
-              <h2 className="text-lg font-serif text-[#3A332C] mb-6 border-b border-[#DFD8CC] pb-3">About Us Hero</h2>
+              <h2 className="text-lg font-serif text-[#3A332C] mb-6 border-b border-[#DFD8CC] pb-3">About Us Editorial Content</h2>
               <div className="space-y-6">
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Tag</label>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Tagline</label>
                   <input
                     id="about-hero-tag"
                     type="text"
                     value={currentContent.hero?.tag || ""}
                     onChange={(e) => updateField("hero", "tag", e.target.value)}
-                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none transition-all"
+                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none focus:border-[#C19A6B] transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Title</label>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Main Heading</label>
                   <input
                     id="about-hero-title"
                     type="text"
                     value={currentContent.hero?.title || ""}
                     onChange={(e) => updateField("hero", "title", e.target.value)}
-                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none transition-all"
+                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none focus:border-[#C19A6B] transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Description</label>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Paragraph 1 (Origin & Heritage)</label>
                   <textarea
-                    id="about-hero-description"
+                    id="about-hero-para1"
                     rows={3}
-                    value={currentContent.hero?.description || ""}
-                    onChange={(e) => updateField("hero", "description", e.target.value)}
-                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none transition-all"
-                  />
-                </div>
-                <ImageUploader
-                  label="About Hero Image"
-                  value={currentContent.hero?.bgImage || ""}
-                  onChange={(url) => updateField("hero", "bgImage", url)}
-                  onUpload={handleImageUpload}
-                  isUploading={isUploading}
-                />
-              </div>
-            </div>
-
-            <div className="bg-white p-8 border border-[#EBE5DA] rounded-sm shadow-sm">
-              <h2 className="text-lg font-serif text-[#3A332C] mb-6 border-b border-[#DFD8CC] pb-3">Mission & Fiber Science</h2>
-              <div className="space-y-6">
-                <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Mission Heading</label>
-                  <input
-                    id="about-mission-title"
-                    type="text"
-                    value={currentContent.mission?.title || ""}
-                    onChange={(e) => updateField("mission", "title", e.target.value)}
-                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none transition-all"
+                    value={currentContent.hero?.para1 || ""}
+                    onChange={(e) => updateField("hero", "para1", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none focus:border-[#C19A6B] transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Mission Statement</label>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Paragraph 2 (Workshop & Craftsmanship)</label>
                   <textarea
-                    id="about-mission-text"
-                    rows={4}
-                    value={currentContent.mission?.text || ""}
-                    onChange={(e) => updateField("mission", "text", e.target.value)}
-                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none transition-all"
+                    id="about-hero-para2"
+                    rows={3}
+                    value={currentContent.hero?.para2 || ""}
+                    onChange={(e) => updateField("hero", "para2", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none focus:border-[#C19A6B] transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Paragraph 3 (Promise & Direct Manufacture)</label>
+                  <textarea
+                    id="about-hero-para3"
+                    rows={3}
+                    value={currentContent.hero?.para3 || ""}
+                    onChange={(e) => updateField("hero", "para3", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none focus:border-[#C19A6B] transition-all"
                   />
                 </div>
                 <ImageUploader
-                  label="Recycled Yarn / Craft Image"
-                  value={currentContent.mission?.image || ""}
-                  onChange={(url) => updateField("mission", "image", url)}
+                  label="About Us Bottom Feature Image"
+                  value={currentContent.hero?.image || ""}
+                  onChange={(url) => updateField("hero", "image", url)}
                   onUpload={handleImageUpload}
                   isUploading={isUploading}
                 />
@@ -1432,56 +1414,48 @@ export default function SiteContentAdmin() {
             </div>
           </div>
         )}
-
         {/* --- TAB 5: CONTACT --- */}
         {activeTab === "contact" && (
           <div className="space-y-10">
             <div className="bg-white p-8 border border-[#EBE5DA] rounded-sm shadow-sm">
-              <h2 className="text-lg font-serif text-[#3A332C] mb-6 border-b border-[#DFD8CC] pb-3">Contact Page Header</h2>
+              <h2 className="text-lg font-serif text-[#3A332C] mb-6 border-b border-[#DFD8CC] pb-3">Contact Page Form & Header</h2>
               <div className="space-y-6">
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Tag</label>
-                  <input
-                    id="contact-header-tag"
-                    type="text"
-                    value={currentContent.header?.tag || ""}
-                    onChange={(e) => updateField("header", "tag", e.target.value)}
-                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none transition-all"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Title</label>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Main Heading</label>
                   <input
                     id="contact-header-title"
                     type="text"
                     value={currentContent.header?.title || ""}
                     onChange={(e) => updateField("header", "title", e.target.value)}
-                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none transition-all"
+                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none focus:border-[#C19A6B] transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Description</label>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Description / Subtitle</label>
                   <textarea
                     id="contact-header-description"
-                    rows={2}
+                    rows={3}
                     value={currentContent.header?.description || ""}
                     onChange={(e) => updateField("header", "description", e.target.value)}
-                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none transition-all"
+                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none focus:border-[#C19A6B] transition-all"
                   />
                 </div>
-                <ImageUploader
-                  label="Header Image"
-                  value={currentContent.header?.bgImage || ""}
-                  onChange={(url) => updateField("header", "bgImage", url)}
-                  onUpload={handleImageUpload}
-                  isUploading={isUploading}
-                />
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Submit Button Text</label>
+                  <input
+                    id="contact-header-btnText"
+                    type="text"
+                    value={currentContent.header?.btnText || ""}
+                    onChange={(e) => updateField("header", "btnText", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none focus:border-[#C19A6B] transition-all"
+                  />
+                </div>
               </div>
             </div>
 
             <div className="bg-white p-8 border border-[#EBE5DA] rounded-sm shadow-sm">
-              <h2 className="text-lg font-serif text-[#3A332C] mb-6 border-b border-[#DFD8CC] pb-3">Workshop & Concierge Information</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <h2 className="text-lg font-serif text-[#3A332C] mb-6 border-b border-[#DFD8CC] pb-3">Workshop & Direct Contact Info (Optional)</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                   <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Workshop Address</label>
                   <input
@@ -1509,16 +1483,6 @@ export default function SiteContentAdmin() {
                     type="text"
                     value={currentContent.info?.phone || ""}
                     onChange={(e) => updateField("info", "phone", e.target.value)}
-                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none transition-all"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Operational Hours</label>
-                  <input
-                    id="contact-info-hours"
-                    type="text"
-                    value={currentContent.info?.hours || ""}
-                    onChange={(e) => updateField("info", "hours", e.target.value)}
                     className="w-full border border-[#DFD8CC] p-3 text-sm outline-none transition-all"
                   />
                 </div>

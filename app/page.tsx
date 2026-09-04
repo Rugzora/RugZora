@@ -84,12 +84,24 @@ export default function Home() {
           <p className="text-lg text-[#6B6054] mb-12 max-w-2xl mx-auto font-light leading-relaxed">
             {siteData?.hero?.description || "Handcrafted chunky braided rugs woven from sustainable recycled PET fibers. Ultra-soft wool-like feel, 100% reversible, and tailored directly in our Bhadohi workshop."}
           </p>
-          <a 
-            href={siteData?.hero?.ctaLink || "/collections"} 
-            className="bg-[#3A332C] text-[#F8F5F0] px-12 py-5 text-xs tracking-[0.2em] uppercase hover:bg-[#C19A6B] hover:text-white transition duration-500 shadow-xl inline-block"
-          >
-            {siteData?.hero?.ctaText || "Explore Handcrafted Rugs"}
-          </a>
+
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <a 
+              href={siteData?.hero?.ctaLink || "/collections"} 
+              className="w-full sm:w-auto bg-[#3A332C] text-[#F8F5F0] px-10 py-5 text-xs tracking-[0.2em] uppercase hover:bg-[#C19A6B] hover:text-white transition duration-500 shadow-xl inline-block font-semibold"
+            >
+              {siteData?.hero?.ctaText || "Explore Handcrafted Rugs"}
+            </a>
+
+            <a 
+              href="/process" 
+              className="w-full sm:w-auto bg-white/70 backdrop-blur-md text-[#3A332C] border border-[#DFD8CC] px-8 py-5 text-xs tracking-[0.2em] uppercase hover:bg-[#3A332C] hover:text-white hover:border-[#3A332C] transition duration-500 shadow-md inline-flex items-center justify-center gap-2 font-semibold"
+            >
+              <span>See What We Do When You Order</span>
+              <span className="text-sm">→</span>
+            </a>
+          </div>
         </motion.div>
       </section>
 
