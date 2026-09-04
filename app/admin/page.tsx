@@ -43,24 +43,30 @@ export default function AdminUpload() {
   const dragItem = useRef<number | null>(null);
   const dragOverItem = useRef<number | null>(null);
 
-  // 🌟 Added customization_surcharge in state
+  const defaultCategories = [
+    "Rectangular",
+    "Round & Oval",
+    "Runners",
+    "Traditional"
+  ];
+
   const initialFormState = {
     name: "", original_name: "", sku: "", quantity: "1", 
-    category: "Cut-Pile", custom_category: "", 
-    color: "", shape: "Rectangular", style: "", room: "", pattern: "", material: "",
-    tags: "", features: "", description: "",
+    category: "Rectangular", custom_category: "", 
+    color: "", shape: "Rectangular", style: "", room: "", pattern: "", material: "100% Recycled PET (rPET)",
+    tags: "", features: "100% Reversible, Shed-free, Stain-resistant, Wool-like soft feel", description: "",
     processing_type: "Made to Order",
-    care_instructions: "", processing_time: "2-3 business days", return_policy: "Returns accepted within 14 days",
+    care_instructions: "Spot clean or hose wash. Do not machine wash.", processing_time: "2-3 business days", return_policy: "Returns accepted within 14 days",
     is_customizable: false,
-    customization_surcharge: "20", // 🌟 Default 20% surcharge
+    customization_surcharge: "20",
     free_delivery: false,
+    show_etsy: false,
+    etsy_url: "",
     related_products: [] as string[],
     variants: [{ dimensions: "", unit: "ft", price: "" }] 
   };
 
   const [formData, setFormData] = useState(initialFormState);
-
-  const defaultCategories = ["Cut-Pile", "Jute", "Modern", "Traditional"];
 
   const fetchData = async () => {
     const { data: products } = await supabase.from("products").select("id, name, images").order("created_at", { ascending: false });
@@ -123,14 +129,14 @@ export default function AdminUpload() {
           original_name: data.original_name || "",
           sku: data.sku || "",
           quantity: data.stock_quantity?.toString() || "1",
-          category: isCustomCategory ? "Custom" : (data.category || "Cut-Pile"),
+          category: isCustomCategory ? "Custom" : (data.category || defaultCategories[0]),
           custom_category: isCustomCategory ? data.category : "",
           color: data.color || "",
           shape: data.shape || "Rectangular",
           style: data.style || "",
           room: data.room || "",
           pattern: data.pattern || "",
-          material: data.material || "",
+          material: data.material || "100% Recycled PET (rPET)",
           tags: Array.isArray(data.tags) ? data.tags.join(", ") : (data.tags || ""),
           features: Array.isArray(data.features) ? data.features.join(", ") : (data.features || ""),
           description: data.description || "",
@@ -139,8 +145,10 @@ export default function AdminUpload() {
           processing_time: data.processing_time || "",
           return_policy: data.return_policy || "",
           is_customizable: data.is_customizable || false,
-          customization_surcharge: data.customization_surcharge?.toString() || "20", // 🌟 Added loading
+          customization_surcharge: data.customization_surcharge?.toString() || "20",
           free_delivery: data.free_delivery || false,
+          show_etsy: data.show_etsy || false,
+          etsy_url: data.etsy_url || "",
           related_products: data.related_products || [],
           variants: loadedVariants
         });
@@ -227,6 +235,10 @@ export default function AdminUpload() {
     const finalCategory = formData.category === "Custom" ? formData.custom_category.trim() : formData.category;
     if (!finalCategory) return alert("Please specify a category.");
 
+    if (formData.show_etsy && !formData.etsy_url.trim()) {
+      return alert("Please enter the Etsy URL or uncheck the View on Etsy box.");
+    }
+
     setLoadingAction(statusType); 
     setStatusMsg("Processing upload...");
     try {
@@ -273,8 +285,10 @@ export default function AdminUpload() {
         processing_type: formData.processing_type,
         care_instructions: formData.care_instructions, processing_time: formData.processing_time, return_policy: formData.return_policy,
         is_customizable: formData.is_customizable, 
-        customization_surcharge: parseFloat(formData.customization_surcharge) || 20, // 🌟 Save Surcharge
+        customization_surcharge: parseFloat(formData.customization_surcharge) || 20,
         free_delivery: formData.free_delivery,
+        show_etsy: formData.show_etsy,
+        etsy_url: formData.etsy_url.trim(),
         images: finalImageUrls, 
         related_products: formData.related_products,
         status: statusType === "publish" ? "published" : "draft" 
@@ -304,7 +318,7 @@ export default function AdminUpload() {
       setStatusMsg("");
       
     } catch (err: any) {
-      setStatusMsg(`Error processing request. Please try again.`);
+      setStatusMsg(`Error processing request: ${err.message || 'Please check database fields'}`);
     } finally {
       setLoadingAction(null);
     }
@@ -369,10 +383,9 @@ export default function AdminUpload() {
               <div>
                 <label className="block text-[11px] uppercase tracking-wider font-semibold text-[#3A332C] mb-2">Category *</label>
                 <select name="category" value={formData.category} onChange={handleInputChange} className="w-full border border-[#DFD8CC] p-3 text-sm focus:outline-none focus:border-[#C19A6B] bg-white mb-2">
-                  <option value="Cut-Pile">Cut-Pile</option>
-                  <option value="Jute">Jute</option>
-                  <option value="Modern">Modern</option>
-                  <option value="Traditional">Traditional</option>
+                  {defaultCategories.map((cat) => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
                   <option value="Custom">Custom (Type your own)</option>
                 </select>
                 {formData.category === "Custom" && (
@@ -448,7 +461,7 @@ export default function AdminUpload() {
               <InputField label="Style" name="style" value={formData.style} onChange={handleInputChange} placeholder="e.g. Bohemian, Minimalist" />
               <InputField label="Pattern" name="pattern" value={formData.pattern} onChange={handleInputChange} placeholder="e.g. Geometric, Floral" />
               <InputField label="Room Context" name="room" value={formData.room} onChange={handleInputChange} placeholder="e.g. Living Room, Bedroom" />
-              <InputField label="Material Composition" name="material" value={formData.material} onChange={handleInputChange} placeholder="e.g. 100% Wool, Jute blend" />
+              <InputField label="Material Composition" name="material" value={formData.material} onChange={handleInputChange} placeholder="e.g. 100% Recycled PET (rPET)" />
             </div>
             
             <div className="space-y-6">
@@ -458,17 +471,16 @@ export default function AdminUpload() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <InputField label="Tags (Comma Separated)" name="tags" value={formData.tags} onChange={handleInputChange} placeholder="handmade rug, living room carpet" />
-                <InputField label="Features (Comma Separated)" name="features" value={formData.features} onChange={handleInputChange} placeholder="Washable, Anti-slip backing" />
-                <InputField label="Care Instructions" name="care_instructions" value={formData.care_instructions} onChange={handleInputChange} placeholder="Vacuum regularly, Spot clean..." />
-                <InputField label="SKU / Internal Ref" name="sku" value={formData.sku} onChange={handleInputChange} placeholder="e.g. RUG-JUT-001" />
+                <InputField label="Features (Comma Separated)" name="features" value={formData.features} onChange={handleInputChange} placeholder="100% Reversible, Shed-free, Stain-resistant" />
+                <InputField label="Care Instructions" name="care_instructions" value={formData.care_instructions} onChange={handleInputChange} placeholder="Spot clean or hose wash..." />
+                <InputField label="SKU / Internal Ref" name="sku" value={formData.sku} onChange={handleInputChange} placeholder="e.g. RUG-PET-001" />
               </div>
             </div>
           </div>
 
           <div>
-            <h3 className="text-lg font-serif text-[#3A332C] mb-4 border-b border-[#DFD8CC] pb-2">4. Processing & Operations</h3>
+            <h3 className="text-lg font-serif text-[#3A332C] mb-4 border-b border-[#DFD8CC] pb-2">4. Processing, Logistics & External Channels</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
-              
               <div>
                 <label className="block text-[11px] uppercase tracking-wider font-semibold text-[#3A332C] mb-2">Processing Type</label>
                 <select name="processing_type" value={formData.processing_type} onChange={handleInputChange} className="w-full border border-[#DFD8CC] p-3 text-sm focus:outline-none focus:border-[#C19A6B] bg-white">
@@ -485,8 +497,6 @@ export default function AdminUpload() {
                <InputField label="Return Policy" name="return_policy" value={formData.return_policy} onChange={handleInputChange} placeholder="e.g. Returns accepted within 14 days" />
                
                <div className="flex flex-col space-y-3">
-                  
-                  {/* 🌟 Customization Checkbox and Surcharge input */}
                   <div className="flex flex-col bg-[#F8F5F0] p-3 border border-[#EBE5DA] rounded-sm gap-3">
                     <div className="flex items-center space-x-3">
                       <input type="checkbox" name="is_customizable" id="is_customizable" checked={formData.is_customizable} onChange={handleInputChange} className="w-4 h-4 text-[#C19A6B] border-[#DFD8CC] focus:ring-[#C19A6B]" />
@@ -509,6 +519,44 @@ export default function AdminUpload() {
                     <input type="checkbox" name="free_delivery" id="free_delivery" checked={formData.free_delivery} onChange={handleInputChange} className="w-4 h-4 text-emerald-600 border-emerald-200 focus:ring-emerald-500" />
                     <label htmlFor="free_delivery" className="text-sm text-emerald-800 font-bold cursor-pointer">Offer Free Worldwide Delivery</label>
                   </div>
+
+                  {/* 🌟 VIEW ON ETSY CONFIGURATION */}
+                  <div className="flex flex-col bg-[#FAF7F2] p-4 border border-[#E4DCce] rounded-sm gap-3">
+                    <div className="flex items-center space-x-3">
+                      <input 
+                        type="checkbox" 
+                        name="show_etsy" 
+                        id="show_etsy" 
+                        checked={formData.show_etsy} 
+                        onChange={handleInputChange} 
+                        className="w-4 h-4 text-[#C19A6B] border-[#DFD8CC] focus:ring-[#C19A6B]" 
+                      />
+                      <label htmlFor="show_etsy" className="text-sm text-[#3A332C] font-semibold cursor-pointer flex items-center gap-2">
+                        <span>View on Etsy</span>
+                        <span className="text-[10px] uppercase tracking-wider bg-[#F26522]/10 text-[#F26522] px-2 py-0.5 rounded font-bold">Channel</span>
+                      </label>
+                    </div>
+
+                    {formData.show_etsy && (
+                      <div className="pl-7 pt-1">
+                        <label className="block text-[11px] uppercase tracking-wider font-semibold text-[#8C7A63] mb-1.5">
+                          Etsy Listing URL *
+                        </label>
+                        <input 
+                          type="url" 
+                          name="etsy_url" 
+                          value={formData.etsy_url} 
+                          onChange={handleInputChange} 
+                          placeholder="https://www.etsy.com/listing/..." 
+                          className="w-full border border-[#DFD8CC] bg-white p-2.5 text-sm focus:outline-none focus:border-[#C19A6B] text-[#3A332C]" 
+                        />
+                        <span className="text-[11px] text-[#7A7065] mt-1 block">
+                          This will display a "View on Etsy" direct redirect button on the live product page.
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
                </div>
             </div>
           </div>

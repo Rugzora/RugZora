@@ -66,11 +66,20 @@ export default function Shop() {
     fetchProducts();
   }, []);
 
-  const categories = ["All", "RECTANGULAR", "ROUND & OVAL", "RUNNERS", "Traditional"];
+  // इसे लगाएँ:
+const categories = [
+  "Rectangular",
+  "Round & Oval",
+  "Runners",
+  "Traditional"
+];
 
   const filteredProducts = (() => {
     if (isLoading) return [];
-    return activeCategory === "All" ? dbProducts : dbProducts.filter(item => item.category === activeCategory);
+    if (activeCategory === "All") return dbProducts;
+    return dbProducts.filter(
+      (item) => item.category?.toLowerCase() === activeCategory.toLowerCase()
+    );
   })();
 
   const fadeUpVariant: Variants = {

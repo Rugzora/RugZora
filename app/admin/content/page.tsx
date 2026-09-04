@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
-// 🌟 Universal Image Selector Component (Drag & Drop + Open File + Direct URL)
 function ImageUploader({
   label,
   value,
@@ -35,27 +34,25 @@ function ImageUploader({
       </label>
       
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-        {/* Preview Box */}
-        <div className="w-24 h-24 bg-[#EBE5DA] border border-[#DFD8CC] rounded-sm overflow-hidden flex-shrink-0 relative group">
+        <div className="w-20 h-20 bg-[#EBE5DA] border border-[#DFD8CC] rounded-sm overflow-hidden flex-shrink-0 relative group">
           {value ? (
             <img src={value} alt="Preview" className="w-full h-full object-cover" />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-[10px] text-[#8C7A63] uppercase">No Image</div>
+            <div className="w-full h-full flex items-center justify-center text-[9px] text-[#8C7A63] uppercase">No Image</div>
           )}
         </div>
 
-        {/* Drag & Drop Zone + URL + Browse */}
         <div className="flex-1 w-full space-y-2">
           <div
             onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
             onDragLeave={() => setIsDragging(false)}
             onDrop={handleDrop}
-            className={`border-2 border-dashed p-3 text-center rounded-sm transition-colors cursor-pointer ${
+            className={`border-2 border-dashed p-2.5 text-center rounded-sm transition-colors cursor-pointer ${
               isDragging ? "border-[#C19A6B] bg-[#F8F5F0]" : "border-[#DFD8CC] bg-[#FAFAF8] hover:border-[#C19A6B]"
             }`}
           >
             <p className="text-xs text-[#7A7065]">
-              {isUploading ? "Uploading file..." : "Drag & Drop any image format here, or "}
+              {isUploading ? "Uploading..." : "Drag & Drop image here, or "}
               <label className="text-[#C19A6B] font-bold underline cursor-pointer hover:text-[#3A332C]">
                 browse file
                 <input
@@ -76,9 +73,9 @@ function ImageUploader({
             <span className="text-[10px] uppercase font-bold text-[#8C7A63] shrink-0">Direct URL:</span>
             <input
               type="text"
-              value={value}
+              value={value || ""}
               onChange={(e) => onChange(e.target.value)}
-              placeholder="https://images.unsplash.com/... or paste image URL"
+              placeholder="Paste image URL directly"
               className="w-full border border-[#DFD8CC] px-3 py-1.5 text-xs bg-white focus:border-[#C19A6B] outline-none text-[#3A332C]"
             />
           </div>
@@ -88,7 +85,6 @@ function ImageUploader({
   );
 }
 
-// DEFAULT CONTENTS FOR ALL PAGES
 const defaultData: Record<string, any> = {
   home: {
     hero: {
@@ -111,6 +107,41 @@ const defaultData: Record<string, any> = {
       description: "Operating right from Bhadohi, India's world-renowned 'Carpet City', RugZora bridges ancient braiding legacy with conscious innovation. We turn post-consumer plastic waste into micro-spun yarns that mimic pure wool—delivering an itch-free, luxuriously soft step directly from the loom to your room.",
       image: "https://media.istockphoto.com/id/2241474699/photo/rolling-up-a-colorful-rug-in-a-cozy-living-space.jpg?b=1&s=612x612&w=0&k=20&c=YCZM8PgDSFYKG7JTCxgW4HqYBrUVqECzMpiVk3J3x2I="
     },
+    silhouettesHeader: {
+      title: "Signature Silhouettes",
+      desc: "Braided profiles tailored to balance your home's geometry."
+    },
+    silhouettes: [
+      { title: "Chunky Braided Oval & Rectangular", desc: "Heavy-gauge cord construction that frames living and dining areas with organic marled depth.", link: "Shop Silhouettes →", img: "https://images.unsplash.com/photo-1600166898405-da9535204843?w=800" },
+      { title: "Round Medallions", desc: "Spiraled center-out to accentuate entryways, reading nooks, and circular seating layouts.", link: "Shop Silhouettes →", img: "https://images.unsplash.com/photo-1590118318182-3d5f35fc0ea4?w=800" },
+      { title: "Architectural Bespoke", desc: "Custom hallway runners and oversized rugs tailored to your exact floor plan dimensions.", link: "Shop Silhouettes →", img: "https://images.unsplash.com/photo-1581428982868-e410dd047a90?w=800" }
+    ],
+    materialScience: {
+      tag: "Material Science",
+      title: "The Softness of Wool. The Strength of rPET.",
+      desc: "Zero plastic stiffness. By micro-spinning recycled polyester, our rugs offer pure wool-grade plushness without scratching skin. Naturally hydrophobic, they repel liquid spills and maintain pristine air quality with 100% shed-free construction.",
+      btnText: "Explore Our Fiber Craft",
+      img: "https://images.unsplash.com/photo-1544816155-12df9643f363?w=1200"
+    },
+    textureLibrary: {
+      tag: "Natural Warmth",
+      title: "Neutral & Marled Palettes",
+      images: [
+        "https://images.unsplash.com/photo-1615876234886-fd1a8f947122?w=600",
+        "https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=600",
+        "https://images.unsplash.com/photo-1600166898405-da9535204843?w=600",
+        "https://images.unsplash.com/photo-1600607688969-a5bfcd64bd40?w=600"
+      ]
+    },
+    spacesHeader: {
+      title: "Built for Family & High Traffic",
+      desc: "Hydrophobic, stain-resistant fibers designed for effortless living."
+    },
+    spaces: [
+      { title: "Living Room Statement", link: "Shop Area Rugs", img: "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=800" },
+      { title: "Pet & Kid Friendly", link: "Zero-Shed Textures", img: "https://images.unsplash.com/photo-1522771731478-44eb11de520b?w=800" },
+      { title: "Covered Patio & Hallways", link: "Shop Runners", img: "https://images.unsplash.com/photo-1598928506311-c55dd129a0f4?w=800" }
+    ],
     promise: {
       title: "Sustainable Braided Luxury. Straight from our Workshop in Bhadohi.",
       ctaText: "Explore All Handcrafted Rugs",
@@ -119,31 +150,51 @@ const defaultData: Record<string, any> = {
   },
   collections: {
     hero: {
-      tag: "The Catalog",
+      tag: "THE",
       title: "Artisanal Floor Sculptures",
       description: "Browse our hand-braided rPET area rugs, runners, and custom silhouettes. 100% reversible, stain-resistant, and woven for mindful living.",
-      bgImage: "https://images.unsplash.com/photo-1600166898405-da9535204843?q=80&w=1600&auto=format&fit=crop"
-    },
-    banner: {
-      title: "Need Custom Architectural Dimensions?",
-      description: "Every room has distinct proportions. Configure size, shape, and dual-tone cords through our bespoke studio.",
-      ctaText: "Start Custom Order",
-      ctaLink: "/collections"
+      bgImage: ""
     }
   },
   legacy: {
     hero: {
-      tag: "Origins & Lineage",
-      title: "The Heartbeat of Bhadohi",
-      subtitle: "Centuries of Craftsmanship in every braided cord.",
-      description: "Known globally as The Carpet City, Bhadohi's soil carries centuries of weaving mastery. At RugZora, we honor this ancestral discipline by combining it with cutting-edge yarn recycling.",
-      bgImage: "https://images.unsplash.com/photo-1544816155-12df9643f363?q=80&w=1600&auto=format&fit=crop"
+      tag: "Our Heritage",
+      title: "Crafted in Bhadohi",
+      subtitle: "The Carpet City of India",
+      bgImage: "https://images.unsplash.com/photo-1594040226829-7f251ab46d80?w=1600&auto=format&fit=crop"
     },
-    section1: {
-      tag: "Zero Compromise",
-      title: "The Heavy-Gauge Braiding Method",
-      text: "Unlike flat-weave mats, our artisans twist post-consumer fibers into robust structural cords. Spiraled tightly and locked with reinforced industrial zigzag stitching, our carpets withstand pets, family foot-traffic, and generations of wear.",
-      image: "https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?q=80&w=1000&auto=format&fit=crop"
+    intro: {
+      quote: "RugZora represents the pinnacle of modern carpet manufacturing, rooted deeply in the rich textile heritage of Uttar Pradesh.",
+      description: "We bring the fresh, golden warmth of artisanal design directly from our production house to your floors. By operating as direct manufacturers, we strip away the traditional retail markup, ensuring that every thread aligns with our standard of premium elegance and absolute authenticity."
+    },
+    workshop: {
+      tag: "Our Workshop",
+      title: "Precision in Every Stitch",
+      desc1: "Our specialized setup is the heartbeat of RugZora. Equipped with an array of dedicated zigzag sewing technology and highly accurate straight-stitch machinery, our artisans maintain absolute control over every phase of production.",
+      desc2: "This hands-on, mechanical precision allows us to meticulously shape the rugged, natural textures of Jute, while simultaneously achieving the flawless, luxurious finish required for our Cut-Pile carpets.",
+      image: "https://images.unsplash.com/photo-1544816155-12df9643f363?w=1200&auto=format&fit=crop"
+    },
+    materials: {
+      title: "Tale of Two Textures",
+      subtitle: "Mastering the duality of natural warmth and refined luxury.",
+      pillar1: {
+        tag: "The Earthy",
+        title: "Golden Jute",
+        desc: "Eco-friendly, highly durable, and naturally textured. Hand-guided through our straight-stitch machines to create a robust foundation that breathes life into any room.",
+        img: "https://images.unsplash.com/photo-1590118318182-3d5f35fc0ea4?w=1000&auto=format&fit=crop"
+      },
+      pillar2: {
+        tag: "The Luxurious",
+        title: "Plush Cut-Pile",
+        desc: "Soft, dense, and incredibly inviting. Crafted utilizing advanced zigzag techniques to ensure the yarn stands upright, delivering an exceptionally smooth and premium feel underfoot.",
+        img: "https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=1000&auto=format&fit=crop"
+      }
+    },
+    cta: {
+      title: "Experience the Legacy",
+      description: "Bring the unmatched quality of direct manufacturing into your home.",
+      btnText: "Explore Our Collections",
+      btnLink: "/collections"
     }
   },
   about: {
@@ -191,10 +242,15 @@ export default function SiteContentAdmin() {
   const [isUploading, setIsUploading] = useState(false);
   const [statusMsg, setStatusMsg] = useState("");
 
+  // 🌟 Live Quick Search States
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     async function loadAllContent() {
       try {
-        const { data, error } = await supabase.from("site_content").select("id, data");
+        const { data } = await supabase.from("site_content").select("id, data");
         if (data && data.length > 0) {
           const loaded: Record<string, any> = { ...defaultData };
           data.forEach((row: any) => {
@@ -205,12 +261,23 @@ export default function SiteContentAdmin() {
           setSiteContent(loaded);
         }
       } catch (err) {
-        console.error("Failed to load CMS content:", err);
+        console.error(err);
       } finally {
         setIsLoading(false);
       }
     }
     loadAllContent();
+  }, []);
+
+  // Close search dropdown on click outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setIsSearchFocused(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const handleImageUpload = async (file: File, callback: (url: string) => void) => {
@@ -267,6 +334,84 @@ export default function SiteContentAdmin() {
     }));
   };
 
+  // 🌟 Scan all text fields across all tabs for live search
+  const searchableEntries = useMemo(() => {
+    const results: Array<{
+      tabId: string;
+      tabLabel: string;
+      sectionTitle: string;
+      fieldLabel: string;
+      targetId: string;
+      valueText: string;
+    }> = [];
+
+    const formatLabel = (key: string) => key.replace(/([A-Z])/g, " $1").replace(/^./, (s) => s.toUpperCase());
+
+    const recurse = (obj: any, tabId: string, tabLabel: string, path: string[]) => {
+      if (!obj || typeof obj !== "object") return;
+      Object.entries(obj).forEach(([key, val]) => {
+        const currentPath = [...path, key];
+        if (typeof val === "string") {
+          // ignore URLs in search matches
+          if (val.startsWith("http://") || val.startsWith("https://")) return;
+          const targetId = `${tabId}-${currentPath.join("-")}`;
+          results.push({
+            tabId,
+            tabLabel,
+            sectionTitle: formatLabel(path[0] || "Section"),
+            fieldLabel: formatLabel(key),
+            targetId,
+            valueText: val
+          });
+        } else if (typeof val === "object") {
+          recurse(val, tabId, tabLabel, currentPath);
+        }
+      });
+    };
+
+    PAGES.forEach((p) => {
+      const pageData = siteContent[p.id] || defaultData[p.id];
+      if (pageData) {
+        recurse(pageData, p.id, p.label, []);
+      }
+    });
+
+    return results;
+  }, [siteContent]);
+
+  // Filtered Results
+  const searchResults = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return [];
+    return searchableEntries
+      .filter((item) => 
+        item.valueText.toLowerCase().includes(q) ||
+        item.fieldLabel.toLowerCase().includes(q) ||
+        item.sectionTitle.toLowerCase().includes(q) ||
+        item.tabLabel.toLowerCase().includes(q)
+      )
+      .slice(0, 10);
+  }, [searchQuery, searchableEntries]);
+
+  // 🌟 Auto Jump & Highlight Function
+  const handleJumpToField = (tabId: string, targetId: string) => {
+    setActiveTab(tabId);
+    setSearchQuery("");
+    setIsSearchFocused(false);
+
+    setTimeout(() => {
+      const element = document.getElementById(targetId);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "center" });
+        element.focus();
+        element.classList.add("ring-4", "ring-[#C19A6B]/50", "border-[#C19A6B]", "bg-amber-50/50");
+        setTimeout(() => {
+          element.classList.remove("ring-4", "ring-[#C19A6B]/50", "border-[#C19A6B]", "bg-amber-50/50");
+        }, 2500);
+      }
+    }, 150);
+  };
+
   const currentContent = siteContent[activeTab] || defaultData[activeTab];
 
   if (isLoading) {
@@ -281,8 +426,71 @@ export default function SiteContentAdmin() {
     <div className="bg-[#F8F5F0] min-h-screen pt-20 pb-32 px-6 font-sans">
       <div className="max-w-5xl mx-auto">
         
-        {/* 🌟 1. NAVIGATION BAR - CHOOSE WHICH PAGE TO EDIT */}
-        <div className="bg-white p-4 border border-[#EBE5DA] rounded-sm shadow-sm mb-6 flex flex-wrap items-center justify-between gap-4 sticky top-20 z-30">
+        {/* 🌟 1. INTERACTIVE LIVE SEARCH BAR (TOP) */}
+        <div ref={searchContainerRef} className="relative mb-6 z-40">
+          <div className="relative flex items-center bg-white border border-[#DFD8CC] rounded-sm shadow-sm focus-within:border-[#C19A6B] focus-within:ring-2 focus-within:ring-[#C19A6B]/20 transition-all">
+            <div className="pl-4 pr-2 text-[#8C7A63]">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => setIsSearchFocused(true)}
+              placeholder="Quick Jump: Search any text, title, or section name across all pages..."
+              className="w-full py-3.5 pr-10 text-sm bg-transparent outline-none text-[#3A332C] placeholder-[#8C7A63]"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="pr-4 text-xs font-bold text-[#8C7A63] hover:text-[#3A332C]"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+
+          {/* Live Search Results Dropdown */}
+          {isSearchFocused && searchQuery.trim().length > 0 && (
+            <div className="absolute left-0 right-0 top-full mt-1.5 bg-white border border-[#DFD8CC] rounded-sm shadow-xl max-h-80 overflow-y-auto z-50 divide-y divide-[#EBE5DA]">
+              {searchResults.length > 0 ? (
+                searchResults.map((item, idx) => (
+                  <div
+                    key={idx}
+                    onMouseDown={() => handleJumpToField(item.tabId, item.targetId)}
+                    className="p-3.5 hover:bg-[#F8F5F0] cursor-pointer transition-colors flex items-start justify-between gap-4"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-[10px] uppercase font-bold px-2 py-0.5 bg-[#3A332C] text-[#F8F5F0] rounded-xs">
+                          {item.tabLabel}
+                        </span>
+                        <span className="text-xs font-semibold text-[#C19A6B]">
+                          {item.sectionTitle} → {item.fieldLabel}
+                        </span>
+                      </div>
+                      <p className="text-xs text-[#3A332C] truncate font-medium">
+                        "{item.valueText}"
+                      </p>
+                    </div>
+                    <span className="text-[10px] uppercase tracking-wider font-bold text-[#8C7A63] shrink-0 mt-1">
+                      Jump To Box ↗
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <div className="p-4 text-center text-xs text-[#7A7065]">
+                  No matching text found for "{searchQuery}".
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* 🌟 2. PAGE NAVIGATION TABS BAR */}
+        <div className="bg-white p-4 border border-[#EBE5DA] rounded-sm shadow-sm mb-8 flex flex-wrap items-center justify-between gap-4 sticky top-20 z-30">
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#8C7A63] mr-2">
               Select Page:
@@ -326,9 +534,9 @@ export default function SiteContentAdmin() {
           </div>
         )}
 
-        {/* 🌟 2. ACTIVE PAGE EDITOR */}
-        
-        {/* TAB 1: HOME PAGE */}
+        {/* 🌟 3. ACTIVE TAB CONTENTS */}
+
+        {/* --- TAB 1: HOME --- */}
         {activeTab === "home" && (
           <div className="space-y-10">
             {/* HERO */}
@@ -336,30 +544,60 @@ export default function SiteContentAdmin() {
               <h2 className="text-lg font-serif text-[#3A332C] mb-6 border-b border-[#DFD8CC] pb-3">1. Hero Section</h2>
               <div className="space-y-6">
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Tagline (Top Small Text)</label>
-                  <input type="text" value={currentContent.hero.tag} onChange={(e) => updateField("hero", "tag", e.target.value)} className="w-full border border-[#DFD8CC] p-3 text-sm focus:border-[#C19A6B] outline-none" />
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Tagline</label>
+                  <input
+                    id="home-hero-tag"
+                    type="text"
+                    value={currentContent.hero?.tag || ""}
+                    onChange={(e) => updateField("hero", "tag", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-3 text-sm focus:border-[#C19A6B] outline-none transition-all"
+                  />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Main Heading Line 1</label>
-                    <input type="text" value={currentContent.hero.title} onChange={(e) => updateField("hero", "title", e.target.value)} className="w-full border border-[#DFD8CC] p-3 text-sm focus:border-[#C19A6B] outline-none" />
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Heading Line 1</label>
+                    <input
+                      id="home-hero-title"
+                      type="text"
+                      value={currentContent.hero?.title || ""}
+                      onChange={(e) => updateField("hero", "title", e.target.value)}
+                      className="w-full border border-[#DFD8CC] p-3 text-sm focus:border-[#C19A6B] outline-none transition-all"
+                    />
                   </div>
                   <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Italic Subtitle Line 2</label>
-                    <input type="text" value={currentContent.hero.subtitle} onChange={(e) => updateField("hero", "subtitle", e.target.value)} className="w-full border border-[#DFD8CC] p-3 text-sm focus:border-[#C19A6B] outline-none" />
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Subtitle Line 2</label>
+                    <input
+                      id="home-hero-subtitle"
+                      type="text"
+                      value={currentContent.hero?.subtitle || ""}
+                      onChange={(e) => updateField("hero", "subtitle", e.target.value)}
+                      className="w-full border border-[#DFD8CC] p-3 text-sm focus:border-[#C19A6B] outline-none transition-all"
+                    />
                   </div>
                 </div>
                 <div>
                   <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Description</label>
-                  <textarea rows={3} value={currentContent.hero.description} onChange={(e) => updateField("hero", "description", e.target.value)} className="w-full border border-[#DFD8CC] p-3 text-sm focus:border-[#C19A6B] outline-none" />
+                  <textarea
+                    id="home-hero-description"
+                    rows={3}
+                    value={currentContent.hero?.description || ""}
+                    onChange={(e) => updateField("hero", "description", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-3 text-sm focus:border-[#C19A6B] outline-none transition-all"
+                  />
                 </div>
                 <div>
                   <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Button Text</label>
-                  <input type="text" value={currentContent.hero.ctaText} onChange={(e) => updateField("hero", "ctaText", e.target.value)} className="w-full border border-[#DFD8CC] p-3 text-sm focus:border-[#C19A6B] outline-none" />
+                  <input
+                    id="home-hero-ctaText"
+                    type="text"
+                    value={currentContent.hero?.ctaText || ""}
+                    onChange={(e) => updateField("hero", "ctaText", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-3 text-sm focus:border-[#C19A6B] outline-none transition-all"
+                  />
                 </div>
                 <ImageUploader
                   label="Hero Background Image"
-                  value={currentContent.hero.bgImage}
+                  value={currentContent.hero?.bgImage || ""}
                   onChange={(url) => updateField("hero", "bgImage", url)}
                   onUpload={handleImageUpload}
                   isUploading={isUploading}
@@ -367,17 +605,17 @@ export default function SiteContentAdmin() {
               </div>
             </div>
 
-            {/* ETHOS 3 CARDS */}
+            {/* THREE ETHOS CARDS */}
             <div className="bg-white p-8 border border-[#EBE5DA] rounded-sm shadow-sm">
-              <h2 className="text-lg font-serif text-[#3A332C] mb-6 border-b border-[#DFD8CC] pb-3">2. Three Ethos Cards</h2>
+              <h2 className="text-lg font-serif text-[#3A332C] mb-6 border-b border-[#DFD8CC] pb-3">2. Three Brand Ethos Cards</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {currentContent.ethos.map((card: any, idx: number) => (
+                {(currentContent.ethos || defaultData.home.ethos).map((card: any, idx: number) => (
                   <div key={idx} className="border border-[#DFD8CC] p-4 bg-[#F8F5F0]/60 rounded-sm space-y-4">
                     <ImageUploader
                       label={`Card #${idx + 1} Image`}
                       value={card.img}
                       onChange={(url) => {
-                        const updated = [...currentContent.ethos];
+                        const updated = [...(currentContent.ethos || defaultData.home.ethos)];
                         updated[idx].img = url;
                         setSiteContent((prev) => ({ ...prev, home: { ...prev.home, ethos: updated } }));
                       }}
@@ -386,19 +624,31 @@ export default function SiteContentAdmin() {
                     />
                     <div>
                       <label className="block text-[10px] uppercase font-bold text-[#8C7A63] mb-1">Title</label>
-                      <input type="text" value={card.title} onChange={(e) => {
-                        const updated = [...currentContent.ethos];
-                        updated[idx].title = e.target.value;
-                        setSiteContent((prev) => ({ ...prev, home: { ...prev.home, ethos: updated } }));
-                      }} className="w-full border border-[#DFD8CC] p-2 text-sm bg-white outline-none" />
+                      <input
+                        id={`home-ethos-${idx}-title`}
+                        type="text"
+                        value={card.title}
+                        onChange={(e) => {
+                          const updated = [...(currentContent.ethos || defaultData.home.ethos)];
+                          updated[idx].title = e.target.value;
+                          setSiteContent((prev) => ({ ...prev, home: { ...prev.home, ethos: updated } }));
+                        }}
+                        className="w-full border border-[#DFD8CC] p-2 text-sm bg-white outline-none transition-all"
+                      />
                     </div>
                     <div>
                       <label className="block text-[10px] uppercase font-bold text-[#8C7A63] mb-1">Description</label>
-                      <textarea rows={3} value={card.desc} onChange={(e) => {
-                        const updated = [...currentContent.ethos];
-                        updated[idx].desc = e.target.value;
-                        setSiteContent((prev) => ({ ...prev, home: { ...prev.home, ethos: updated } }));
-                      }} className="w-full border border-[#DFD8CC] p-2 text-sm bg-white outline-none" />
+                      <textarea
+                        id={`home-ethos-${idx}-desc`}
+                        rows={3}
+                        value={card.desc}
+                        onChange={(e) => {
+                          const updated = [...(currentContent.ethos || defaultData.home.ethos)];
+                          updated[idx].desc = e.target.value;
+                          setSiteContent((prev) => ({ ...prev, home: { ...prev.home, ethos: updated } }));
+                        }}
+                        className="w-full border border-[#DFD8CC] p-2 text-sm bg-white outline-none transition-all"
+                      />
                     </div>
                   </div>
                 ))}
@@ -411,19 +661,37 @@ export default function SiteContentAdmin() {
               <div className="space-y-6">
                 <div>
                   <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Tagline</label>
-                  <input type="text" value={currentContent.story.tag} onChange={(e) => updateField("story", "tag", e.target.value)} className="w-full border border-[#DFD8CC] p-3 text-sm focus:border-[#C19A6B] outline-none" />
+                  <input
+                    id="home-story-tag"
+                    type="text"
+                    value={currentContent.story?.tag || ""}
+                    onChange={(e) => updateField("story", "tag", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-3 text-sm focus:border-[#C19A6B] outline-none transition-all"
+                  />
                 </div>
                 <div>
                   <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Heading</label>
-                  <input type="text" value={currentContent.story.title} onChange={(e) => updateField("story", "title", e.target.value)} className="w-full border border-[#DFD8CC] p-3 text-sm focus:border-[#C19A6B] outline-none" />
+                  <input
+                    id="home-story-title"
+                    type="text"
+                    value={currentContent.story?.title || ""}
+                    onChange={(e) => updateField("story", "title", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-3 text-sm focus:border-[#C19A6B] outline-none transition-all"
+                  />
                 </div>
                 <div>
                   <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Description</label>
-                  <textarea rows={4} value={currentContent.story.description} onChange={(e) => updateField("story", "description", e.target.value)} className="w-full border border-[#DFD8CC] p-3 text-sm focus:border-[#C19A6B] outline-none" />
+                  <textarea
+                    id="home-story-description"
+                    rows={4}
+                    value={currentContent.story?.description || ""}
+                    onChange={(e) => updateField("story", "description", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-3 text-sm focus:border-[#C19A6B] outline-none transition-all"
+                  />
                 </div>
                 <ImageUploader
                   label="Side Photo"
-                  value={currentContent.story.image}
+                  value={currentContent.story?.image || ""}
                   onChange={(url) => updateField("story", "image", url)}
                   onUpload={handleImageUpload}
                   isUploading={isUploading}
@@ -431,21 +699,287 @@ export default function SiteContentAdmin() {
               </div>
             </div>
 
-            {/* BOTTOM PROMISE */}
+            {/* SILHOUETTES */}
             <div className="bg-white p-8 border border-[#EBE5DA] rounded-sm shadow-sm">
-              <h2 className="text-lg font-serif text-[#3A332C] mb-6 border-b border-[#DFD8CC] pb-3">4. Bottom Artisan Promise Banner</h2>
+              <h2 className="text-lg font-serif text-[#3A332C] mb-6 border-b border-[#DFD8CC] pb-3">4. Signature Silhouettes</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Section Title</label>
+                  <input
+                    id="home-silhouettesHeader-title"
+                    type="text"
+                    value={currentContent.silhouettesHeader?.title || "Signature Silhouettes"}
+                    onChange={(e) => updateField("silhouettesHeader", "title", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-2.5 text-sm outline-none transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Section Description</label>
+                  <input
+                    id="home-silhouettesHeader-desc"
+                    type="text"
+                    value={currentContent.silhouettesHeader?.desc || ""}
+                    onChange={(e) => updateField("silhouettesHeader", "desc", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-2.5 text-sm outline-none transition-all"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {(currentContent.silhouettes || defaultData.home.silhouettes).map((card: any, idx: number) => (
+                  <div key={idx} className="border border-[#DFD8CC] p-4 bg-[#F8F5F0]/60 rounded-sm space-y-4">
+                    <ImageUploader
+                      label={`Silhouette #${idx + 1} Image`}
+                      value={card.img}
+                      onChange={(url) => {
+                        const updated = [...(currentContent.silhouettes || defaultData.home.silhouettes)];
+                        updated[idx].img = url;
+                        setSiteContent((prev) => ({ ...prev, home: { ...prev.home, silhouettes: updated } }));
+                      }}
+                      onUpload={handleImageUpload}
+                      isUploading={isUploading}
+                    />
+                    <div>
+                      <label className="block text-[10px] uppercase font-bold text-[#8C7A63] mb-1">Title</label>
+                      <input
+                        id={`home-silhouettes-${idx}-title`}
+                        type="text"
+                        value={card.title}
+                        onChange={(e) => {
+                          const updated = [...(currentContent.silhouettes || defaultData.home.silhouettes)];
+                          updated[idx].title = e.target.value;
+                          setSiteContent((prev) => ({ ...prev, home: { ...prev.home, silhouettes: updated } }));
+                        }}
+                        className="w-full border border-[#DFD8CC] p-2 text-sm bg-white outline-none transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] uppercase font-bold text-[#8C7A63] mb-1">Description</label>
+                      <textarea
+                        id={`home-silhouettes-${idx}-desc`}
+                        rows={3}
+                        value={card.desc}
+                        onChange={(e) => {
+                          const updated = [...(currentContent.silhouettes || defaultData.home.silhouettes)];
+                          updated[idx].desc = e.target.value;
+                          setSiteContent((prev) => ({ ...prev, home: { ...prev.home, silhouettes: updated } }));
+                        }}
+                        className="w-full border border-[#DFD8CC] p-2 text-sm bg-white outline-none transition-all"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* MATERIAL SCIENCE */}
+            <div className="bg-white p-8 border border-[#EBE5DA] rounded-sm shadow-sm">
+              <h2 className="text-lg font-serif text-[#3A332C] mb-6 border-b border-[#DFD8CC] pb-3">5. Material Science Section</h2>
               <div className="space-y-6">
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Banner Title</label>
-                  <input type="text" value={currentContent.promise.title} onChange={(e) => updateField("promise", "title", e.target.value)} className="w-full border border-[#DFD8CC] p-3 text-sm focus:border-[#C19A6B] outline-none" />
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Small Tag</label>
+                  <input
+                    id="home-materialScience-tag"
+                    type="text"
+                    value={currentContent.materialScience?.tag || ""}
+                    onChange={(e) => updateField("materialScience", "tag", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Heading</label>
+                  <input
+                    id="home-materialScience-title"
+                    type="text"
+                    value={currentContent.materialScience?.title || ""}
+                    onChange={(e) => updateField("materialScience", "title", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Description</label>
+                  <textarea
+                    id="home-materialScience-desc"
+                    rows={3}
+                    value={currentContent.materialScience?.desc || ""}
+                    onChange={(e) => updateField("materialScience", "desc", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none transition-all"
+                  />
                 </div>
                 <div>
                   <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Button Text</label>
-                  <input type="text" value={currentContent.promise.ctaText} onChange={(e) => updateField("promise", "ctaText", e.target.value)} className="w-full border border-[#DFD8CC] p-3 text-sm focus:border-[#C19A6B] outline-none" />
+                  <input
+                    id="home-materialScience-btnText"
+                    type="text"
+                    value={currentContent.materialScience?.btnText || ""}
+                    onChange={(e) => updateField("materialScience", "btnText", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none transition-all"
+                  />
                 </div>
                 <ImageUploader
-                  label="Full Bleed Background Image"
-                  value={currentContent.promise.image}
+                  label="Material Science Side Image"
+                  value={currentContent.materialScience?.img || ""}
+                  onChange={(url) => updateField("materialScience", "img", url)}
+                  onUpload={handleImageUpload}
+                  isUploading={isUploading}
+                />
+              </div>
+            </div>
+
+            {/* TEXTURE LIBRARY */}
+            <div className="bg-white p-8 border border-[#EBE5DA] rounded-sm shadow-sm">
+              <h2 className="text-lg font-serif text-[#3A332C] mb-6 border-b border-[#DFD8CC] pb-3">6. The Texture Library (4 Swatches)</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Tag</label>
+                  <input
+                    id="home-textureLibrary-tag"
+                    type="text"
+                    value={currentContent.textureLibrary?.tag || ""}
+                    onChange={(e) => updateField("textureLibrary", "tag", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-2.5 text-sm outline-none transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Title</label>
+                  <input
+                    id="home-textureLibrary-title"
+                    type="text"
+                    value={currentContent.textureLibrary?.title || ""}
+                    onChange={(e) => updateField("textureLibrary", "title", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-2.5 text-sm outline-none transition-all"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {[0, 1, 2, 3].map((idx) => (
+                  <div key={idx} className="border border-[#DFD8CC] p-4 bg-[#F8F5F0]/60 rounded-sm">
+                    <ImageUploader
+                      label={`Swatch #${idx + 1}`}
+                      value={currentContent.textureLibrary?.images?.[idx] || ""}
+                      onChange={(url) => {
+                        const updated = [...(currentContent.textureLibrary?.images || defaultData.home.textureLibrary.images)];
+                        updated[idx] = url;
+                        setSiteContent((prev) => ({
+                          ...prev,
+                          home: {
+                            ...prev.home,
+                            textureLibrary: {
+                              ...prev.home?.textureLibrary,
+                              images: updated
+                            }
+                          }
+                        }));
+                      }}
+                      onUpload={handleImageUpload}
+                      isUploading={isUploading}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* LIVING SPACES */}
+            <div className="bg-white p-8 border border-[#EBE5DA] rounded-sm shadow-sm">
+              <h2 className="text-lg font-serif text-[#3A332C] mb-6 border-b border-[#DFD8CC] pb-3">7. Designed For Living Spaces</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Section Title</label>
+                  <input
+                    id="home-spacesHeader-title"
+                    type="text"
+                    value={currentContent.spacesHeader?.title || ""}
+                    onChange={(e) => updateField("spacesHeader", "title", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-2.5 text-sm outline-none transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Section Description</label>
+                  <input
+                    id="home-spacesHeader-desc"
+                    type="text"
+                    value={currentContent.spacesHeader?.desc || ""}
+                    onChange={(e) => updateField("spacesHeader", "desc", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-2.5 text-sm outline-none transition-all"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {(currentContent.spaces || defaultData.home.spaces).map((card: any, idx: number) => (
+                  <div key={idx} className="border border-[#DFD8CC] p-4 bg-[#F8F5F0]/60 rounded-sm space-y-4">
+                    <ImageUploader
+                      label={`Space #${idx + 1} Image`}
+                      value={card.img}
+                      onChange={(url) => {
+                        const updated = [...(currentContent.spaces || defaultData.home.spaces)];
+                        updated[idx].img = url;
+                        setSiteContent((prev) => ({ ...prev, home: { ...prev.home, spaces: updated } }));
+                      }}
+                      onUpload={handleImageUpload}
+                      isUploading={isUploading}
+                    />
+                    <div>
+                      <label className="block text-[10px] uppercase font-bold text-[#8C7A63] mb-1">Title</label>
+                      <input
+                        id={`home-spaces-${idx}-title`}
+                        type="text"
+                        value={card.title}
+                        onChange={(e) => {
+                          const updated = [...(currentContent.spaces || defaultData.home.spaces)];
+                          updated[idx].title = e.target.value;
+                          setSiteContent((prev) => ({ ...prev, home: { ...prev.home, spaces: updated } }));
+                        }}
+                        className="w-full border border-[#DFD8CC] p-2 text-sm bg-white outline-none transition-all"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] uppercase font-bold text-[#8C7A63] mb-1">Link Label</label>
+                      <input
+                        id={`home-spaces-${idx}-link`}
+                        type="text"
+                        value={card.link}
+                        onChange={(e) => {
+                          const updated = [...(currentContent.spaces || defaultData.home.spaces)];
+                          updated[idx].link = e.target.value;
+                          setSiteContent((prev) => ({ ...prev, home: { ...prev.home, spaces: updated } }));
+                        }}
+                        className="w-full border border-[#DFD8CC] p-2 text-sm bg-white outline-none transition-all"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* PROMISE */}
+            <div className="bg-white p-8 border border-[#EBE5DA] rounded-sm shadow-sm">
+              <h2 className="text-lg font-serif text-[#3A332C] mb-6 border-b border-[#DFD8CC] pb-3">8. Bottom Artisan Banner</h2>
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Banner Title</label>
+                  <input
+                    id="home-promise-title"
+                    type="text"
+                    value={currentContent.promise?.title || ""}
+                    onChange={(e) => updateField("promise", "title", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-3 text-sm focus:border-[#C19A6B] outline-none transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Button Text</label>
+                  <input
+                    id="home-promise-ctaText"
+                    type="text"
+                    value={currentContent.promise?.ctaText || ""}
+                    onChange={(e) => updateField("promise", "ctaText", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-3 text-sm focus:border-[#C19A6B] outline-none transition-all"
+                  />
+                </div>
+                <ImageUploader
+                  label="Banner Background Image"
+                  value={currentContent.promise?.image || ""}
                   onChange={(url) => updateField("promise", "image", url)}
                   onUpload={handleImageUpload}
                   isUploading={isUploading}
@@ -455,7 +989,7 @@ export default function SiteContentAdmin() {
           </div>
         )}
 
-        {/* TAB 2: COLLECTIONS PAGE */}
+        {/* --- TAB 2: COLLECTIONS --- */}
         {activeTab === "collections" && (
           <div className="space-y-10">
             <div className="bg-white p-8 border border-[#EBE5DA] rounded-sm shadow-sm">
@@ -464,7 +998,7 @@ export default function SiteContentAdmin() {
                   <h2 className="text-lg font-serif text-[#3A332C]">Collections Page Header</h2>
                   <p className="text-xs text-[#7A7065] mt-1">Leave background image blank to keep standard light background.</p>
                 </div>
-                {currentContent.hero.bgImage && (
+                {currentContent.hero?.bgImage && (
                   <button
                     type="button"
                     onClick={() => updateField("hero", "bgImage", "")}
@@ -477,41 +1011,44 @@ export default function SiteContentAdmin() {
 
               <div className="space-y-6">
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Tagline (Top Small Text)</label>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Tagline</label>
                   <input
+                    id="collections-hero-tag"
                     type="text"
-                    value={currentContent.hero.tag || ""}
+                    value={currentContent.hero?.tag || ""}
                     onChange={(e) => updateField("hero", "tag", e.target.value)}
                     placeholder="e.g. THE"
-                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none focus:border-[#C19A6B]"
+                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none focus:border-[#C19A6B] transition-all"
                   />
                 </div>
 
                 <div>
                   <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Main Heading</label>
                   <input
+                    id="collections-hero-title"
                     type="text"
-                    value={currentContent.hero.title || ""}
+                    value={currentContent.hero?.title || ""}
                     onChange={(e) => updateField("hero", "title", e.target.value)}
                     placeholder="e.g. Artisanal Floor Sculptures"
-                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none focus:border-[#C19A6B]"
+                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none focus:border-[#C19A6B] transition-all"
                   />
                 </div>
 
                 <div>
                   <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Subtitle / Description</label>
                   <textarea
+                    id="collections-hero-description"
                     rows={3}
-                    value={currentContent.hero.description || ""}
+                    value={currentContent.hero?.description || ""}
                     onChange={(e) => updateField("hero", "description", e.target.value)}
                     placeholder="Browse our hand-braided rPET area rugs..."
-                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none focus:border-[#C19A6B]"
+                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none focus:border-[#C19A6B] transition-all"
                   />
                 </div>
 
                 <ImageUploader
                   label="Header Background Image (Optional)"
-                  value={currentContent.hero.bgImage || ""}
+                  value={currentContent.hero?.bgImage || ""}
                   onChange={(url) => updateField("hero", "bgImage", url)}
                   onUpload={handleImageUpload}
                   isUploading={isUploading}
@@ -521,31 +1058,48 @@ export default function SiteContentAdmin() {
           </div>
         )}
 
-        {/* TAB 3: OUR LEGACY */}
+        {/* --- TAB 3: OUR LEGACY --- */}
         {activeTab === "legacy" && (
           <div className="space-y-10">
+            {/* 1. HERO */}
             <div className="bg-white p-8 border border-[#EBE5DA] rounded-sm shadow-sm">
-              <h2 className="text-lg font-serif text-[#3A332C] mb-6 border-b border-[#DFD8CC] pb-3">Legacy Hero Section</h2>
+              <h2 className="text-lg font-serif text-[#3A332C] mb-6 border-b border-[#DFD8CC] pb-3">1. Cinematic Hero Section</h2>
               <div className="space-y-6">
                 <div>
                   <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Tag</label>
-                  <input type="text" value={currentContent.hero.tag} onChange={(e) => updateField("hero", "tag", e.target.value)} className="w-full border border-[#DFD8CC] p-3 text-sm outline-none" />
+                  <input
+                    id="legacy-hero-tag"
+                    type="text"
+                    value={currentContent.hero?.tag || ""}
+                    onChange={(e) => updateField("hero", "tag", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none focus:border-[#C19A6B] transition-all"
+                  />
                 </div>
-                <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Title</label>
-                  <input type="text" value={currentContent.hero.title} onChange={(e) => updateField("hero", "title", e.target.value)} className="w-full border border-[#DFD8CC] p-3 text-sm outline-none" />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Subtitle</label>
-                  <input type="text" value={currentContent.hero.subtitle} onChange={(e) => updateField("hero", "subtitle", e.target.value)} className="w-full border border-[#DFD8CC] p-3 text-sm outline-none" />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Description</label>
-                  <textarea rows={3} value={currentContent.hero.description} onChange={(e) => updateField("hero", "description", e.target.value)} className="w-full border border-[#DFD8CC] p-3 text-sm outline-none" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Title</label>
+                    <input
+                      id="legacy-hero-title"
+                      type="text"
+                      value={currentContent.hero?.title || ""}
+                      onChange={(e) => updateField("hero", "title", e.target.value)}
+                      className="w-full border border-[#DFD8CC] p-3 text-sm outline-none focus:border-[#C19A6B] transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Subtitle</label>
+                    <input
+                      id="legacy-hero-subtitle"
+                      type="text"
+                      value={currentContent.hero?.subtitle || ""}
+                      onChange={(e) => updateField("hero", "subtitle", e.target.value)}
+                      className="w-full border border-[#DFD8CC] p-3 text-sm outline-none focus:border-[#C19A6B] transition-all"
+                    />
+                  </div>
                 </div>
                 <ImageUploader
-                  label="Hero Heritage Image"
-                  value={currentContent.hero.bgImage}
+                  label="Hero Background Image"
+                  value={currentContent.hero?.bgImage || ""}
                   onChange={(url) => updateField("hero", "bgImage", url)}
                   onUpload={handleImageUpload}
                   isUploading={isUploading}
@@ -553,34 +1107,252 @@ export default function SiteContentAdmin() {
               </div>
             </div>
 
+            {/* 2. EDITORIAL INTRO */}
             <div className="bg-white p-8 border border-[#EBE5DA] rounded-sm shadow-sm">
-              <h2 className="text-lg font-serif text-[#3A332C] mb-6 border-b border-[#DFD8CC] pb-3">Craftsmanship Feature Section</h2>
+              <h2 className="text-lg font-serif text-[#3A332C] mb-6 border-b border-[#DFD8CC] pb-3">2. Editorial Quote & Intro</h2>
               <div className="space-y-6">
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Feature Tag</label>
-                  <input type="text" value={currentContent.section1.tag} onChange={(e) => updateField("section1", "tag", e.target.value)} className="w-full border border-[#DFD8CC] p-3 text-sm outline-none" />
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Main Quote</label>
+                  <textarea
+                    id="legacy-intro-quote"
+                    rows={3}
+                    value={currentContent.intro?.quote || ""}
+                    onChange={(e) => updateField("intro", "quote", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none focus:border-[#C19A6B] transition-all"
+                  />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Feature Heading</label>
-                  <input type="text" value={currentContent.section1.title} onChange={(e) => updateField("section1", "title", e.target.value)} className="w-full border border-[#DFD8CC] p-3 text-sm outline-none" />
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Detailed Paragraph</label>
+                  <textarea
+                    id="legacy-intro-description"
+                    rows={4}
+                    value={currentContent.intro?.description || ""}
+                    onChange={(e) => updateField("intro", "description", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none focus:border-[#C19A6B] transition-all"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* 3. WORKSHOP & MACHINERY */}
+            <div className="bg-white p-8 border border-[#EBE5DA] rounded-sm shadow-sm">
+              <h2 className="text-lg font-serif text-[#3A332C] mb-6 border-b border-[#DFD8CC] pb-3">3. Workshop & Stitch Precision</h2>
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Small Tag</label>
+                  <input
+                    id="legacy-workshop-tag"
+                    type="text"
+                    value={currentContent.workshop?.tag || ""}
+                    onChange={(e) => updateField("workshop", "tag", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none focus:border-[#C19A6B] transition-all"
+                  />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Text Content</label>
-                  <textarea rows={4} value={currentContent.section1.text} onChange={(e) => updateField("section1", "text", e.target.value)} className="w-full border border-[#DFD8CC] p-3 text-sm outline-none" />
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Heading</label>
+                  <input
+                    id="legacy-workshop-title"
+                    type="text"
+                    value={currentContent.workshop?.title || ""}
+                    onChange={(e) => updateField("workshop", "title", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none focus:border-[#C19A6B] transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Paragraph 1</label>
+                  <textarea
+                    id="legacy-workshop-desc1"
+                    rows={3}
+                    value={currentContent.workshop?.desc1 || ""}
+                    onChange={(e) => updateField("workshop", "desc1", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none focus:border-[#C19A6B] transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Paragraph 2</label>
+                  <textarea
+                    id="legacy-workshop-desc2"
+                    rows={3}
+                    value={currentContent.workshop?.desc2 || ""}
+                    onChange={(e) => updateField("workshop", "desc2", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none focus:border-[#C19A6B] transition-all"
+                  />
                 </div>
                 <ImageUploader
-                  label="Weaving Machinery / Artisan Photo"
-                  value={currentContent.section1.image}
-                  onChange={(url) => updateField("section1", "image", url)}
+                  label="Workshop Image"
+                  value={currentContent.workshop?.image || ""}
+                  onChange={(url) => updateField("workshop", "image", url)}
                   onUpload={handleImageUpload}
                   isUploading={isUploading}
                 />
               </div>
             </div>
+
+            {/* 4. TALE OF TWO TEXTURES */}
+            <div className="bg-white p-8 border border-[#EBE5DA] rounded-sm shadow-sm">
+              <h2 className="text-lg font-serif text-[#3A332C] mb-6 border-b border-[#DFD8CC] pb-3">4. Tale of Two Textures (Two Pillars)</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Section Title</label>
+                  <input
+                    id="legacy-materials-title"
+                    type="text"
+                    value={currentContent.materials?.title || ""}
+                    onChange={(e) => updateField("materials", "title", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-2.5 text-sm outline-none transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Section Subtitle</label>
+                  <input
+                    id="legacy-materials-subtitle"
+                    type="text"
+                    value={currentContent.materials?.subtitle || ""}
+                    onChange={(e) => updateField("materials", "subtitle", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-2.5 text-sm outline-none transition-all"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Pillar 1 */}
+                <div className="border border-[#DFD8CC] p-4 bg-[#F8F5F0]/60 rounded-sm space-y-4">
+                  <span className="font-bold text-xs uppercase tracking-wider text-[#C19A6B]">Pillar 1 (Earthy)</span>
+                  <div>
+                    <label className="block text-[10px] uppercase font-bold text-[#8C7A63] mb-1">Tag</label>
+                    <input
+                      id="legacy-materials-pillar1-tag"
+                      type="text"
+                      value={currentContent.materials?.pillar1?.tag || ""}
+                      onChange={(e) => setSiteContent((prev: any) => ({ ...prev, legacy: { ...prev.legacy, materials: { ...prev.legacy.materials, pillar1: { ...prev.legacy.materials.pillar1, tag: e.target.value } } } }))}
+                      className="w-full border border-[#DFD8CC] p-2 text-sm bg-white outline-none transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] uppercase font-bold text-[#8C7A63] mb-1">Title</label>
+                    <input
+                      id="legacy-materials-pillar1-title"
+                      type="text"
+                      value={currentContent.materials?.pillar1?.title || ""}
+                      onChange={(e) => setSiteContent((prev: any) => ({ ...prev, legacy: { ...prev.legacy, materials: { ...prev.legacy.materials, pillar1: { ...prev.legacy.materials.pillar1, title: e.target.value } } } }))}
+                      className="w-full border border-[#DFD8CC] p-2 text-sm bg-white outline-none transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] uppercase font-bold text-[#8C7A63] mb-1">Description</label>
+                    <textarea
+                      id="legacy-materials-pillar1-desc"
+                      rows={3}
+                      value={currentContent.materials?.pillar1?.desc || ""}
+                      onChange={(e) => setSiteContent((prev: any) => ({ ...prev, legacy: { ...prev.legacy, materials: { ...prev.legacy.materials, pillar1: { ...prev.legacy.materials.pillar1, desc: e.target.value } } } }))}
+                      className="w-full border border-[#DFD8CC] p-2 text-sm bg-white outline-none transition-all"
+                    />
+                  </div>
+                  <ImageUploader
+                    label="Pillar 1 Image"
+                    value={currentContent.materials?.pillar1?.img || ""}
+                    onChange={(url) => setSiteContent((prev: any) => ({ ...prev, legacy: { ...prev.legacy, materials: { ...prev.legacy.materials, pillar1: { ...prev.legacy.materials, pillar1: { ...prev.legacy.materials.pillar1, img: url } } } } }))}
+                    onUpload={handleImageUpload}
+                    isUploading={isUploading}
+                  />
+                </div>
+
+                {/* Pillar 2 */}
+                <div className="border border-[#DFD8CC] p-4 bg-[#F8F5F0]/60 rounded-sm space-y-4">
+                  <span className="font-bold text-xs uppercase tracking-wider text-[#C19A6B]">Pillar 2 (Luxurious)</span>
+                  <div>
+                    <label className="block text-[10px] uppercase font-bold text-[#8C7A63] mb-1">Tag</label>
+                    <input
+                      id="legacy-materials-pillar2-tag"
+                      type="text"
+                      value={currentContent.materials?.pillar2?.tag || ""}
+                      onChange={(e) => setSiteContent((prev: any) => ({ ...prev, legacy: { ...prev.legacy, materials: { ...prev.legacy.materials, pillar2: { ...prev.legacy.materials.pillar2, tag: e.target.value } } } }))}
+                      className="w-full border border-[#DFD8CC] p-2 text-sm bg-white outline-none transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] uppercase font-bold text-[#8C7A63] mb-1">Title</label>
+                    <input
+                      id="legacy-materials-pillar2-title"
+                      type="text"
+                      value={currentContent.materials?.pillar2?.title || ""}
+                      onChange={(e) => setSiteContent((prev: any) => ({ ...prev, legacy: { ...prev.legacy, materials: { ...prev.legacy.materials, pillar2: { ...prev.legacy.materials.pillar2, title: e.target.value } } } }))}
+                      className="w-full border border-[#DFD8CC] p-2 text-sm bg-white outline-none transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] uppercase font-bold text-[#8C7A63] mb-1">Description</label>
+                    <textarea
+                      id="legacy-materials-pillar2-desc"
+                      rows={3}
+                      value={currentContent.materials?.pillar2?.desc || ""}
+                      onChange={(e) => setSiteContent((prev: any) => ({ ...prev, legacy: { ...prev.legacy, materials: { ...prev.legacy.materials, pillar2: { ...prev.legacy.materials.pillar2, desc: e.target.value } } } }))}
+                      className="w-full border border-[#DFD8CC] p-2 text-sm bg-white outline-none transition-all"
+                    />
+                  </div>
+                  <ImageUploader
+                    label="Pillar 2 Image"
+                    value={currentContent.materials?.pillar2?.img || ""}
+                    onChange={(url) => setSiteContent((prev: any) => ({ ...prev, legacy: { ...prev.legacy, materials: { ...prev.legacy.materials, pillar2: { ...prev.legacy.materials.pillar2, img: url } } } }))}
+                    onUpload={handleImageUpload}
+                    isUploading={isUploading}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* 5. CALL TO ACTION */}
+            <div className="bg-white p-8 border border-[#EBE5DA] rounded-sm shadow-sm">
+              <h2 className="text-lg font-serif text-[#3A332C] mb-6 border-b border-[#DFD8CC] pb-3">5. Final Call To Action</h2>
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Heading</label>
+                  <input
+                    id="legacy-cta-title"
+                    type="text"
+                    value={currentContent.cta?.title || ""}
+                    onChange={(e) => updateField("cta", "title", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none focus:border-[#C19A6B] transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Description</label>
+                  <textarea
+                    id="legacy-cta-description"
+                    rows={2}
+                    value={currentContent.cta?.description || ""}
+                    onChange={(e) => updateField("cta", "description", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none focus:border-[#C19A6B] transition-all"
+                  />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Button Text</label>
+                    <input
+                      id="legacy-cta-btnText"
+                      type="text"
+                      value={currentContent.cta?.btnText || ""}
+                      onChange={(e) => updateField("cta", "btnText", e.target.value)}
+                      className="w-full border border-[#DFD8CC] p-2.5 text-sm outline-none transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Button Link</label>
+                    <input
+                      id="legacy-cta-btnLink"
+                      type="text"
+                      value={currentContent.cta?.btnLink || ""}
+                      onChange={(e) => updateField("cta", "btnLink", e.target.value)}
+                      className="w-full border border-[#DFD8CC] p-2.5 text-sm outline-none transition-all"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
-        {/* TAB 4: ABOUT US */}
+        {/* --- TAB 4: ABOUT US --- */}
         {activeTab === "about" && (
           <div className="space-y-10">
             <div className="bg-white p-8 border border-[#EBE5DA] rounded-sm shadow-sm">
@@ -588,19 +1360,37 @@ export default function SiteContentAdmin() {
               <div className="space-y-6">
                 <div>
                   <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Tag</label>
-                  <input type="text" value={currentContent.hero.tag} onChange={(e) => updateField("hero", "tag", e.target.value)} className="w-full border border-[#DFD8CC] p-3 text-sm outline-none" />
+                  <input
+                    id="about-hero-tag"
+                    type="text"
+                    value={currentContent.hero?.tag || ""}
+                    onChange={(e) => updateField("hero", "tag", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none transition-all"
+                  />
                 </div>
                 <div>
                   <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Title</label>
-                  <input type="text" value={currentContent.hero.title} onChange={(e) => updateField("hero", "title", e.target.value)} className="w-full border border-[#DFD8CC] p-3 text-sm outline-none" />
+                  <input
+                    id="about-hero-title"
+                    type="text"
+                    value={currentContent.hero?.title || ""}
+                    onChange={(e) => updateField("hero", "title", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none transition-all"
+                  />
                 </div>
                 <div>
                   <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Description</label>
-                  <textarea rows={3} value={currentContent.hero.description} onChange={(e) => updateField("hero", "description", e.target.value)} className="w-full border border-[#DFD8CC] p-3 text-sm outline-none" />
+                  <textarea
+                    id="about-hero-description"
+                    rows={3}
+                    value={currentContent.hero?.description || ""}
+                    onChange={(e) => updateField("hero", "description", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none transition-all"
+                  />
                 </div>
                 <ImageUploader
                   label="About Hero Image"
-                  value={currentContent.hero.bgImage}
+                  value={currentContent.hero?.bgImage || ""}
                   onChange={(url) => updateField("hero", "bgImage", url)}
                   onUpload={handleImageUpload}
                   isUploading={isUploading}
@@ -613,15 +1403,27 @@ export default function SiteContentAdmin() {
               <div className="space-y-6">
                 <div>
                   <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Mission Heading</label>
-                  <input type="text" value={currentContent.mission.title} onChange={(e) => updateField("mission", "title", e.target.value)} className="w-full border border-[#DFD8CC] p-3 text-sm outline-none" />
+                  <input
+                    id="about-mission-title"
+                    type="text"
+                    value={currentContent.mission?.title || ""}
+                    onChange={(e) => updateField("mission", "title", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none transition-all"
+                  />
                 </div>
                 <div>
                   <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Mission Statement</label>
-                  <textarea rows={4} value={currentContent.mission.text} onChange={(e) => updateField("mission", "text", e.target.value)} className="w-full border border-[#DFD8CC] p-3 text-sm outline-none" />
+                  <textarea
+                    id="about-mission-text"
+                    rows={4}
+                    value={currentContent.mission?.text || ""}
+                    onChange={(e) => updateField("mission", "text", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none transition-all"
+                  />
                 </div>
                 <ImageUploader
-                  label="Recycled Yarn / Wool Feel Image"
-                  value={currentContent.mission.image}
+                  label="Recycled Yarn / Craft Image"
+                  value={currentContent.mission?.image || ""}
                   onChange={(url) => updateField("mission", "image", url)}
                   onUpload={handleImageUpload}
                   isUploading={isUploading}
@@ -631,7 +1433,7 @@ export default function SiteContentAdmin() {
           </div>
         )}
 
-        {/* TAB 5: CONTACT */}
+        {/* --- TAB 5: CONTACT --- */}
         {activeTab === "contact" && (
           <div className="space-y-10">
             <div className="bg-white p-8 border border-[#EBE5DA] rounded-sm shadow-sm">
@@ -639,19 +1441,37 @@ export default function SiteContentAdmin() {
               <div className="space-y-6">
                 <div>
                   <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Tag</label>
-                  <input type="text" value={currentContent.header.tag} onChange={(e) => updateField("header", "tag", e.target.value)} className="w-full border border-[#DFD8CC] p-3 text-sm outline-none" />
+                  <input
+                    id="contact-header-tag"
+                    type="text"
+                    value={currentContent.header?.tag || ""}
+                    onChange={(e) => updateField("header", "tag", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none transition-all"
+                  />
                 </div>
                 <div>
                   <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Title</label>
-                  <input type="text" value={currentContent.header.title} onChange={(e) => updateField("header", "title", e.target.value)} className="w-full border border-[#DFD8CC] p-3 text-sm outline-none" />
+                  <input
+                    id="contact-header-title"
+                    type="text"
+                    value={currentContent.header?.title || ""}
+                    onChange={(e) => updateField("header", "title", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none transition-all"
+                  />
                 </div>
                 <div>
                   <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Description</label>
-                  <textarea rows={2} value={currentContent.header.description} onChange={(e) => updateField("header", "description", e.target.value)} className="w-full border border-[#DFD8CC] p-3 text-sm outline-none" />
+                  <textarea
+                    id="contact-header-description"
+                    rows={2}
+                    value={currentContent.header?.description || ""}
+                    onChange={(e) => updateField("header", "description", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none transition-all"
+                  />
                 </div>
                 <ImageUploader
                   label="Header Image"
-                  value={currentContent.header.bgImage}
+                  value={currentContent.header?.bgImage || ""}
                   onChange={(url) => updateField("header", "bgImage", url)}
                   onUpload={handleImageUpload}
                   isUploading={isUploading}
@@ -664,19 +1484,43 @@ export default function SiteContentAdmin() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Workshop Address</label>
-                  <input type="text" value={currentContent.info.address} onChange={(e) => updateField("info", "address", e.target.value)} className="w-full border border-[#DFD8CC] p-3 text-sm outline-none" />
+                  <input
+                    id="contact-info-address"
+                    type="text"
+                    value={currentContent.info?.address || ""}
+                    onChange={(e) => updateField("info", "address", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none transition-all"
+                  />
                 </div>
                 <div>
                   <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Email Address</label>
-                  <input type="text" value={currentContent.info.email} onChange={(e) => updateField("info", "email", e.target.value)} className="w-full border border-[#DFD8CC] p-3 text-sm outline-none" />
+                  <input
+                    id="contact-info-email"
+                    type="text"
+                    value={currentContent.info?.email || ""}
+                    onChange={(e) => updateField("info", "email", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none transition-all"
+                  />
                 </div>
                 <div>
                   <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Phone / WhatsApp</label>
-                  <input type="text" value={currentContent.info.phone} onChange={(e) => updateField("info", "phone", e.target.value)} className="w-full border border-[#DFD8CC] p-3 text-sm outline-none" />
+                  <input
+                    id="contact-info-phone"
+                    type="text"
+                    value={currentContent.info?.phone || ""}
+                    onChange={(e) => updateField("info", "phone", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none transition-all"
+                  />
                 </div>
                 <div>
                   <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Operational Hours</label>
-                  <input type="text" value={currentContent.info.hours} onChange={(e) => updateField("info", "hours", e.target.value)} className="w-full border border-[#DFD8CC] p-3 text-sm outline-none" />
+                  <input
+                    id="contact-info-hours"
+                    type="text"
+                    value={currentContent.info?.hours || ""}
+                    onChange={(e) => updateField("info", "hours", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none transition-all"
+                  />
                 </div>
               </div>
             </div>

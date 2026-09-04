@@ -10,10 +10,11 @@ export default function Home() {
   useEffect(() => {
     async function getDynamicContent() {
       try {
+        // "homepage" ki jagah "home" karein:
         const { data } = await supabase
           .from("site_content")
           .select("data")
-          .eq("id", "homepage")
+          .eq("id", "home")
           .maybeSingle();
         if (data && data.data) {
           setSiteData(data.data);

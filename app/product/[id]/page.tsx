@@ -271,8 +271,22 @@ export default function ProductPage() {
           </div>
         )}
 
-        {/* WISHLIST BUTTON */}
-        <div className="flex justify-end mt-10 md:pr-4">
+        {/* 🌟 ETSY BUTTON & WISHLIST BUTTON CONTAINER */}
+        <div className="flex flex-col items-end gap-3 mt-10 md:pr-4">
+          
+         {/* VIEW ON ETSY BUTTON */}
+         {product.show_etsy && product.etsy_url && (
+            <a
+              href={product.etsy_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center px-6 py-3 bg-[#F1641E] hover:bg-[#D95314] text-white text-xs uppercase tracking-[0.18em] font-bold rounded-sm transition-colors duration-300 shadow-sm"
+            >
+              View on Etsy
+            </a>
+          )}
+
+          {/* WISHLIST BUTTON */}
           <button 
             onClick={toggleWishlist}
             className="flex items-center gap-3 text-sm md:text-base uppercase tracking-[0.15em] font-bold transition-all duration-300 hover:opacity-70"
@@ -297,7 +311,6 @@ export default function ProductPage() {
             <span className="text-[#C19A6B] uppercase tracking-[0.2em] text-sm font-semibold mb-4 block">{product.category} Collection</span>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif text-[#3A332C] mb-2 font-medium leading-tight">{product.name}</h1>
             
-            {/* 🌟 ORIGINAL NAME */}
             {product.original_name && (
               <p className="text-sm text-[#8C7A63] italic mb-6 font-medium">Original Artisan Design: {product.original_name}</p>
             )}
@@ -362,20 +375,16 @@ export default function ProductPage() {
               </button>
             </div>
 
-          {/* 🌟 CUSTOMIZE BUTTON UPDATE */}
-          {product.is_customizable && (
-            <Link 
-               href={`/product/${product.id}/customize`}
+            {product.is_customizable && (
+              <Link 
+                href={`/product/${product.id}/customize`}
                 className="w-full border-2 border-[#C19A6B] text-[#C19A6B] py-4 uppercase tracking-[0.15em] text-sm font-semibold hover:bg-[#C19A6B] hover:text-white transition-colors duration-300 rounded-sm mb-6 flex items-center justify-center text-center"
-                  >
-                 Customise Product Yourself
-            </Link>
-          )}
+              >
+                Customise Product Yourself
+              </Link>
+            )}
 
-            {/* 🌟 DELIVERY, PROCESSING, & STOCK INFO */}
             <div className="flex flex-col gap-3 text-xs text-[#8C7A63] uppercase tracking-wider pt-5 border-t border-[#DFD8CC]/70">
-              
-              {/* 🌟 FREE DELIVERY HIGHLIGHT */}
               {product.free_delivery && (
                 <span className="flex items-center gap-2 text-emerald-600 font-bold bg-emerald-50 w-fit px-3 py-1.5 rounded-sm border border-emerald-100">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"/></svg>
@@ -383,7 +392,6 @@ export default function ProductPage() {
                 </span>
               )}
 
-              {/* 🌟 PROCESSING TYPE */}
               {product.processing_type && (
                 <span className="flex items-center gap-2 text-[#3A332C] font-semibold">
                   <svg className="w-4 h-4 text-[#C19A6B]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
@@ -410,7 +418,6 @@ export default function ProductPage() {
           {product.description || "Meticulously manufactured in our Bhadohi workshop using advanced zigzag and straight-stitch techniques."}
         </p>
 
-        {/* 🌟 FEATURES & TAGS */}
         {(Array.isArray(product.features) && product.features.length > 0) || (Array.isArray(product.tags) && product.tags.length > 0) ? (
           <div className="mb-12">
             {Array.isArray(product.features) && product.features.length > 0 && (
