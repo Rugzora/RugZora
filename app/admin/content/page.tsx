@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import { motion, AnimatePresence } from "framer-motion";
 
 function ImageUploader({
   label,
@@ -89,9 +90,13 @@ const defaultData: Record<string, any> = {
   home: {
     hero: {
       tag: "Bespoke Artisanal Floor Coverings",
+      tagSize: 12,
       title: "Eco-Conscious Luxury.",
+      titleSize: 64,
       subtitle: "Born in The Carpet City.",
+      subtitleSize: 48,
       description: "Handcrafted chunky braided rugs woven from sustainable recycled PET fibers. Ultra-soft wool-like feel, 100% reversible, and tailored directly in our Bhadohi workshop.",
+      descriptionSize: 16,
       ctaText: "Explore Handcrafted Rugs",
       ctaLink: "/collections",
       bgImage: "https://images.unsplash.com/photo-1631679706909-1844bbd07221?q=80&w=1992&auto=format&fit=crop"
@@ -207,6 +212,15 @@ const defaultData: Record<string, any> = {
       image: "https://images.unsplash.com/photo-1581428982868-e410dd047a90?auto=format&fit=crop&q=80&w=1200"
     }
   },
+  bespoke: {
+    tag: "End-to-End Bespoke",
+    title: "Tailored to Your Floor Plan",
+    description: "Need non-standard proportions? Customize shapes, custom foot measurements, and duo-tone palette contrasts crafted individually in our Bhadohi facility.",
+    mainImage: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
+    detailImage: "https://images.unsplash.com/photo-1590118318182-3d5f35fc0ea4?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
+    btnText: "Customize Your Rug",
+    btnLink: "/collections"
+  },
   contact: {
     header: {
       title: "Connect With Us",
@@ -236,6 +250,7 @@ export default function SiteContentAdmin() {
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [statusMsg, setStatusMsg] = useState("");
+  const [showCelebration, setShowCelebration] = useState(false);
 
   // 🌟 Live Quick Search States
   const [searchQuery, setSearchQuery] = useState("");
@@ -300,18 +315,24 @@ export default function SiteContentAdmin() {
     setIsSaving(true);
     setStatusMsg(`Saving changes for ${activeTab.toUpperCase()}...`);
     try {
-      const { error } = await supabase.from("site_content").upsert({
-        id: activeTab,
-        data: siteContent[activeTab],
-        updated_at: new Date().toISOString()
-      });
+      const { error } = await supabase
+        .from("site_content")
+        .upsert(
+          {
+            id: activeTab,
+            data: siteContent[activeTab],
+            updated_at: new Date().toISOString()
+          },
+          { onConflict: "id" }
+        );
+
       if (error) throw error;
-      setStatusMsg(`"${activeTab.toUpperCase()}" page updated live! ✔`);
-      setTimeout(() => setStatusMsg(""), 4000);
+
+      setIsSaving(false);
+      setShowCelebration(true); // 🌟 Green tick popup trigger
+      setTimeout(() => setShowCelebration(false), 2500);
     } catch (err: any) {
       alert("Failed to save: " + err.message);
-      setStatusMsg("");
-    } finally {
       setIsSaving(false);
     }
   };
@@ -534,62 +555,152 @@ export default function SiteContentAdmin() {
         {/* --- TAB 1: HOME --- */}
         {activeTab === "home" && (
           <div className="space-y-10">
-            {/* HERO */}
+            {/* 1. HERO WITH FONT SIZE CONTROLLERS */}
             <div className="bg-white p-8 border border-[#EBE5DA] rounded-sm shadow-sm">
-              <h2 className="text-lg font-serif text-[#3A332C] mb-6 border-b border-[#DFD8CC] pb-3">1. Hero Section</h2>
+              <h2 className="text-lg font-serif text-[#3A332C] mb-6 border-b border-[#DFD8CC] pb-3">
+                1. Hero Section (Text & Font Sizes)
+              </h2>
               <div className="space-y-6">
-                <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Tagline</label>
-                  <input
-                    id="home-hero-tag"
-                    type="text"
-                    value={currentContent.hero?.tag || ""}
-                    onChange={(e) => updateField("hero", "tag", e.target.value)}
-                    className="w-full border border-[#DFD8CC] p-3 text-sm focus:border-[#C19A6B] outline-none transition-all"
-                  />
+                
+                {/* Tagline & Size */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                  <div className="md:col-span-2">
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">
+                      Tagline (Blank = Hide)
+                    </label>
+                    <input
+                      id="home-hero-tag"
+                      type="text"
+                      value={currentContent.hero?.tag ?? ""}
+                      onChange={(e) => updateField("hero", "tag", e.target.value)}
+                      placeholder="Bespoke Artisanal Floor Coverings"
+                      className="w-full border border-[#DFD8CC] p-3 text-sm focus:border-[#C19A6B] outline-none transition-all"
+                    />
+                  </div>
+                  <div className="bg-[#F8F5F0] p-3 border border-[#DFD8CC] rounded-sm">
+                    <div className="flex justify-between items-center mb-1">
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-[#8C7A63]">Font Size</label>
+                      <span className="text-xs font-bold text-[#C19A6B]">{currentContent.hero?.tagSize || 12}px</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="10"
+                      max="24"
+                      value={currentContent.hero?.tagSize || 12}
+                      onChange={(e) => updateField("hero", "tagSize", Number(e.target.value))}
+                      className="w-full accent-[#C19A6B] cursor-pointer"
+                    />
+                  </div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Heading Line 1</label>
+
+                {/* Heading Line 1 & Size */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                  <div className="md:col-span-2">
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">
+                      Heading Line 1 (Blank = Hide)
+                    </label>
                     <input
                       id="home-hero-title"
                       type="text"
-                      value={currentContent.hero?.title || ""}
+                      value={currentContent.hero?.title ?? ""}
                       onChange={(e) => updateField("hero", "title", e.target.value)}
+                      placeholder="Premium Rugs"
                       className="w-full border border-[#DFD8CC] p-3 text-sm focus:border-[#C19A6B] outline-none transition-all"
                     />
                   </div>
-                  <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Subtitle Line 2</label>
+                  <div className="bg-[#F8F5F0] p-3 border border-[#DFD8CC] rounded-sm">
+                    <div className="flex justify-between items-center mb-1">
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-[#8C7A63]">Font Size</label>
+                      <span className="text-xs font-bold text-[#C19A6B]">{currentContent.hero?.titleSize || 64}px</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="28"
+                      max="96"
+                      value={currentContent.hero?.titleSize || 64}
+                      onChange={(e) => updateField("hero", "titleSize", Number(e.target.value))}
+                      className="w-full accent-[#C19A6B] cursor-pointer"
+                    />
+                  </div>
+                </div>
+
+                {/* Subtitle Line 2 & Size */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                  <div className="md:col-span-2">
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">
+                      Subtitle Line 2 (Blank = Hide)
+                    </label>
                     <input
                       id="home-hero-subtitle"
                       type="text"
-                      value={currentContent.hero?.subtitle || ""}
+                      value={currentContent.hero?.subtitle ?? ""}
                       onChange={(e) => updateField("hero", "subtitle", e.target.value)}
+                      placeholder="By RugZora"
                       className="w-full border border-[#DFD8CC] p-3 text-sm focus:border-[#C19A6B] outline-none transition-all"
                     />
                   </div>
+                  <div className="bg-[#F8F5F0] p-3 border border-[#DFD8CC] rounded-sm">
+                    <div className="flex justify-between items-center mb-1">
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-[#8C7A63]">Font Size</label>
+                      <span className="text-xs font-bold text-[#C19A6B]">{currentContent.hero?.subtitleSize || 48}px</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="20"
+                      max="72"
+                      value={currentContent.hero?.subtitleSize || 48}
+                      onChange={(e) => updateField("hero", "subtitleSize", Number(e.target.value))}
+                      className="w-full accent-[#C19A6B] cursor-pointer"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Description</label>
-                  <textarea
-                    id="home-hero-description"
-                    rows={3}
-                    value={currentContent.hero?.description || ""}
-                    onChange={(e) => updateField("hero", "description", e.target.value)}
-                    className="w-full border border-[#DFD8CC] p-3 text-sm focus:border-[#C19A6B] outline-none transition-all"
-                  />
+
+                {/* Description & Size */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                  <div className="md:col-span-2">
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">
+                      Description (Blank = Hide)
+                    </label>
+                    <textarea
+                      id="home-hero-description"
+                      rows={3}
+                      value={currentContent.hero?.description ?? ""}
+                      onChange={(e) => updateField("hero", "description", e.target.value)}
+                      placeholder="Handcrafted chunky braided rugs..."
+                      className="w-full border border-[#DFD8CC] p-3 text-sm focus:border-[#C19A6B] outline-none transition-all"
+                    />
+                  </div>
+                  <div className="bg-[#F8F5F0] p-3 border border-[#DFD8CC] rounded-sm">
+                    <div className="flex justify-between items-center mb-1">
+                      <label className="text-[10px] font-bold uppercase tracking-wider text-[#8C7A63]">Font Size</label>
+                      <span className="text-xs font-bold text-[#C19A6B]">{currentContent.hero?.descriptionSize || 16}px</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="12"
+                      max="26"
+                      value={currentContent.hero?.descriptionSize || 16}
+                      onChange={(e) => updateField("hero", "descriptionSize", Number(e.target.value))}
+                      className="w-full accent-[#C19A6B] cursor-pointer"
+                    />
+                  </div>
                 </div>
+
+                {/* Button Text */}
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Button Text</label>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">
+                    Button Text (Blank = Hide)
+                  </label>
                   <input
                     id="home-hero-ctaText"
                     type="text"
-                    value={currentContent.hero?.ctaText || ""}
+                    value={currentContent.hero?.ctaText ?? ""}
                     onChange={(e) => updateField("hero", "ctaText", e.target.value)}
+                    placeholder="Explore Handcrafted Rugs"
                     className="w-full border border-[#DFD8CC] p-3 text-sm focus:border-[#C19A6B] outline-none transition-all"
                   />
                 </div>
+
                 <ImageUploader
                   label="Hero Background Image"
                   value={currentContent.hero?.bgImage || ""}
@@ -811,7 +922,8 @@ export default function SiteContentAdmin() {
                     className="w-full border border-[#DFD8CC] p-3 text-sm outline-none transition-all"
                   />
                 </div>
-                <ImageUploader
+               {/* Material Science Side Image */}
+               <ImageUploader
                   label="Material Science Side Image"
                   value={currentContent.materialScience?.img || ""}
                   onChange={(url) => updateField("materialScience", "img", url)}
@@ -821,7 +933,7 @@ export default function SiteContentAdmin() {
               </div>
             </div>
 
-            {/* TEXTURE LIBRARY */}
+            {/* 6. THE TEXTURE LIBRARY */}
             <div className="bg-white p-8 border border-[#EBE5DA] rounded-sm shadow-sm">
               <h2 className="text-lg font-serif text-[#3A332C] mb-6 border-b border-[#DFD8CC] pb-3">6. The Texture Library (4 Swatches)</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -852,9 +964,15 @@ export default function SiteContentAdmin() {
                   <div key={idx} className="border border-[#DFD8CC] p-4 bg-[#F8F5F0]/60 rounded-sm">
                     <ImageUploader
                       label={`Swatch #${idx + 1}`}
-                      value={currentContent.textureLibrary?.images?.[idx] || ""}
+                      value={
+                        typeof currentContent.textureLibrary?.images?.[idx] === "string"
+                          ? currentContent.textureLibrary.images[idx]
+                          : currentContent.textureLibrary?.images?.[idx]?.url || ""
+                      }
                       onChange={(url) => {
-                        const updated = [...(currentContent.textureLibrary?.images || defaultData.home.textureLibrary.images)];
+                        const updated = [
+                          ...(currentContent.textureLibrary?.images || defaultData.home.textureLibrary.images),
+                        ];
                         updated[idx] = url;
                         setSiteContent((prev) => ({
                           ...prev,
@@ -862,9 +980,9 @@ export default function SiteContentAdmin() {
                             ...prev.home,
                             textureLibrary: {
                               ...prev.home?.textureLibrary,
-                              images: updated
-                            }
-                          }
+                              images: updated,
+                            },
+                          },
                         }));
                       }}
                       onUpload={handleImageUpload}
@@ -948,37 +1066,81 @@ export default function SiteContentAdmin() {
               </div>
             </div>
 
-            {/* PROMISE */}
+
+            {/* BESPOKE STUDIO SPOTLIGHT (TWO IMAGES CONTROL) */}
             <div className="bg-white p-8 border border-[#EBE5DA] rounded-sm shadow-sm">
-              <h2 className="text-lg font-serif text-[#3A332C] mb-6 border-b border-[#DFD8CC] pb-3">8. Bottom Artisan Banner</h2>
+              <h2 className="text-lg font-serif text-[#3A332C] mb-6 border-b border-[#DFD8CC] pb-3">
+                8. Bespoke Studio Spotlight (Two Images & Content)
+              </h2>
               <div className="space-y-6">
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Banner Title</label>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Tagline</label>
                   <input
-                    id="home-promise-title"
                     type="text"
-                    value={currentContent.promise?.title || ""}
-                    onChange={(e) => updateField("promise", "title", e.target.value)}
-                    className="w-full border border-[#DFD8CC] p-3 text-sm focus:border-[#C19A6B] outline-none transition-all"
+                    value={currentContent.bespoke?.tag ?? ""}
+                    onChange={(e) => updateField("bespoke", "tag", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none focus:border-[#C19A6B]"
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Button Text</label>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Heading</label>
                   <input
-                    id="home-promise-ctaText"
                     type="text"
-                    value={currentContent.promise?.ctaText || ""}
-                    onChange={(e) => updateField("promise", "ctaText", e.target.value)}
-                    className="w-full border border-[#DFD8CC] p-3 text-sm focus:border-[#C19A6B] outline-none transition-all"
+                    value={currentContent.bespoke?.title ?? ""}
+                    onChange={(e) => updateField("bespoke", "title", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none focus:border-[#C19A6B]"
                   />
                 </div>
-                <ImageUploader
-                  label="Banner Background Image"
-                  value={currentContent.promise?.image || ""}
-                  onChange={(url) => updateField("promise", "image", url)}
-                  onUpload={handleImageUpload}
-                  isUploading={isUploading}
-                />
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Description</label>
+                  <textarea
+                    rows={3}
+                    value={currentContent.bespoke?.description ?? ""}
+                    onChange={(e) => updateField("bespoke", "description", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none focus:border-[#C19A6B]"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-[#DFD8CC]">
+                  {/* Image 1: Main Large Architecture Photo */}
+                  <ImageUploader
+                    label="1. Main Large Background Photo"
+                    value={currentContent.bespoke?.mainImage || ""}
+                    onChange={(url) => updateField("bespoke", "mainImage", url)}
+                    onUpload={handleImageUpload}
+                    isUploading={isUploading}
+                  />
+
+                  {/* Image 2: Close-up Rug Card Photo */}
+                  <ImageUploader
+                    label="2. Floating Card Close-up Detail Photo"
+                    value={currentContent.bespoke?.detailImage || ""}
+                    onChange={(url) => updateField("bespoke", "detailImage", url)}
+                    onUpload={handleImageUpload}
+                    isUploading={isUploading}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Button Text</label>
+                    <input
+                      type="text"
+                      value={currentContent.bespoke?.btnText ?? ""}
+                      onChange={(e) => updateField("bespoke", "btnText", e.target.value)}
+                      className="w-full border border-[#DFD8CC] p-2.5 text-sm outline-none focus:border-[#C19A6B]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Button Link</label>
+                    <input
+                      type="text"
+                      value={currentContent.bespoke?.btnLink ?? ""}
+                      onChange={(e) => updateField("bespoke", "btnLink", e.target.value)}
+                      className="w-full border border-[#DFD8CC] p-2.5 text-sm outline-none focus:border-[#C19A6B]"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -1492,6 +1654,80 @@ export default function SiteContentAdmin() {
         )}
 
       </div>
+
+      {/* 🌟 1. FULLSCREEN DARK BACKDROP WITH ROUND GREEN SPINNER */}
+      <AnimatePresence>
+        {isSaving && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[120] flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm select-none"
+          >
+            <div className="bg-white border border-[#DFD8CC] p-8 rounded-sm shadow-2xl flex flex-col items-center gap-5 max-w-xs w-full text-center">
+              <div className="relative w-16 h-16 flex items-center justify-center">
+                <div className="w-16 h-16 rounded-full border-4 border-emerald-100 animate-pulse"></div>
+                <div className="absolute inset-0 w-16 h-16 rounded-full border-4 border-emerald-500 border-t-transparent animate-spin"></div>
+              </div>
+              <div>
+                <h4 className="text-base font-serif text-[#3A332C] font-semibold">
+                  Processing...
+                </h4>
+                <p className="text-xs text-[#7A7065] mt-1 font-medium">
+                  Saving and synchronizing content...
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* 🌟 2. ANIMATED GREEN CHECKMARK SUCCESS MODAL */}
+      <AnimatePresence>
+        {showCelebration && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[130] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 select-none"
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 10 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="bg-white rounded-sm max-w-xs w-full p-8 text-center shadow-2xl border-t-4 border-emerald-500"
+            >
+              <div className="relative w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+                <div className="w-16 h-16 bg-emerald-50 border-2 border-emerald-500 rounded-full flex items-center justify-center">
+                  <svg
+                    className="w-8 h-8 text-emerald-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={3}
+                  >
+                    <motion.path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M5 13l4 4L19 7"
+                      initial={{ pathLength: 0 }}
+                      animate={{ pathLength: 1 }}
+                      transition={{ duration: 0.4, ease: "easeOut" }}
+                    />
+                  </svg>
+                </div>
+              </div>
+              <h3 className="text-lg font-serif text-[#3A332C] font-semibold">
+                Changes Saved!
+              </h3>
+              <p className="text-xs text-[#7A7065] mt-1">
+                Updated live across the storefront.
+              </p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

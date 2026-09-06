@@ -63,19 +63,23 @@ export default function AdminUpload() {
     show_etsy: false,
     etsy_url: "",
     related_products: [] as string[],
-    variants: [{ dimensions: "", unit: "ft", price: "" }] 
+    variants: [{ dimensions: "3 x 5", unit: "ft", price: "4500" }] 
   };
 
   const [formData, setFormData] = useState(initialFormState);
 
   const fetchData = async () => {
-    const { data: products } = await supabase.from("products").select("id, name, images").order("created_at", { ascending: false });
-    if (products) setAvailableProducts(products);
+    try {
+      const { data: products } = await supabase.from("products").select("id, name, images").order("created_at", { ascending: false });
+      if (products) setAvailableProducts(products);
 
-    const { data: settings } = await supabase.from("store_settings").select("usd_rate").eq("id", 1).maybeSingle();
-    if (settings && settings.usd_rate) {
-      setGlobalUsdRate(settings.usd_rate.toString());
-      setInitialUsdRate(settings.usd_rate.toString());
+      const { data: settings } = await supabase.from("store_settings").select("usd_rate").eq("id", 1).maybeSingle();
+      if (settings && settings.usd_rate) {
+        setGlobalUsdRate(settings.usd_rate.toString());
+        setInitialUsdRate(settings.usd_rate.toString());
+      }
+    } catch (e) {
+      console.error(e);
     }
   };
 
@@ -88,7 +92,6 @@ export default function AdminUpload() {
     await supabase.from("store_settings").upsert({ id: 1, usd_rate: parseFloat(globalUsdRate) });
     setInitialUsdRate(globalUsdRate);
     setIsSavingRate(false);
-    
     setRateSavedSuccess(true);
     setTimeout(() => setRateSavedSuccess(false), 3000);
   };
@@ -107,7 +110,7 @@ export default function AdminUpload() {
     }
 
     setLoadingAction("publish"); 
-    setStatusMsg("Loading product details...");
+    setStatusMsg("Loading details...");
     try {
       const { data, error } = await supabase.from("products").select("*").eq("id", productId).maybeSingle();
       if (error) throw error;
@@ -150,7 +153,7 @@ export default function AdminUpload() {
           show_etsy: data.show_etsy || false,
           etsy_url: data.etsy_url || "",
           related_products: data.related_products || [],
-          variants: loadedVariants
+          variants: loadedVariants.length > 0 ? loadedVariants : [{ dimensions: "3 x 5", unit: "ft", price: "4500" }]
         });
 
         if (data.images && Array.isArray(data.images)) {
@@ -160,7 +163,7 @@ export default function AdminUpload() {
         }
       }
     } catch (err: any) {
-      alert("Failed to load product.");
+      alert("Failed to load: " + err.message);
     } finally {
       setLoadingAction(null);
       setStatusMsg("");
@@ -189,7 +192,7 @@ export default function AdminUpload() {
     setFormData(prev => {
       const isSelected = prev.related_products.includes(productId);
       if (isSelected) return { ...prev, related_products: prev.related_products.filter(id => id !== productId) };
-      if (prev.related_products.length >= 4) { alert("Maximum 4 related products allowed."); return prev; }
+      if (prev.related_products.length >= 4) { alert("Maximum 4 items allowed."); return prev; }
       return { ...prev, related_products: [...prev.related_products, productId] };
     });
   };
@@ -229,18 +232,16 @@ export default function AdminUpload() {
   };
 
   const submitData = async (statusType: "publish" | "draft") => {
-    if (images.length === 0) return alert("Please add at least 1 photo.");
-    if (formData.variants.some(v => !v.dimensions || !v.price)) return alert("Please fill all size dimensions and price fields.");
-    
+    if (!formData.name.trim()) return alert("Please fill the Carpet Title.");
+    if (images.length === 0) return alert("Please add at least 1 image.");
+    if (formData.variants.some(v => !v.dimensions || !v.price)) return alert("Please fill all size dimensions and prices.");
+
     const finalCategory = formData.category === "Custom" ? formData.custom_category.trim() : formData.category;
     if (!finalCategory) return alert("Please specify a category.");
 
-    if (formData.show_etsy && !formData.etsy_url.trim()) {
-      return alert("Please enter the Etsy URL or uncheck the View on Etsy box.");
-    }
-
     setLoadingAction(statusType); 
-    setStatusMsg("Processing upload...");
+    setStatusMsg("Uploading files and synchronizing...");
+    
     try {
       const finalImageUrls: string[] = [];
       
@@ -258,7 +259,6 @@ export default function AdminUpload() {
         }
       }
 
-      setStatusMsg("Saving product data...");
       const tagsArray = formData.tags.split(",").map((s) => s.trim()).filter(Boolean);
       const featuresArray = formData.features.split(",").map((s) => s.trim()).filter(Boolean);
 
@@ -267,10 +267,10 @@ export default function AdminUpload() {
         price: v.price
       }));
       
-      const basePrice = constructedVariants[0].price;
+      const basePrice = constructedVariants[0]?.price || "0";
       const sizesArray = constructedVariants.map(v => v.size);
 
-      const productPayload = {
+      const productPayload: any = {
         name: formData.name, 
         original_name: formData.original_name,
         price: `₹${basePrice}`, 
@@ -280,10 +280,18 @@ export default function AdminUpload() {
         stock_quantity: parseInt(formData.quantity) || 1, 
         category: finalCategory, 
         color: formData.color,
-        shape: formData.shape, style: formData.style, room: formData.room, pattern: formData.pattern, material: formData.material,
-        tags: tagsArray, features: featuresArray, description: formData.description,
+        shape: formData.shape, 
+        style: formData.style, 
+        room: formData.room, 
+        pattern: formData.pattern, 
+        material: formData.material,
+        tags: tagsArray, 
+        features: featuresArray, 
+        description: formData.description,
         processing_type: formData.processing_type,
-        care_instructions: formData.care_instructions, processing_time: formData.processing_time, return_policy: formData.return_policy,
+        care_instructions: formData.care_instructions, 
+        processing_time: formData.processing_time, 
+        return_policy: formData.return_policy,
         is_customizable: formData.is_customizable, 
         customization_surcharge: parseFloat(formData.customization_surcharge) || 20,
         free_delivery: formData.free_delivery,
@@ -308,18 +316,13 @@ export default function AdminUpload() {
 
       if (submittedId) setNewlyCreatedId(submittedId);
       
-      if (statusType === "publish") {
-        setShowCelebration(true);
-      } else {
-        alert("Draft saved successfully!");
-        if (mode === "create") resetForm();
-      }
-      
-      setStatusMsg("");
+      // Stop Loader and Show Animated Tick
+      setLoadingAction(null);
+      setShowCelebration(true);
       
     } catch (err: any) {
-      setStatusMsg(`Error processing request: ${err.message || 'Please check database fields'}`);
-    } finally {
+      console.error(err);
+      alert(`Error saving listing: ${err.message || 'Please check database fields'}`);
       setLoadingAction(null);
     }
   };
@@ -328,31 +331,81 @@ export default function AdminUpload() {
     <div className="bg-[#F8F5F0] min-h-screen pt-20 pb-24 px-6 relative">
       <div className="max-w-5xl mx-auto bg-white p-10 rounded-sm shadow-sm border border-[#EBE5DA]">
         
-        {/* HEADER & GLOBAL SETTINGS */}
+        {/* HEADER */}
         <div className="mb-10 flex flex-col lg:flex-row lg:items-end justify-between gap-6 border-b border-[#EBE5DA] pb-6">
           <div>
-            <span className="text-[#C19A6B] uppercase tracking-[0.2em] font-semibold text-xs block mb-1">RugZora Studio CMS</span>
+            <span className="text-[#C19A6B] uppercase tracking-[0.2em] font-semibold text-xs block mb-1">
+              RugZora Studio CMS
+            </span>
             <h1 className="text-3xl font-serif text-[#3A332C]">Listing Management</h1>
           </div>
           
           <div className="flex flex-col items-end gap-3">
-            <div className="flex bg-[#F8F5F0] p-1 rounded-sm border border-[#EBE5DA]">
-              <button onClick={() => { setMode("create"); resetForm(); }} className={`px-4 py-2 text-xs font-semibold uppercase tracking-wider transition-colors rounded-sm ${mode === "create" ? "bg-white text-[#C19A6B] shadow-sm border border-[#DFD8CC]" : "text-[#7A7065] hover:text-[#3A332C]"}`}>Create New</button>
-              <button onClick={() => setMode("edit")} className={`px-4 py-2 text-xs font-semibold uppercase tracking-wider transition-colors rounded-sm ${mode === "edit" ? "bg-white text-[#C19A6B] shadow-sm border border-[#DFD8CC]" : "text-[#7A7065] hover:text-[#3A332C]"}`}>Edit Existing</button>
+            <div className="flex items-center gap-2">
+              {/* 🌟 EDIT WEB BUTTON INSIDE ADMIN */}
+              <Link
+                href="/admin/content"
+                className="px-4 py-2 text-xs font-bold uppercase tracking-widest bg-[#3A332C] text-[#F8F5F0] hover:bg-[#C19A6B] transition-colors rounded-sm shadow-sm flex items-center gap-1.5"
+              >
+                <span>Edit Web</span>
+                <span className="text-xs">↗</span>
+              </Link>
+
+              {/* Mode Toggle Tabs */}
+              <div className="flex bg-[#F8F5F0] p-1 rounded-sm border border-[#EBE5DA]">
+                <button 
+                  type="button" 
+                  onClick={() => { setMode("create"); resetForm(); }} 
+                  className={`px-4 py-2 text-xs font-semibold uppercase tracking-wider transition-colors rounded-sm ${
+                    mode === "create" 
+                      ? "bg-white text-[#C19A6B] shadow-sm border border-[#DFD8CC]" 
+                      : "text-[#7A7065] hover:text-[#3A332C]"
+                  }`}
+                >
+                  Create New
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => setMode("edit")} 
+                  className={`px-4 py-2 text-xs font-semibold uppercase tracking-wider transition-colors rounded-sm ${
+                    mode === "edit" 
+                      ? "bg-white text-[#C19A6B] shadow-sm border border-[#DFD8CC]" 
+                      : "text-[#7A7065] hover:text-[#3A332C]"
+                  }`}
+                >
+                  Edit Existing
+                </button>
+              </div>
             </div>
 
+            {/* Global Currency Rate Box */}
             <div className="flex items-center gap-3 bg-white border border-[#DFD8CC] px-4 py-2 rounded-sm shadow-sm h-[42px]">
-              <span className="text-xs font-semibold text-[#3A332C] uppercase tracking-wider">Global Rate: 1 USD =</span>
+              <span className="text-xs font-semibold text-[#3A332C] uppercase tracking-wider">
+                Global Rate: 1 USD =
+              </span>
               <div className="flex items-center gap-2">
                 <span className="text-[#6B6054] font-medium">₹</span>
-                <input type="number" value={globalUsdRate} onChange={(e) => setGlobalUsdRate(e.target.value)} className="w-20 text-sm font-semibold text-[#C19A6B] border-b border-[#DFD8CC] focus:outline-none focus:border-[#C19A6B] text-center bg-transparent" />
+                <input 
+                  type="number" 
+                  value={globalUsdRate} 
+                  onChange={(e) => setGlobalUsdRate(e.target.value)} 
+                  className="w-20 text-sm font-semibold text-[#C19A6B] border-b border-[#DFD8CC] focus:outline-none focus:border-[#C19A6B] text-center bg-transparent" 
+                />
               </div>
-              
               {globalUsdRate !== initialUsdRate && !rateSavedSuccess && (
-                <button onClick={saveGlobalRate} disabled={isSavingRate} className="text-[10px] uppercase bg-[#3A332C] text-white px-3 py-1.5 rounded-sm hover:bg-[#C19A6B] transition-colors">{isSavingRate ? "..." : "Save"}</button>
+                <button 
+                  type="button" 
+                  onClick={saveGlobalRate} 
+                  disabled={isSavingRate} 
+                  className="text-[10px] uppercase bg-[#3A332C] text-white px-3 py-1.5 rounded-sm hover:bg-[#C19A6B] transition-colors"
+                >
+                  {isSavingRate ? "..." : "Save"}
+                </button>
               )}
               {rateSavedSuccess && (
-                <span className="text-[11px] uppercase tracking-widest text-emerald-600 font-bold px-2">Saved ✔</span>
+                <span className="text-[11px] uppercase tracking-widest text-emerald-600 font-bold px-2">
+                  Saved ✔
+                </span>
               )}
             </div>
           </div>
@@ -368,18 +421,14 @@ export default function AdminUpload() {
           </div>
         )}
 
-        {statusMsg && <div className="mb-6 p-4 bg-[#F4F0E8] border border-[#C19A6B] text-[#3A332C] text-sm font-medium">{statusMsg}</div>}
-
-        <form className={`space-y-10 ${(mode === "edit" && !editingProductId) ? "opacity-40 pointer-events-none" : ""}`}>
+        <form onSubmit={(e) => e.preventDefault()} className={`space-y-10 ${(mode === "edit" && !editingProductId) ? "opacity-40 pointer-events-none" : ""}`}>
           
+          {/* SECTION 1 */}
           <div>
             <h3 className="text-lg font-serif text-[#3A332C] mb-4 border-b border-[#DFD8CC] pb-2">1. Basic Information & Pricing Variants</h3>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-              
               <InputField label="Carpet Title (Public) *" name="name" required value={formData.name} onChange={handleInputChange} placeholder="e.g. Royal Golden Jute Rug" />
-              
               <InputField label="Original Name (Optional - Internal)" name="original_name" value={formData.original_name} onChange={handleInputChange} placeholder="e.g. Artisan Design Alpha" />
-              
               <div>
                 <label className="block text-[11px] uppercase tracking-wider font-semibold text-[#3A332C] mb-2">Category *</label>
                 <select name="category" value={formData.category} onChange={handleInputChange} className="w-full border border-[#DFD8CC] p-3 text-sm focus:outline-none focus:border-[#C19A6B] bg-white mb-2">
@@ -396,7 +445,6 @@ export default function AdminUpload() {
                   />
                 )}
               </div>
-
             </div>
 
             <div className="bg-[#F8F5F0] p-6 border border-[#EBE5DA] rounded-sm">
@@ -427,6 +475,7 @@ export default function AdminUpload() {
             </div>
           </div>
 
+          {/* SECTION 2: IMAGES */}
           <div>
             <h3 className="text-lg font-serif text-[#3A332C] mb-4 border-b border-[#DFD8CC] pb-2">2. Visuals</h3>
             <div className="flex items-center gap-4">
@@ -453,6 +502,7 @@ export default function AdminUpload() {
             )}
           </div>
 
+          {/* SECTION 3 */}
           <div>
             <h3 className="text-lg font-serif text-[#3A332C] mb-4 border-b border-[#DFD8CC] pb-2">3. Search & Specifications</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
@@ -466,8 +516,8 @@ export default function AdminUpload() {
             
             <div className="space-y-6">
               <div>
-                <label className="block text-[11px] uppercase tracking-wider font-semibold text-[#3A332C] mb-2">Description *</label>
-                <textarea name="description" required rows={4} value={formData.description} onChange={handleInputChange} placeholder="Detailed product description..." className="w-full border border-[#DFD8CC] p-3 text-sm focus:outline-none focus:border-[#C19A6B]" />
+                <label className="block text-[11px] uppercase tracking-wider font-semibold text-[#3A332C] mb-2">Description</label>
+                <textarea name="description" rows={4} value={formData.description} onChange={handleInputChange} placeholder="Detailed product description..." className="w-full border border-[#DFD8CC] p-3 text-sm focus:outline-none focus:border-[#C19A6B]" />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <InputField label="Tags (Comma Separated)" name="tags" value={formData.tags} onChange={handleInputChange} placeholder="handmade rug, living room carpet" />
@@ -478,8 +528,9 @@ export default function AdminUpload() {
             </div>
           </div>
 
+          {/* SECTION 4 */}
           <div>
-            <h3 className="text-lg font-serif text-[#3A332C] mb-4 border-b border-[#DFD8CC] pb-2">4. Processing, Logistics & External Channels</h3>
+            <h3 className="text-lg font-serif text-[#3A332C] mb-4 border-b border-[#DFD8CC] pb-2">4. Operations & External Channels</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
               <div>
                 <label className="block text-[11px] uppercase tracking-wider font-semibold text-[#3A332C] mb-2">Processing Type</label>
@@ -488,79 +539,51 @@ export default function AdminUpload() {
                   <option value="Ready to Ship">Ready to Ship</option>
                 </select>
               </div>
-
               <InputField label="Estimated Processing Time" name="processing_time" value={formData.processing_time} onChange={handleInputChange} placeholder="e.g. 2-3 days" />
               <InputField label="Inventory Quantity" name="quantity" type="number" value={formData.quantity} onChange={handleInputChange} placeholder="10" />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 items-start">
-               <InputField label="Return Policy" name="return_policy" value={formData.return_policy} onChange={handleInputChange} placeholder="e.g. Returns accepted within 14 days" />
+              <InputField label="Return Policy" name="return_policy" value={formData.return_policy} onChange={handleInputChange} placeholder="e.g. Returns accepted within 14 days" />
                
-               <div className="flex flex-col space-y-3">
-                  <div className="flex flex-col bg-[#F8F5F0] p-3 border border-[#EBE5DA] rounded-sm gap-3">
-                    <div className="flex items-center space-x-3">
-                      <input type="checkbox" name="is_customizable" id="is_customizable" checked={formData.is_customizable} onChange={handleInputChange} className="w-4 h-4 text-[#C19A6B] border-[#DFD8CC] focus:ring-[#C19A6B]" />
-                      <label htmlFor="is_customizable" className="text-sm text-[#3A332C] font-medium cursor-pointer">Accept Customization Requests</label>
-                    </div>
-                    
-                    {formData.is_customizable && (
-                      <div className="pl-7">
-                        <label className="block text-[10px] uppercase tracking-wider font-semibold text-[#8C7A63] mb-1">Customization Surcharge (%)</label>
-                        <div className="flex items-center gap-2">
-                          <span className="text-[#6B6054] font-medium">+</span>
-                          <input type="number" name="customization_surcharge" value={formData.customization_surcharge} onChange={handleInputChange} placeholder="20" className="w-20 border-b border-[#DFD8CC] bg-transparent p-1 text-sm focus:outline-none focus:border-[#C19A6B] text-[#3A332C]" />
-                          <span className="text-[#6B6054] font-medium">%</span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
+              <div className="flex flex-col space-y-3">
+                <div className="flex items-center space-x-3 bg-white p-3 border border-[#DFD8CC] rounded-sm">
+                  <input type="checkbox" name="is_customizable" id="is_customizable" checked={formData.is_customizable} onChange={handleInputChange} className="w-4 h-4 text-[#C19A6B]" />
+                  <label htmlFor="is_customizable" className="text-sm text-[#3A332C] font-medium cursor-pointer">Accept Customization Requests</label>
+                </div>
 
-                  <div className="flex items-center space-x-3 bg-emerald-50 p-3 border border-emerald-100 rounded-sm">
-                    <input type="checkbox" name="free_delivery" id="free_delivery" checked={formData.free_delivery} onChange={handleInputChange} className="w-4 h-4 text-emerald-600 border-emerald-200 focus:ring-emerald-500" />
-                    <label htmlFor="free_delivery" className="text-sm text-emerald-800 font-bold cursor-pointer">Offer Free Worldwide Delivery</label>
-                  </div>
+                <div className="flex items-center space-x-3 bg-emerald-50 p-3 border border-emerald-100 rounded-sm">
+                  <input type="checkbox" name="free_delivery" id="free_delivery" checked={formData.free_delivery} onChange={handleInputChange} className="w-4 h-4 text-emerald-600" />
+                  <label htmlFor="free_delivery" className="text-sm text-emerald-800 font-bold cursor-pointer">Offer Free Worldwide Delivery</label>
+                </div>
 
-                  {/* 🌟 VIEW ON ETSY CONFIGURATION */}
-                  <div className="flex flex-col bg-[#FAF7F2] p-4 border border-[#E4DCce] rounded-sm gap-3">
-                    <div className="flex items-center space-x-3">
+                {/* View on Etsy */}
+                <div className="flex flex-col bg-[#FAF7F2] p-4 border border-[#E4DCce] rounded-sm gap-3">
+                  <div className="flex items-center space-x-3">
+                    <input type="checkbox" name="show_etsy" id="show_etsy" checked={formData.show_etsy} onChange={handleInputChange} className="w-4 h-4 text-[#C19A6B]" />
+                    <label htmlFor="show_etsy" className="text-sm text-[#3A332C] font-semibold cursor-pointer flex items-center gap-2">
+                      <span>View on Etsy</span>
+                      <span className="text-[10px] uppercase tracking-wider bg-[#F26522]/10 text-[#F26522] px-2 py-0.5 rounded font-bold">Channel</span>
+                    </label>
+                  </div>
+                  {formData.show_etsy && (
+                    <div className="pl-7 pt-1">
                       <input 
-                        type="checkbox" 
-                        name="show_etsy" 
-                        id="show_etsy" 
-                        checked={formData.show_etsy} 
+                        type="url" 
+                        name="etsy_url" 
+                        value={formData.etsy_url} 
                         onChange={handleInputChange} 
-                        className="w-4 h-4 text-[#C19A6B] border-[#DFD8CC] focus:ring-[#C19A6B]" 
+                        placeholder="https://www.etsy.com/listing/..." 
+                        className="w-full border border-[#DFD8CC] bg-white p-2.5 text-sm outline-none focus:border-[#C19A6B]" 
                       />
-                      <label htmlFor="show_etsy" className="text-sm text-[#3A332C] font-semibold cursor-pointer flex items-center gap-2">
-                        <span>View on Etsy</span>
-                        <span className="text-[10px] uppercase tracking-wider bg-[#F26522]/10 text-[#F26522] px-2 py-0.5 rounded font-bold">Channel</span>
-                      </label>
                     </div>
-
-                    {formData.show_etsy && (
-                      <div className="pl-7 pt-1">
-                        <label className="block text-[11px] uppercase tracking-wider font-semibold text-[#8C7A63] mb-1.5">
-                          Etsy Listing URL *
-                        </label>
-                        <input 
-                          type="url" 
-                          name="etsy_url" 
-                          value={formData.etsy_url} 
-                          onChange={handleInputChange} 
-                          placeholder="https://www.etsy.com/listing/..." 
-                          className="w-full border border-[#DFD8CC] bg-white p-2.5 text-sm focus:outline-none focus:border-[#C19A6B] text-[#3A332C]" 
-                        />
-                        <span className="text-[11px] text-[#7A7065] mt-1 block">
-                          This will display a "View on Etsy" direct redirect button on the live product page.
-                        </span>
-                      </div>
-                    )}
-                  </div>
-
-               </div>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
 
+          {/* SECTION 5 */}
           <div>
             <div className="flex items-center justify-between border-b border-[#DFD8CC] pb-2 mb-4">
               <h3 className="text-lg font-serif text-[#3A332C]">5. Related Products Merchandising</h3>
@@ -569,87 +592,157 @@ export default function AdminUpload() {
               </span>
             </div>
             
-            <p className="text-xs text-[#7A7065] mb-4 leading-relaxed">
-              Select priorities (Max 4 items). They will appear on the product page in the exact sequence (#1, #2, #3, #4) selected.
-            </p>
-            
             <div className="max-h-64 overflow-y-auto border border-[#DFD8CC] rounded-sm p-4 bg-[#F8F5F0]/50 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {availableProducts.length > 0 ? (
-                availableProducts.filter(p => p.id !== editingProductId).map(p => {
-                  const selectedIndex = formData.related_products.indexOf(p.id);
-                  const isSelected = selectedIndex !== -1;
-
-                  return (
-                    <div 
-                      key={p.id} 
-                      onClick={() => handleRelatedProductChange(p.id)}
-                      className={`flex items-center space-x-3 cursor-pointer p-3 rounded-sm transition-all border relative select-none ${
-                        isSelected ? 'bg-white border-[#C19A6B] shadow-sm ring-1 ring-[#C19A6B]' : 'bg-transparent border-transparent hover:bg-white hover:border-[#EBE5DA]'
-                      }`}
-                    >
-                      <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-all flex-shrink-0 ${
-                        isSelected ? 'bg-[#C19A6B] text-white shadow-sm' : 'border border-[#DFD8CC] text-[#7A7065] bg-white'
-                      }`}>
-                        {isSelected ? `#${selectedIndex + 1}` : ''}
-                      </div>
-
-                      <div className="w-10 h-10 bg-[#EBE5DA] rounded-sm overflow-hidden flex-shrink-0">
-                        {p.images && p.images.length > 0 ? (
-                          <img src={p.images[0]} alt="" className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-[#C19A6B] text-[10px]">No Img</div>
-                        )}
-                      </div>
-                      <span className="text-sm text-[#3A332C] font-medium truncate flex-1" title={p.name}>{p.name}</span>
+              {availableProducts.filter(p => p.id !== editingProductId).map(p => {
+                const selectedIndex = formData.related_products.indexOf(p.id);
+                const isSelected = selectedIndex !== -1;
+                return (
+                  <div 
+                    key={p.id} 
+                    onClick={() => handleRelatedProductChange(p.id)}
+                    className={`flex items-center space-x-3 cursor-pointer p-3 rounded-sm border select-none transition-all ${
+                      isSelected ? 'bg-white border-[#C19A6B] shadow-sm ring-1 ring-[#C19A6B]' : 'bg-transparent border-transparent hover:bg-white hover:border-[#EBE5DA]'
+                    }`}
+                  >
+                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                      isSelected ? 'bg-[#C19A6B] text-white shadow-sm' : 'border border-[#DFD8CC] text-[#7A7065] bg-white'
+                    }`}>
+                      {isSelected ? `#${selectedIndex + 1}` : ''}
                     </div>
-                  );
-                })
-              ) : (
-                <div className="col-span-full text-sm text-[#7A7065] text-center py-6">No published products available.</div>
-              )}
+                    <span className="text-sm text-[#3A332C] font-medium truncate flex-1">{p.name}</span>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
+          {/* ACTION BUTTONS */}
           <div className="flex flex-col sm:flex-row gap-4 mt-8 pt-4 border-t border-[#DFD8CC]">
             <button 
               type="button" 
               onClick={() => submitData("draft")} 
-              disabled={loadingAction !== null || (mode === "edit" && !editingProductId)} 
-              className="w-full sm:w-1/3 bg-[#F8F5F0] border-2 border-[#DFD8CC] text-[#6B6054] py-4 text-sm tracking-[0.2em] uppercase font-bold hover:bg-[#EBE5DA] hover:text-[#3A332C] transition duration-300 disabled:opacity-50"
+              disabled={loadingAction !== null} 
+              className="w-full sm:w-1/3 bg-[#F8F5F0] border-2 border-[#DFD8CC] text-[#6B6054] py-4 text-sm tracking-[0.2em] uppercase font-bold hover:bg-[#EBE5DA] transition cursor-pointer"
             >
-              {loadingAction === "draft" ? "Saving..." : "Save as Draft"}
+              Save as Draft
             </button>
             <button 
               type="button" 
               onClick={() => submitData("publish")} 
-              disabled={loadingAction !== null || (mode === "edit" && !editingProductId)} 
-              className="w-full sm:w-2/3 bg-[#3A332C] text-[#F8F5F0] py-4 text-sm tracking-[0.2em] uppercase font-bold hover:bg-[#C19A6B] transition duration-300 disabled:opacity-50 shadow-lg"
+              disabled={loadingAction !== null} 
+              className="w-full sm:w-2/3 bg-[#3A332C] text-[#F8F5F0] py-4 text-sm tracking-[0.2em] uppercase font-bold hover:bg-[#C19A6B] transition shadow-lg cursor-pointer"
             >
-              {loadingAction === "publish" ? "Processing..." : (mode === "create" ? "Publish New Listing" : "Update Listing")}
+              {mode === "create" ? "Publish New Listing" : "Update Listing"}
             </button>
           </div>
         </form>
       </div>
 
+      {/* 🌟 1. FULLSCREEN LOADING OVERLAY WITH ROUND GREEN SPINNER */}
+      <AnimatePresence>
+        {loadingAction !== null && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[120] flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm select-none"
+          >
+            <div className="bg-white border border-[#DFD8CC] p-8 rounded-sm shadow-2xl flex flex-col items-center gap-5 max-w-xs w-full text-center">
+              <div className="relative w-16 h-16 flex items-center justify-center">
+                <div className="w-16 h-16 rounded-full border-4 border-emerald-100 animate-pulse"></div>
+                <div className="absolute inset-0 w-16 h-16 rounded-full border-4 border-emerald-500 border-t-transparent animate-spin"></div>
+              </div>
+              <div>
+                <h4 className="text-base font-serif text-[#3A332C] font-semibold">
+                  {mode === "create" ? "Publishing Listing..." : "Processing..."}
+                </h4>
+                <p className="text-xs text-[#7A7065] mt-1 font-medium">
+                  {statusMsg || "Uploading media & synchronizing..."}
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* 🌟 2. SUCCESS MODAL WITH ANIMATED GREEN CHECKMARK */}
       <AnimatePresence>
         {showCelebration && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-            <motion.div initial={{ scale: 0.85, opacity: 0, y: 20 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.9, opacity: 0, y: 10 }} transition={{ type: "spring", damping: 25, stiffness: 300 }} className="bg-white rounded-sm max-w-md w-full p-8 text-center shadow-2xl border-t-4 border-emerald-500 relative overflow-hidden">
-              <div className="absolute -top-20 -left-20 w-40 h-40 bg-emerald-100 rounded-full blur-3xl opacity-70 pointer-events-none"></div>
-              <div className="absolute -bottom-20 -right-20 w-40 h-40 bg-emerald-100 rounded-full blur-3xl opacity-70 pointer-events-none"></div>
-              <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.15, type: "spring", stiffness: 200 }} className="w-20 h-20 bg-emerald-50 border-2 border-emerald-400 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
-                <svg className="w-10 h-10" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-              </motion.div>
-              <h2 className="text-2xl font-serif text-[#3A332C] mb-2 font-medium">{mode === "create" ? "Listing Published!" : "Listing Updated!"}</h2>
-              <p className="text-sm text-[#7A7065] mb-8 leading-relaxed">The product has been successfully {mode === "create" ? "published to" : "updated on"} the live store.</p>
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }} 
+            className="fixed inset-0 z-[130] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 select-none"
+          >
+            <motion.div 
+              initial={{ scale: 0.8, opacity: 0, y: 20 }} 
+              animate={{ scale: 1, opacity: 1, y: 0 }} 
+              exit={{ scale: 0.9, opacity: 0, y: 10 }} 
+              transition={{ type: "spring", damping: 25, stiffness: 300 }} 
+              className="bg-white rounded-sm max-w-md w-full p-8 text-center shadow-2xl border-t-4 border-emerald-500 relative overflow-hidden"
+            >
+              <div className="relative w-24 h-24 mx-auto mb-6 flex items-center justify-center">
+                <motion.div
+                  initial={{ scale: 0.8, opacity: 0.5 }}
+                  animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0, 0.3] }}
+                  transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+                  className="absolute inset-0 rounded-full bg-emerald-400"
+                />
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 260, damping: 20 }}
+                  className="w-20 h-20 bg-emerald-50 border-2 border-emerald-500 rounded-full flex items-center justify-center shadow-inner relative z-10"
+                >
+                  <svg 
+                    className="w-10 h-10 text-emerald-600" 
+                    fill="none" 
+                    viewBox="0 0 24 24" 
+                    stroke="currentColor" 
+                    strokeWidth={3}
+                  >
+                    <motion.path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M5 13l4 4L19 7"
+                      initial={{ pathLength: 0, opacity: 0 }}
+                      animate={{ pathLength: 1, opacity: 1 }}
+                      transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
+                    />
+                  </svg>
+                </motion.div>
+              </div>
+
+              <h2 className="text-2xl font-serif text-[#3A332C] mb-2 font-medium">
+                {mode === "create" ? "Listing Published!" : "Listing Updated!"}
+              </h2>
+              <p className="text-sm text-[#7A7065] mb-8 leading-relaxed">
+                The product details, variants, and external configurations are now synchronized live.
+              </p>
+
               <div className="space-y-3">
-                {newlyCreatedId && <Link href={`/product/${newlyCreatedId}`} target="_blank" className="block w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3.5 text-xs uppercase tracking-[0.15em] font-semibold rounded-sm transition-colors shadow-md">View Live Listing ↗</Link>}
-                <button type="button" onClick={resetForm} className="w-full border border-[#DFD8CC] text-[#3A332C] hover:bg-[#F8F5F0] py-3.5 text-xs uppercase tracking-[0.15em] font-semibold rounded-sm transition-colors">Close Menu</button>
+                {newlyCreatedId && (
+                  <Link 
+                    href={`/product/${newlyCreatedId}`} 
+                    target="_blank" 
+                    className="block w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3.5 text-xs uppercase tracking-[0.15em] font-semibold rounded-sm transition-colors shadow-md"
+                  >
+                    View Live Listing ↗
+                  </Link>
+                )}
+                <button 
+                  type="button" 
+                  onClick={resetForm} 
+                  className="w-full border border-[#DFD8CC] text-[#3A332C] hover:bg-[#F8F5F0] py-3.5 text-xs uppercase tracking-[0.15em] font-semibold rounded-sm transition-colors"
+                >
+                  Close Menu
+                </button>
               </div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
+
     </div>
   );
 }

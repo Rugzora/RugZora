@@ -168,12 +168,7 @@ export default function Navbar() {
   >
     Admin
   </Link>
-  <Link
-    href="/admin/content"
-    className="px-3 py-1 text-[11px] uppercase tracking-widest font-semibold bg-[#3A332C] text-[#F8F5F0] hover:bg-[#C19A6B] rounded-sm transition-colors shadow-sm"
-  >
-    Edit Web
-  </Link>
+  
 </div>
             
             {/* CURRENCY SWITCHER */}
