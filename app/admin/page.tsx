@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "../../lib/supabase";
+import { compressAndConvertToWebP } from "@/lib/compressImage";
 
 const InputField = ({ label, name, placeholder, required = false, type = "text", value, onChange }: any) => (
   <div className="w-full">
@@ -197,11 +198,27 @@ export default function AdminUpload() {
     });
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const selectedFiles = Array.from(e.target.files);
-      const newImages = selectedFiles.map(file => ({ id: Math.random().toString(36).substring(2, 9), file, preview: URL.createObjectURL(file), isExisting: false }));
-      setImages(prev => [...prev, ...newImages]); 
+      setStatusMsg("Optimizing & converting images to WebP...");
+
+      const processedFiles: ImageFile[] = [];
+
+      for (const file of selectedFiles) {
+        // 🌟 Auto WebP & Compression
+        const optimizedWebpFile = await compressAndConvertToWebP(file);
+        
+        processedFiles.push({
+          id: Math.random().toString(36).substring(2, 9),
+          file: optimizedWebpFile,
+          preview: URL.createObjectURL(optimizedWebpFile),
+          isExisting: false,
+        });
+      }
+
+      setImages((prev) => [...prev, ...processedFiles]);
+      setStatusMsg("");
     }
   };
 

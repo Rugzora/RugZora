@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { motion, AnimatePresence } from "framer-motion";
+import { compressAndConvertToWebP } from "@/lib/compressImage";
 
 function ImageUploader({
   label,
@@ -292,19 +293,34 @@ export default function SiteContentAdmin() {
 
   const handleImageUpload = async (file: File, callback: (url: string) => void) => {
     setIsUploading(true);
-    setStatusMsg(`Uploading "${file.name}"...`);
+    setStatusMsg(`Optimizing "${file.name}" to WebP...`);
+
     try {
-      const fileExt = file.name.split(".").pop();
-      const fileName = `site-${Date.now()}-${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
-      const { error: uploadError } = await supabase.storage.from("product-images").upload(fileName, file);
+      // 🌟 1. Auto-convert and compress to WebP before uploading
+      const optimizedFile = await compressAndConvertToWebP(file);
+
+      const fileName = `site-${Date.now()}-${Math.random().toString(36).substring(2, 7)}.webp`;
+
+      setStatusMsg(`Uploading optimized WebP image...`);
+
+      const { error: uploadError } = await supabase.storage
+        .from("product-images")
+        .upload(fileName, optimizedFile, {
+          contentType: "image/webp",
+          upsert: true,
+        });
+
       if (uploadError) throw uploadError;
 
-      const { data: publicData } = supabase.storage.from("product-images").getPublicUrl(fileName);
+      const { data: publicData } = supabase.storage
+        .from("product-images")
+        .getPublicUrl(fileName);
+
       callback(publicData.publicUrl);
-      setStatusMsg("Photo uploaded successfully! ✔");
+      setStatusMsg("Photo optimized & uploaded! ✔");
       setTimeout(() => setStatusMsg(""), 3000);
     } catch (err: any) {
-      alert("Photo upload failed: " + err.message);
+      alert("Upload failed: " + err.message);
       setStatusMsg("");
     } finally {
       setIsUploading(false);
