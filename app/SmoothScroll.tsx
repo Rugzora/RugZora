@@ -11,14 +11,20 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
     }
 
     const lenis = new Lenis({
-      duration: 1.2,
+      duration: 1.1,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       orientation: "vertical",
       gestureOrientation: "vertical",
       smoothWheel: true,
       wheelMultiplier: 1,
       touchMultiplier: 1.5,
+      lerp: 0.1, // 🌟 Yeh scroll ko ultra-smooth banata hai bina lag ke
+      syncTouch: true, // 🌟 Mobile aur trackpad touch scrolling ko hardware sync karta hai
     });
+    // 🌟 YEH LINE JODI HAI: Taaki ScrollToTop ishe access karke turant upar laa sake
+    if (typeof window !== "undefined") {
+      (window as any).lenis = lenis;
+    }
 
     let rafId: number;
     function raf(time: number) {
@@ -44,6 +50,9 @@ export default function SmoothScroll({ children }: { children: React.ReactNode }
       window.removeEventListener("resize", handleInitialSync);
       cancelAnimationFrame(rafId);
       lenis.destroy();
+      if (typeof window !== "undefined") {
+        delete (window as any).lenis;
+      }
     };
   }, []);
 

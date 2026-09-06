@@ -3,6 +3,7 @@ import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import Navbar from "./Navbar";
 import SmoothScroll from "./SmoothScroll";
+import ScrollToTop from "./components/ScrollToTop";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfair" });
@@ -22,6 +23,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         {/* SmoothScroll component poori website ko wrap kar raha hai */}
         <SmoothScroll>
           
+          {/* ScrollToTop ko SmoothScroll ke andar rakha hai taaki page change hone par smooth scroll top par aa jaye */}
+          <ScrollToTop />
+
           {/* Yahan aapka Navbar.tsx jud raha hai */}
           <Navbar />
 

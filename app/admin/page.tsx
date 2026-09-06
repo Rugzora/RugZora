@@ -6,6 +6,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "../../lib/supabase";
 import { compressAndConvertToWebP } from "@/lib/compressImage";
 
+import { deleteStorageImage } from "@/lib/deleteStorageImage";
+
+
+
 const InputField = ({ label, name, placeholder, required = false, type = "text", value, onChange }: any) => (
   <div className="w-full">
     <label className="block text-[11px] uppercase tracking-wider font-semibold text-[#3A332C] mb-2">{label}</label>
@@ -31,7 +35,18 @@ export default function AdminUpload() {
   const [editingProductId, setEditingProductId] = useState<string>("");
 
   const [images, setImages] = useState<ImageFile[]>([]);
+  
   const [availableProducts, setAvailableProducts] = useState<any[]>([]);
+  // ✅ YAHAN PASTE KAREIN (Component ke andar):
+  const handleRemoveImage = async (indexToRemove: number) => {
+    const imageToRemove = images[indexToRemove];
+
+    if (imageToRemove?.isExisting && imageToRemove.preview) {
+      await deleteStorageImage(imageToRemove.preview);
+    }
+
+    setImages((prev) => prev.filter((_, idx) => idx !== indexToRemove));
+  };
 
   const [globalUsdRate, setGlobalUsdRate] = useState<string>("83.50");
   const [initialUsdRate, setInitialUsdRate] = useState<string>("83.50");
@@ -511,7 +526,7 @@ export default function AdminUpload() {
                     className={`relative aspect-square cursor-grab active:cursor-grabbing rounded-sm overflow-hidden border-2 transition-colors ${index === 0 ? "border-[#C19A6B] shadow-md" : "border-transparent hover:border-[#DFD8CC]"}`}
                   >
                     <img src={img.preview} alt="preview" className="w-full h-full object-cover" />
-                    <button type="button" onClick={() => removeImage(index)} className="absolute top-1 right-1 bg-red-500/80 hover:bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px]">✕</button>
+                    <button type="button" onClick={() => handleRemoveImage(index)} className="absolute top-1 right-1 bg-red-500/80 hover:bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px]">✕</button>
                     {index === 0 && <div className="absolute bottom-0 left-0 w-full bg-[#C19A6B] text-white text-[10px] text-center py-1 uppercase tracking-wider font-semibold">Thumbnail</div>}
                   </div>
                 ))}

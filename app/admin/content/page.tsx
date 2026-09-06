@@ -5,6 +5,7 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { motion, AnimatePresence } from "framer-motion";
 import { compressAndConvertToWebP } from "@/lib/compressImage";
+import { deleteStorageImage } from "@/lib/deleteStorageImage";
 
 function ImageUploader({
   label,
@@ -16,7 +17,7 @@ function ImageUploader({
   label: string;
   value: string;
   onChange: (val: string) => void;
-  onUpload: (file: File, cb: (url: string) => void) => void;
+  onUpload: (file: File, cb: (url: string) => void, oldUrl?: string) => void;
   isUploading: boolean;
 }) {
   const [isDragging, setIsDragging] = useState(false);
@@ -25,7 +26,8 @@ function ImageUploader({
     e.preventDefault();
     setIsDragging(false);
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      onUpload(e.dataTransfer.files[0], onChange);
+      // 🌟 Purani image ki value pass karein
+      onUpload(e.dataTransfer.files[0], onChange, value);
     }
   };
 
@@ -63,7 +65,8 @@ function ImageUploader({
                   className="hidden"
                   onChange={(e) => {
                     if (e.target.files?.[0]) {
-                      onUpload(e.target.files[0], onChange);
+                      // 🌟 Purani image ki value pass karein
+                      onUpload(e.target.files[0], onChange, value);
                     }
                   }}
                 />
@@ -80,6 +83,18 @@ function ImageUploader({
               placeholder="Paste image URL directly"
               className="w-full border border-[#DFD8CC] px-3 py-1.5 text-xs bg-white focus:border-[#C19A6B] outline-none text-[#3A332C]"
             />
+            {value && (
+              <button
+                type="button"
+                onClick={async () => {
+                  await deleteStorageImage(value);
+                  onChange("");
+                }}
+                className="text-[11px] text-red-600 hover:underline px-2 py-1 font-semibold uppercase shrink-0"
+              >
+                Delete
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -286,11 +301,23 @@ export default function SiteContentAdmin() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleImageUpload = async (file: File, callback: (url: string) => void) => {
+  const handleImageUpload = async (
+    file: File, 
+    callback: (url: string) => void,
+    oldUrl?: string
+  ) => {
     setIsUploading(true);
     setStatusMsg(`Optimizing "${file.name}" to WebP...`);
 
     try {
+      // 1. Agar koi purani image pehle se lagi hui thi, toh use Supabase storage se delete karein
+      if (oldUrl) {
+        setStatusMsg("Cleaning up old image from storage...");
+        await deleteStorageImage(oldUrl);
+      }
+
+      // 2. Nayi image ko WebP me convert karein
+      setStatusMsg(`Compressing & converting to WebP...`);
       const optimizedFile = await compressAndConvertToWebP(file);
       const fileName = `site-${Date.now()}-${Math.random().toString(36).substring(2, 7)}.webp`;
 
@@ -310,7 +337,7 @@ export default function SiteContentAdmin() {
         .getPublicUrl(fileName);
 
       callback(publicData.publicUrl);
-      setStatusMsg("Photo optimized & uploaded! ✔");
+      setStatusMsg("Photo optimized, uploaded & old image deleted! ✔");
       setTimeout(() => setStatusMsg(""), 3000);
     } catch (err: any) {
       alert("Upload failed: " + err.message);
@@ -319,7 +346,6 @@ export default function SiteContentAdmin() {
       setIsUploading(false);
     }
   };
-
   const handleSaveCurrentPage = async () => {
     setIsSaving(true);
     setStatusMsg(`Saving changes for ${activeTab.toUpperCase()}...`);
