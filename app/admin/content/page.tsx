@@ -40,7 +40,7 @@ function ImageUploader({
           {value ? (
             <img src={value} alt="Preview" className="w-full h-full object-cover" />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-[9px] text-[#8C7A63] uppercase">No Image</div>
+            <div className="w-full h-full flex items-center justify-center text-[9px] text-[#8C7A63] uppercase font-semibold">No Image</div>
           )}
         </div>
 
@@ -54,7 +54,7 @@ function ImageUploader({
             }`}
           >
             <p className="text-xs text-[#7A7065]">
-              {isUploading ? "Uploading..." : "Drag & Drop image here, or "}
+              {isUploading ? "Optimizing & Uploading..." : "Drag & Drop image here, or "}
               <label className="text-[#C19A6B] font-bold underline cursor-pointer hover:text-[#3A332C]">
                 browse file
                 <input
@@ -87,6 +87,7 @@ function ImageUploader({
   );
 }
 
+// 🌟 Zero External Unsplash/Pexels URLs - Only User Uploaded Assets
 const defaultData: Record<string, any> = {
   home: {
     hero: {
@@ -100,58 +101,62 @@ const defaultData: Record<string, any> = {
       descriptionSize: 16,
       ctaText: "Explore Handcrafted Rugs",
       ctaLink: "/collections",
-      bgImage: "https://images.unsplash.com/photo-1631679706909-1844bbd07221?q=80&w=1992&auto=format&fit=crop"
+      bgImage: ""
     },
     ethos: [
-      { title: "Japandi & Modern Boho", desc: "Warm neutral tones and marled textures designed to blend into Minimalist, Scandinavian, and Modern living spaces.", img: "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=800" },
-      { title: "100% Reversible Architecture", desc: "Completely unbacked with identical texture on both sides. Flip your rug anytime to double its usable lifespan.", img: "https://images.pexels.com/photos/39005790/pexels-photo-39005790.jpeg?auto=compress&w=800" },
-      { title: "Reinforced Zigzag Craft", desc: "Hand-braided chunky cords spiraled and locked using heavy-duty zigzag machine stitching to eliminate edge curl.", img: "https://images.pexels.com/photos/31598222/pexels-photo-31598222.jpeg?auto=compress&w=800" }
+      { title: "Japandi & Modern Boho", desc: "Warm neutral tones and marled textures designed to blend into Minimalist, Scandinavian, and Modern living spaces.", img: "" },
+      { title: "100% Reversible Architecture", desc: "Completely unbacked with identical texture on both sides. Flip your rug anytime to double its usable lifespan.", img: "" },
+      { title: "Reinforced Zigzag Craft", desc: "Hand-braided chunky cords spiraled and locked using heavy-duty zigzag machine stitching to eliminate edge curl.", img: "" }
     ],
     story: {
       tag: "The Heritage of Bhadohi",
       title: "Centuries of Tradition. Reimagined with rPET.",
       description: "Operating right from Bhadohi, India's world-renowned 'Carpet City', RugZora bridges ancient braiding legacy with conscious innovation. We turn post-consumer plastic waste into micro-spun yarns that mimic pure wool—delivering an itch-free, luxuriously soft step directly from the loom to your room.",
-      image: "https://media.istockphoto.com/id/2241474699/photo/rolling-up-a-colorful-rug-in-a-cozy-living-space.jpg?b=1&s=612x612&w=0&k=20&c=YCZM8PgDSFYKG7JTCxgW4HqYBrUVqECzMpiVk3J3x2I="
+      image: ""
     },
     silhouettesHeader: {
       title: "Signature Silhouettes",
       desc: "Braided profiles tailored to balance your home's geometry."
     },
     silhouettes: [
-      { title: "Chunky Braided Oval & Rectangular", desc: "Heavy-gauge cord construction that frames living and dining areas with organic marled depth.", link: "Shop Silhouettes →", img: "https://images.unsplash.com/photo-1600166898405-da9535204843?w=800" },
-      { title: "Round Medallions", desc: "Spiraled center-out to accentuate entryways, reading nooks, and circular seating layouts.", link: "Shop Silhouettes →", img: "https://images.unsplash.com/photo-1590118318182-3d5f35fc0ea4?w=800" },
-      { title: "Architectural Bespoke", desc: "Custom hallway runners and oversized rugs tailored to your exact floor plan dimensions.", link: "Shop Silhouettes →", img: "https://images.unsplash.com/photo-1581428982868-e410dd047a90?w=800" }
+      { title: "Chunky Braided Oval & Rectangular", desc: "Heavy-gauge cord construction that frames living and dining areas with organic marled depth.", link: "Shop Silhouettes →", img: "" },
+      { title: "Round Medallions", desc: "Spiraled center-out to accentuate entryways, reading nooks, and circular seating layouts.", link: "Shop Silhouettes →", img: "" },
+      { title: "Architectural Bespoke", desc: "Custom hallway runners and oversized rugs tailored to your exact floor plan dimensions.", link: "Shop Silhouettes →", img: "" }
     ],
     materialScience: {
       tag: "Material Science",
       title: "The Softness of Wool. The Strength of rPET.",
       desc: "Zero plastic stiffness. By micro-spinning recycled polyester, our rugs offer pure wool-grade plushness without scratching skin. Naturally hydrophobic, they repel liquid spills and maintain pristine air quality with 100% shed-free construction.",
       btnText: "Explore Our Fiber Craft",
-      img: "https://images.unsplash.com/photo-1544816155-12df9643f363?w=1200"
+      img: ""
     },
     textureLibrary: {
       tag: "Natural Warmth",
       title: "Neutral & Marled Palettes",
-      images: [
-        "https://images.unsplash.com/photo-1615876234886-fd1a8f947122?w=600",
-        "https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=600",
-        "https://images.unsplash.com/photo-1600166898405-da9535204843?w=600",
-        "https://images.unsplash.com/photo-1600607688969-a5bfcd64bd40?w=600"
-      ]
+      images: ["", "", "", ""]
     },
     spacesHeader: {
       title: "Built for Family & High Traffic",
       desc: "Hydrophobic, stain-resistant fibers designed for effortless living."
     },
     spaces: [
-      { title: "Living Room Statement", link: "Shop Area Rugs", img: "https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=800" },
-      { title: "Pet & Kid Friendly", link: "Zero-Shed Textures", img: "https://images.unsplash.com/photo-1522771731478-44eb11de520b?w=800" },
-      { title: "Covered Patio & Hallways", link: "Shop Runners", img: "https://images.unsplash.com/photo-1598928506311-c55dd129a0f4?w=800" }
+      { title: "Living Room Statement", link: "Shop Area Rugs", img: "" },
+      { title: "Pet & Kid Friendly", link: "Zero-Shed Textures", img: "" },
+      { title: "Covered Patio & Hallways", link: "Shop Runners", img: "" }
     ],
+    bespoke: {
+      tag: "End-to-End Bespoke",
+      title: "Tailored to Your Floor Plan",
+      description: "Need non-standard proportions? Customize shapes, custom foot measurements, and duo-tone palette contrasts crafted individually in our Bhadohi facility.",
+      mainImage: "",
+      detailImage: "",
+      btnText: "Customize Your Rug",
+      btnLink: "/collections"
+    },
     promise: {
       title: "Sustainable Braided Luxury. Straight from our Workshop in Bhadohi.",
       ctaText: "Explore All Handcrafted Rugs",
-      image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=2000"
+      image: ""
     }
   },
   collections: {
@@ -167,7 +172,7 @@ const defaultData: Record<string, any> = {
       tag: "Our Heritage",
       title: "Crafted in Bhadohi",
       subtitle: "The Carpet City of India",
-      bgImage: "https://images.unsplash.com/photo-1594040226829-7f251ab46d80?w=1600&auto=format&fit=crop"
+      bgImage: ""
     },
     intro: {
       quote: "RugZora represents the pinnacle of modern carpet manufacturing, rooted deeply in the rich textile heritage of Uttar Pradesh.",
@@ -178,7 +183,7 @@ const defaultData: Record<string, any> = {
       title: "Precision in Every Stitch",
       desc1: "Our specialized setup is the heartbeat of RugZora. Equipped with an array of dedicated zigzag sewing technology and highly accurate straight-stitch machinery, our artisans maintain absolute control over every phase of production.",
       desc2: "This hands-on, mechanical precision allows us to meticulously shape the rugged, natural textures of Jute, while simultaneously achieving the flawless, luxurious finish required for our Cut-Pile carpets.",
-      image: "https://images.unsplash.com/photo-1544816155-12df9643f363?w=1200&auto=format&fit=crop"
+      image: ""
     },
     materials: {
       title: "Tale of Two Textures",
@@ -187,13 +192,13 @@ const defaultData: Record<string, any> = {
         tag: "The Earthy",
         title: "Golden Jute",
         desc: "Eco-friendly, highly durable, and naturally textured. Hand-guided through our straight-stitch machines to create a robust foundation that breathes life into any room.",
-        img: "https://images.unsplash.com/photo-1590118318182-3d5f35fc0ea4?w=1000&auto=format&fit=crop"
+        img: ""
       },
       pillar2: {
         tag: "The Luxurious",
         title: "Plush Cut-Pile",
         desc: "Soft, dense, and incredibly inviting. Crafted utilizing advanced zigzag techniques to ensure the yarn stands upright, delivering an exceptionally smooth and premium feel underfoot.",
-        img: "https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=1000&auto=format&fit=crop"
+        img: ""
       }
     },
     cta: {
@@ -210,17 +215,8 @@ const defaultData: Record<string, any> = {
       para1: "RugZora represents the pinnacle of modern carpet manufacturing, rooted in the rich textile heritage of Bhadohi, Uttar Pradesh. We bring the fresh, golden warmth of artisanal design directly from our production house to your floors.",
       para2: "As direct manufacturers, we operate our own specialized setup. Utilizing precision straight-stitch machinery and advanced zigzag sewing techniques, our artisans meticulously shape both the rugged, natural beauty of Jute and the smooth, luxurious finish of Cut-Pile carpets.",
       para3: "By maintaining complete control over our manufacturing, we ensure that every thread aligns with our standard of premium elegance, offering you unparalleled quality and authentic craftsmanship without the retail markup.",
-      image: "https://images.unsplash.com/photo-1581428982868-e410dd047a90?auto=format&fit=crop&q=80&w=1200"
+      image: ""
     }
-  },
-  bespoke: {
-    tag: "End-to-End Bespoke",
-    title: "Tailored to Your Floor Plan",
-    description: "Need non-standard proportions? Customize shapes, custom foot measurements, and duo-tone palette contrasts crafted individually in our Bhadohi facility.",
-    mainImage: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80",
-    detailImage: "https://images.unsplash.com/photo-1590118318182-3d5f35fc0ea4?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
-    btnText: "Customize Your Rug",
-    btnLink: "/collections"
   },
   contact: {
     header: {
@@ -253,7 +249,7 @@ export default function SiteContentAdmin() {
   const [statusMsg, setStatusMsg] = useState("");
   const [showCelebration, setShowCelebration] = useState(false);
 
-  // 🌟 Live Quick Search States
+  // Live Quick Search States
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const searchContainerRef = useRef<HTMLDivElement>(null);
@@ -280,7 +276,6 @@ export default function SiteContentAdmin() {
     loadAllContent();
   }, []);
 
-  // Close search dropdown on click outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
@@ -296,9 +291,7 @@ export default function SiteContentAdmin() {
     setStatusMsg(`Optimizing "${file.name}" to WebP...`);
 
     try {
-      // 🌟 1. Auto-convert and compress to WebP before uploading
       const optimizedFile = await compressAndConvertToWebP(file);
-
       const fileName = `site-${Date.now()}-${Math.random().toString(36).substring(2, 7)}.webp`;
 
       setStatusMsg(`Uploading optimized WebP image...`);
@@ -344,8 +337,17 @@ export default function SiteContentAdmin() {
 
       if (error) throw error;
 
+      // LocalStorage cache sync for instant rendering across all tabs
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem(`rz_${activeTab}_content`, JSON.stringify(siteContent[activeTab]));
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
       setIsSaving(false);
-      setShowCelebration(true); // 🌟 Green tick popup trigger
+      setShowCelebration(true);
       setTimeout(() => setShowCelebration(false), 2500);
     } catch (err: any) {
       alert("Failed to save: " + err.message);
@@ -366,7 +368,6 @@ export default function SiteContentAdmin() {
     }));
   };
 
-  // 🌟 Scan all text fields across all tabs for live search
   const searchableEntries = useMemo(() => {
     const results: Array<{
       tabId: string;
@@ -384,7 +385,6 @@ export default function SiteContentAdmin() {
       Object.entries(obj).forEach(([key, val]) => {
         const currentPath = [...path, key];
         if (typeof val === "string") {
-          // ignore URLs in search matches
           if (val.startsWith("http://") || val.startsWith("https://")) return;
           const targetId = `${tabId}-${currentPath.join("-")}`;
           results.push({
@@ -411,7 +411,6 @@ export default function SiteContentAdmin() {
     return results;
   }, [siteContent]);
 
-  // Filtered Results
   const searchResults = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     if (!q) return [];
@@ -425,7 +424,6 @@ export default function SiteContentAdmin() {
       .slice(0, 10);
   }, [searchQuery, searchableEntries]);
 
-  // 🌟 Auto Jump & Highlight Function
   const handleJumpToField = (tabId: string, targetId: string) => {
     setActiveTab(tabId);
     setSearchQuery("");
@@ -484,7 +482,6 @@ export default function SiteContentAdmin() {
             )}
           </div>
 
-          {/* Live Search Results Dropdown */}
           {isSearchFocused && searchQuery.trim().length > 0 && (
             <div className="absolute left-0 right-0 top-full mt-1.5 bg-white border border-[#DFD8CC] rounded-sm shadow-xl max-h-80 overflow-y-auto z-50 divide-y divide-[#EBE5DA]">
               {searchResults.length > 0 ? (
@@ -1082,7 +1079,6 @@ export default function SiteContentAdmin() {
               </div>
             </div>
 
-
             {/* BESPOKE STUDIO SPOTLIGHT (TWO IMAGES CONTROL) */}
             <div className="bg-white p-8 border border-[#EBE5DA] rounded-sm shadow-sm">
               <h2 className="text-lg font-serif text-[#3A332C] mb-6 border-b border-[#DFD8CC] pb-3">
@@ -1118,7 +1114,6 @@ export default function SiteContentAdmin() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-[#DFD8CC]">
-                  {/* Image 1: Main Large Architecture Photo */}
                   <ImageUploader
                     label="1. Main Large Background Photo"
                     value={currentContent.bespoke?.mainImage || ""}
@@ -1127,7 +1122,6 @@ export default function SiteContentAdmin() {
                     isUploading={isUploading}
                   />
 
-                  {/* Image 2: Close-up Rug Card Photo */}
                   <ImageUploader
                     label="2. Floating Card Close-up Detail Photo"
                     value={currentContent.bespoke?.detailImage || ""}
@@ -1157,6 +1151,40 @@ export default function SiteContentAdmin() {
                     />
                   </div>
                 </div>
+              </div>
+            </div>
+
+            {/* 9. BOTTOM ARTISAN BANNER */}
+            <div className="bg-white p-8 border border-[#EBE5DA] rounded-sm shadow-sm">
+              <h2 className="text-lg font-serif text-[#3A332C] mb-6 border-b border-[#DFD8CC] pb-3">9. Bottom Artisan Banner</h2>
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Banner Title</label>
+                  <input
+                    id="home-promise-title"
+                    type="text"
+                    value={currentContent.promise?.title || ""}
+                    onChange={(e) => updateField("promise", "title", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-3 text-sm focus:border-[#C19A6B] outline-none transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Button Text</label>
+                  <input
+                    id="home-promise-ctaText"
+                    type="text"
+                    value={currentContent.promise?.ctaText || ""}
+                    onChange={(e) => updateField("promise", "ctaText", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-3 text-sm focus:border-[#C19A6B] outline-none transition-all"
+                  />
+                </div>
+                <ImageUploader
+                  label="Banner Background Image"
+                  value={currentContent.promise?.image || ""}
+                  onChange={(url) => updateField("promise", "image", url)}
+                  onUpload={handleImageUpload}
+                  isUploading={isUploading}
+                />
               </div>
             </div>
           </div>
@@ -1424,7 +1452,7 @@ export default function SiteContentAdmin() {
                   <ImageUploader
                     label="Pillar 1 Image"
                     value={currentContent.materials?.pillar1?.img || ""}
-                    onChange={(url) => setSiteContent((prev: any) => ({ ...prev, legacy: { ...prev.legacy, materials: { ...prev.legacy.materials, pillar1: { ...prev.legacy.materials, pillar1: { ...prev.legacy.materials.pillar1, img: url } } } } }))}
+                    onChange={(url) => setSiteContent((prev: any) => ({ ...prev, legacy: { ...prev.legacy, materials: { ...prev.legacy.materials, pillar1: { ...prev.legacy.materials.pillar1, img: url } } } }))}
                     onUpload={handleImageUpload}
                     isUploading={isUploading}
                   />
@@ -1592,6 +1620,7 @@ export default function SiteContentAdmin() {
             </div>
           </div>
         )}
+
         {/* --- TAB 5: CONTACT --- */}
         {activeTab === "contact" && (
           <div className="space-y-10">

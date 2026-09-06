@@ -68,3 +68,14 @@ html.lenis, html.lenis body {
   scrollbar-width: thin;
   scrollbar-color: #C19A6B #F8F5F0;
 }
+
+
+/* GPU Acceleration for silky-smooth 60-120fps scrolling */
+img {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.group:hover img {
+  will-change: transform;
+}

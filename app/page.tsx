@@ -5,11 +5,24 @@ import { motion, Variants } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 
 export default function Home() {
-  const [siteData, setSiteData] = useState<any>(null);
+  // 🌟 LocalStorage se instant cache read karega (No flash of old text)
+  const [siteData, setSiteData] = useState<any>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const cached = localStorage.getItem("rz_home_content");
+        if (cached) return JSON.parse(cached);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    return null;
+  });
+  
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+
     async function getDynamicContent() {
       try {
         const { data, error } = await supabase
@@ -25,6 +38,8 @@ export default function Home() {
 
         if (data && data.data) {
           setSiteData(data.data);
+          // Cache update karein taaki agli baar bina delay ke load ho
+          localStorage.setItem("rz_home_content", JSON.stringify(data.data));
         }
       } catch (err) {
         console.error("Error:", err);
@@ -33,9 +48,14 @@ export default function Home() {
     getDynamicContent();
   }, []);
 
+  // Performance optimized lightweight variant
   const fadeUpVariant: Variants = {
-    hidden: { opacity: 0, y: 40 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } }
+    hidden: { opacity: 0, y: 24 },
+    visible: { 
+      opacity: 1, 
+      y: 0, 
+      transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } 
+    }
   };
 
   const defaultEthos = [

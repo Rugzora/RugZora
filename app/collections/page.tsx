@@ -28,9 +28,22 @@ export default function Shop() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [dbProducts, setDbProducts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [pageContent, setPageContent] = useState<any>(null);
+  const [mounted, setMounted] = useState(false); // 🌟 Hydration guard
+
+  const [pageContent, setPageContent] = useState<any>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const cached = localStorage.getItem("rz_collections_content");
+        if (cached) return JSON.parse(cached);
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    return null;
+  });
 
   useEffect(() => {
+    setMounted(true); // 🌟 Client mount confirmation
     const fetchPageContent = async () => {
       try {
         const { data } = await supabase
@@ -40,6 +53,7 @@ export default function Shop() {
           .maybeSingle();
         if (data && data.data) {
           setPageContent(data.data);
+          localStorage.setItem("rz_collections_content", JSON.stringify(data.data));
         }
       } catch (err) {}
     };
@@ -66,13 +80,12 @@ export default function Shop() {
     fetchProducts();
   }, []);
 
-  // इसे लगाएँ:
-const categories = [
-  "Rectangular",
-  "Round & Oval",
-  "Runners",
-  "Traditional"
-];
+  const categories = [
+    "Rectangular",
+    "Round & Oval",
+    "Runners",
+    "Traditional"
+  ];
 
   const filteredProducts = (() => {
     if (isLoading) return [];
@@ -95,15 +108,23 @@ const categories = [
     visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.25, 1, 0.5, 1] } }
   };
 
+  // Jab tak client mount na ho, tab tak safe fallback render karein taaki hydration error na aaye
+  if (!mounted) {
+    return <div className="min-h-screen bg-[#F8F5F0]" />;
+  }
+
+  const heroBg = pageContent?.hero?.bgImage;
+  const hasBgImage = typeof heroBg === "string" && heroBg.trim() !== "";
+
   return (
     <div className="bg-[#F8F5F0] pt-20 pb-20 px-6 min-h-screen font-sans">
       <div className="max-w-[1600px] mx-auto">
         
-        {/* Page Header: Balanced Proportions */}
-        {pageContent?.hero?.bgImage ? (
-          <div className="relative w-full h-[220px] md:h-[250px] mb-8 rounded-sm overflow-hidden flex items-center justify-center text-center shadow-md">
+        {/* Page Header */}
+        {hasBgImage ? (
+          <div className="relative w-full h-[220px] md:h-[300px] mb-8 rounded-sm overflow-hidden flex items-center justify-center text-center shadow-md">
             <img
-              src={pageContent.hero.bgImage}
+              src={heroBg}
               alt="Collections Header"
               className="absolute inset-0 w-full h-full object-cover"
             />
@@ -111,13 +132,13 @@ const categories = [
             
             <motion.div variants={fadeUpVariant} initial="hidden" animate="visible" className="relative z-10 px-6 max-w-3xl mx-auto">
               <span className="text-[11px] uppercase tracking-[0.3em] text-[#E0D8CA] font-semibold mb-2 block">
-                {pageContent.hero.tag || "THE"}
+                {pageContent?.hero?.tag || "THE"}
               </span>
               <h1 className="text-3xl md:text-5xl lg:text-6xl font-serif mb-2 text-[#F8F5F0] leading-tight drop-shadow-sm font-normal">
-                {pageContent.hero.title || "Artisanal Floor Sculptures"}
+                {pageContent?.hero?.title || "Artisanal Floor Sculptures"}
               </h1>
               <p className="text-[#EBE5DA] text-xs md:text-sm font-light leading-relaxed drop-shadow-sm line-clamp-2 max-w-xl mx-auto">
-                {pageContent.hero.description || "Browse our hand-braided rPET area rugs, runners, and custom silhouettes. 100% reversible, stain-resistant, and woven for mindful living."}
+                {pageContent?.hero?.description || "Browse our hand-braided rPET area rugs, runners, and custom silhouettes. 100% reversible, stain-resistant, and woven for mindful living."}
               </p>
             </motion.div>
           </div>
@@ -135,7 +156,7 @@ const categories = [
           </motion.div>
         )}
 
-        {/* Filter Navigation: Prominent & Readable Tabs */}
+        {/* Filter Navigation */}
         <motion.div 
           variants={containerVariants} 
           initial="hidden" 
@@ -164,7 +185,7 @@ const categories = [
           ))}
         </motion.div>
         
-        {/* Product Grid Area (Peeks naturally above the fold) */}
+        {/* Product Grid Area */}
         {isLoading ? (
           <SkeletonProductGrid />
         ) : (
