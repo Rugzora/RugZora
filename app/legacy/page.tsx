@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, Variants } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 import { supabase } from "@/lib/supabase";
 
 export default function Legacy() {
@@ -49,25 +50,24 @@ export default function Legacy() {
     loadLegacyContent();
   }, []);
 
+  // 🌟 Pure Smooth Fade-In (No sliding lag)
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        delayChildren: 0.1,
-        staggerChildren: 0.2,
+        staggerChildren: 0.1,
       },
     },
   };
 
   const itemVariants: Variants = {
-    hidden: { opacity: 0, y: 30 },
+    hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      y: 0,
       transition: {
-        duration: 0.8,
-        ease: [0.22, 1, 0.36, 1],
+        duration: 0.6,
+        ease: "easeOut",
       },
     },
   };
@@ -90,10 +90,14 @@ export default function Legacy() {
       <section className="relative w-full h-[70vh] md:h-[85vh] flex items-center justify-center overflow-hidden bg-[#241F1A]">
         {heroBg && (
           <div className="absolute inset-0 z-0">
-            <img 
+            <Image 
               src={heroBg} 
               alt={hero?.title || "Bhadohi Heritage"} 
-              className="w-full h-full object-cover opacity-80" 
+              fill
+              priority // 🌟 Sabse pehle instant load hoga
+              quality={85}
+              sizes="100vw"
+              className="object-cover opacity-80" 
             />
             <div className="absolute inset-0 bg-black/40"></div>
           </div>
@@ -129,7 +133,7 @@ export default function Legacy() {
           variants={containerVariants} 
           initial="hidden" 
           whileInView="visible" 
-          viewport={{ once: true, amount: 0.3 }} 
+          viewport={{ once: true, margin: "-40px" }} 
           className="w-full max-w-[1000px] mx-auto px-6 py-32 text-center"
         >
           {intro?.quote && (
@@ -151,23 +155,26 @@ export default function Legacy() {
         variants={containerVariants} 
         initial="hidden" 
         whileInView="visible" 
-        viewport={{ once: true, amount: 0.2 }} 
+        viewport={{ once: true, margin: "-40px" }} 
         className="w-full bg-[#EBE5DA] py-0 overflow-hidden"
       >
         <div className="flex flex-col md:flex-row">
-          <motion.div variants={itemVariants} className="w-full md:w-1/2 h-[450px] md:h-auto min-h-[400px] relative overflow-hidden bg-[#DFD8CC]">
+          <div className="w-full md:w-1/2 h-[450px] md:h-auto min-h-[400px] relative overflow-hidden bg-[#DFD8CC] group">
             {workshopImg ? (
-              <img 
+              <Image 
                 src={workshopImg} 
                 alt={workshop?.title || "Workshop Machinery"} 
-                className="w-full h-full object-cover hover:scale-105 transition-transform duration-1000" 
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                quality={80}
+                className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out" 
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-xs uppercase tracking-widest text-[#8C7A63] font-semibold">
                 No Image Configured
               </div>
             )}
-          </motion.div>
+          </div>
 
           <div className="w-full md:w-1/2 px-8 py-20 md:p-28 flex flex-col justify-center">
             {workshop?.tag && (
@@ -199,7 +206,7 @@ export default function Legacy() {
         variants={containerVariants} 
         initial="hidden" 
         whileInView="visible" 
-        viewport={{ once: true, amount: 0.1 }} 
+        viewport={{ once: true, margin: "-40px" }} 
         className="w-full max-w-[1400px] mx-auto px-6 py-32"
       >
         <div className="text-center mb-20">
@@ -219,18 +226,21 @@ export default function Legacy() {
           {/* Pillar 1 */}
           <motion.div variants={itemVariants} className="relative group overflow-hidden rounded-sm h-[480px] md:h-[620px] bg-[#EBE5DA]">
             {pillar1Img ? (
-              <img 
+              <Image 
                 src={pillar1Img} 
                 alt={materials?.pillar1?.title || "Pillar 1 Material"} 
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" 
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                quality={80}
+                className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out" 
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-xs uppercase tracking-widest text-[#8C7A63] font-semibold">
                 No Image Configured
               </div>
             )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent"></div>
-            <div className="absolute bottom-10 left-8 right-8">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent pointer-events-none"></div>
+            <div className="absolute bottom-10 left-8 right-8 z-10">
               {materials?.pillar1?.tag && (
                 <span className="text-[#C19A6B] tracking-[0.2em] uppercase text-xs mb-2 block font-semibold">
                   {materials.pillar1.tag}
@@ -252,18 +262,21 @@ export default function Legacy() {
           {/* Pillar 2 */}
           <motion.div variants={itemVariants} className="relative group overflow-hidden rounded-sm h-[480px] md:h-[620px] bg-[#EBE5DA]">
             {pillar2Img ? (
-              <img 
+              <Image 
                 src={pillar2Img} 
                 alt={materials?.pillar2?.title || "Pillar 2 Material"} 
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" 
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                quality={80}
+                className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out" 
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-xs uppercase tracking-widest text-[#8C7A63] font-semibold">
                 No Image Configured
               </div>
             )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent"></div>
-            <div className="absolute bottom-10 left-8 right-8">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent pointer-events-none"></div>
+            <div className="absolute bottom-10 left-8 right-8 z-10">
               {materials?.pillar2?.tag && (
                 <span className="text-[#C19A6B] tracking-[0.2em] uppercase text-xs mb-2 block font-semibold">
                   {materials.pillar2.tag}
@@ -289,7 +302,7 @@ export default function Legacy() {
         variants={containerVariants} 
         initial="hidden" 
         whileInView="visible" 
-        viewport={{ once: true, amount: 0.3 }} 
+        viewport={{ once: true, margin: "-40px" }} 
         className="w-full bg-[#3A332C] py-32 flex flex-col items-center text-center px-6"
       >
         <motion.svg variants={itemVariants} className="w-8 h-8 text-[#C19A6B] mb-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">

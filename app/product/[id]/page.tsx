@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "../../../lib/supabase";
+import { useCurrency } from "@/context/CurrencyContext";
 
 const SpecItem = ({ label, value }: { label: string; value: string }) => {
   if (!value) return null;
@@ -20,6 +21,9 @@ export default function ProductPage() {
   const params = useParams();
   const rawId = params?.id;
   const id = Array.isArray(rawId) ? rawId[0] : rawId;
+
+  // 🌟 Global Currency Context Integration
+  const { formatPrice } = useCurrency();
 
   const [product, setProduct] = useState<any>(null);
   const [relatedItems, setRelatedItems] = useState<any[]>([]);
@@ -38,28 +42,28 @@ export default function ProductPage() {
   const lightboxImageRef = useRef<HTMLImageElement>(null);
   const lightboxBackdropRef = useRef<HTMLDivElement>(null);
 
-  const [globalUsdRate, setGlobalUsdRate] = useState<number>(83.50);
-  const [userCurrency, setUserCurrency] = useState("USD");
-
+  // ✅ Cart Status Listener (Navbar se item delete hote hi instant sync hoga)
   useEffect(() => {
-    setUserCurrency(localStorage.getItem("user_currency") || "USD");
-    const handleCurrencyUpdate = () => setUserCurrency(localStorage.getItem("user_currency") || "USD");
-    window.addEventListener("currency_changed", handleCurrencyUpdate);
-
-    const fetchGlobalRate = async () => {
-      const { data } = await supabase.from("store_settings").select("usd_rate").eq("id", 1).maybeSingle();
-      if (data && data.usd_rate) setGlobalUsdRate(parseFloat(data.usd_rate));
+    const checkCartStatus = () => {
+      if (!product || !selectedVariant) return;
+      try {
+        const cart = JSON.parse(localStorage.getItem("rugzora_cart") || "[]");
+        const exists = cart.some((item: any) => item.id === product.id && item.size === selectedVariant.size);
+        setIsInCart(exists);
+      } catch (e) {
+        setIsInCart(false);
+      }
     };
-    fetchGlobalRate();
 
-    return () => window.removeEventListener("currency_changed", handleCurrencyUpdate);
-  }, []);
+    checkCartStatus();
 
-  useEffect(() => {
-    if (!product || !selectedVariant) return;
-    const cart = JSON.parse(localStorage.getItem("rugzora_cart") || "[]");
-    const exists = cart.some((item: any) => item.id === product.id && item.size === selectedVariant.size);
-    setIsInCart(exists);
+    window.addEventListener("cart_updated", checkCartStatus);
+    window.addEventListener("storage", checkCartStatus);
+
+    return () => {
+      window.removeEventListener("cart_updated", checkCartStatus);
+      window.removeEventListener("storage", checkCartStatus);
+    };
   }, [product, selectedVariant]);
 
   useEffect(() => {
@@ -68,19 +72,6 @@ export default function ProductPage() {
     const exists = wishlist.some((item: any) => item.id === product.id);
     setIsWishlisted(exists);
   }, [product]);
-
-  const getConvertedPrice = (inrPrice: string | number, qty: number = 1) => {
-    if (!inrPrice) return "Price on Request";
-    const numericInrPrice = parseFloat(inrPrice.toString().replace(/[^0-9.-]+/g, ""));
-    if (isNaN(numericInrPrice) || numericInrPrice === 0) return "Price on Request";
-
-    const relativeRates: Record<string, number> = { USD: 1.00, EUR: 0.92, GBP: 0.79, CAD: 1.36, AUD: 1.53, INR: globalUsdRate };
-    const targetRate = relativeRates[userCurrency] || 1;
-    const convertedPrice = (numericInrPrice / globalUsdRate) * targetRate * qty;
-    const symbols: Record<string, string> = { USD: "$", EUR: "€", GBP: "£", CAD: "CA$", AUD: "AU$", INR: "₹" };
-    
-    return `${symbols[userCurrency] || "$"}${convertedPrice.toFixed(2)}`;
-  };
 
   const fetchProduct = async () => {
     if (!id) return;
@@ -113,10 +104,27 @@ export default function ProductPage() {
         const { data: fallbackData } = await supabase.from("products").select("*").eq("category", data.category).neq("id", data.id).limit(4);
         if (fallbackData) setRelatedItems(fallbackData);
       }
-    } catch (err: any) { setError("Product not found."); setProduct(null); } finally { setIsLoading(false); }
+    } catch (err: any) { 
+      setError("Product not found."); 
+      setProduct(null); 
+    } finally { 
+      setIsLoading(false); 
+    }
   };
 
   useEffect(() => { fetchProduct(); }, [id]);
+
+  // 🌟 Main Banner Arrow Image Switcher
+  const handleNavigateImage = (direction: "next" | "prev", e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!product || !Array.isArray(product.images) || product.images.length <= 1) return;
+    const currentIndex = product.images.indexOf(activeImage);
+    const total = product.images.length;
+    const nextIndex = direction === "next" 
+      ? (currentIndex + 1) % total 
+      : (currentIndex - 1 + total) % total;
+    setActiveImage(product.images[nextIndex]);
+  };
 
   const getLightboxIndex = () => (!product || !product.images) ? 0 : product.images.indexOf(activeImage);
   const navigateLightbox = (step: number, e?: React.MouseEvent | Event) => {
@@ -245,37 +253,82 @@ export default function ProductPage() {
   );
 
   return (
-    <div className="bg-[#F8F5F0] pt-[80px] pb-40 min-h-screen font-sans">
+    <div className="bg-[#F8F5F0] pt-3 md:pt-4 pb-40 min-h-screen font-sans">
       
       <div className="w-full max-w-[1600px] mx-auto px-4 md:px-6 mb-16 md:mb-20">
         
-        {/* BIG IMAGE */}
+        {/* BIG HERO IMAGE WITH LEFT/RIGHT ARROWS */}
         <div 
-          className="w-full h-[65vh] md:h-[85vh] bg-[#DFD8CC] overflow-hidden rounded-sm cursor-pointer group relative flex items-center justify-center shadow-md"
+          className="w-full h-[65vh] md:h-[85vh] bg-[#DFD8CC] overflow-hidden rounded-sm cursor-pointer group relative flex items-center justify-center shadow-md select-none"
           onClick={() => setIsLightboxOpen(true)}
         >
-          <img src={activeImage} alt={product.name} className="w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-105" />
+          {activeImage && (
+            <img 
+              key={activeImage}
+              src={activeImage} 
+              alt={product.name} 
+              className="w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-105" 
+            />
+          )}
+
+          {/* 🌟 LEFT ARROW BUTTON */}
+          {Array.isArray(product.images) && product.images.length > 1 && (
+            <button
+              type="button"
+              onClick={(e) => handleNavigateImage("prev", e)}
+              aria-label="Previous image"
+              className="absolute left-4 md:left-6 top-1/2 -translate-y-1/2 w-11 h-11 md:w-13 md:h-13 flex items-center justify-center rounded-full bg-[#F8F5F0]/85 text-[#3A332C] backdrop-blur-md shadow-md opacity-80 hover:opacity-100 hover:bg-[#C19A6B] hover:text-white transition-all duration-300 z-20 focus:outline-none"
+            >
+              <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+          )}
+
+          {/* 🌟 RIGHT ARROW BUTTON */}
+          {Array.isArray(product.images) && product.images.length > 1 && (
+            <button
+              type="button"
+              onClick={(e) => handleNavigateImage("next", e)}
+              aria-label="Next image"
+              className="absolute right-4 md:right-6 top-1/2 -translate-y-1/2 w-11 h-11 md:w-13 md:h-13 flex items-center justify-center rounded-full bg-[#F8F5F0]/85 text-[#3A332C] backdrop-blur-md shadow-md opacity-80 hover:opacity-100 hover:bg-[#C19A6B] hover:text-white transition-all duration-300 z-20 focus:outline-none"
+            >
+              <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          )}
         </div>
         
-        {/* THUMBNAILS */}
+        {/* THUMBNAILS (Instant response with native decoding) */}
         {Array.isArray(product.images) && product.images.length > 1 && (
-          <div className="flex flex-wrap justify-center gap-4 mt-6">
+          <div className="flex flex-wrap justify-center gap-3 sm:gap-4 mt-6">
             {product.images.map((img: string, idx: number) => (
-              <div 
-                key={idx} onClick={() => setActiveImage(img)}
-                className={`w-20 h-20 md:w-24 md:h-24 bg-[#DFD8CC] overflow-hidden cursor-pointer rounded-sm transition ${activeImage === img ? 'opacity-100 border-2 border-[#C19A6B] shadow-inner scale-105' : 'opacity-60 hover:opacity-100'}`}
+              <button 
+                key={idx} 
+                type="button" 
+                onClick={() => setActiveImage(img)}
+                className={`relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-[#DFD8CC] overflow-hidden rounded-sm transition-all duration-200 cursor-pointer ${
+                  activeImage === img 
+                    ? 'opacity-100 ring-2 ring-[#C19A6B] ring-offset-2 ring-offset-[#F8F5F0] scale-105' 
+                    : 'opacity-60 hover:opacity-100'
+                }`}
               >
-                <img src={img} className="w-full h-full object-cover" alt={`Gallery view ${idx + 1}`}/>
-              </div>
+                <img 
+                  src={img} 
+                  className="w-full h-full object-cover pointer-events-none" 
+                  alt={`Thumbnail view ${idx + 1}`}
+                  loading="eager"
+                  decoding="async"
+                />
+              </button>
             ))}
           </div>
         )}
 
-        {/* 🌟 ETSY BUTTON & WISHLIST BUTTON CONTAINER */}
-        <div className="flex flex-col items-end gap-3 mt-10 md:pr-4">
-          
-         {/* VIEW ON ETSY BUTTON */}
-         {product.show_etsy && product.etsy_url && (
+        {/* ETSY & WISHLIST CONTAINER (Full visibility without clipping) */}
+        <div className="flex flex-col items-end gap-4 mt-8 md:mt-10 px-2 sm:px-4">
+          {product.show_etsy && product.etsy_url && (
             <a
               href={product.etsy_url}
               target="_blank"
@@ -286,17 +339,31 @@ export default function ProductPage() {
             </a>
           )}
 
-          {/* WISHLIST BUTTON */}
+          {/* 🌟 Fully Visible Wishlist Heart Button */}
           <button 
+            type="button"
             onClick={toggleWishlist}
-            className="flex items-center gap-3 text-sm md:text-base uppercase tracking-[0.15em] font-bold transition-all duration-300 hover:opacity-70"
+            className="inline-flex items-center gap-2.5 py-1.5 px-2 text-xs md:text-sm uppercase tracking-[0.15em] font-semibold transition-all duration-200 hover:opacity-80 focus:outline-none select-none"
           >
             {isWishlisted ? (
-              <svg className="w-6 h-6 md:w-8 md:h-8 text-red-500 fill-current" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+              <svg 
+                className="w-5 h-5 md:w-6 md:h-6 text-red-500 fill-current shrink-0" 
+                viewBox="0 0 24 24"
+              >
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+              </svg>
             ) : (
-              <svg className="w-6 h-6 md:w-8 md:h-8 text-[#6B6054]" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" /></svg>
+              <svg 
+                className="w-5 h-5 md:w-6 md:h-6 text-[#3A332C] shrink-0" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth={1.5} 
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+              </svg>
             )}
-            <span className={isWishlisted ? "text-red-500" : "text-[#6B6054]"}>
+            <span className={`whitespace-nowrap font-medium ${isWishlisted ? "text-red-500" : "text-[#3A332C]"}`}>
               {isWishlisted ? "Saved to Wishlist" : "Add to Wishlist"}
             </span>
           </button>
@@ -317,17 +384,17 @@ export default function ProductPage() {
             
             <div className="flex items-end flex-wrap gap-x-4 gap-y-2 mt-4">
               {selectedVariant && (
-                quantity > 1 && getConvertedPrice(selectedVariant.price, 1) !== "Price on Request" ? (
+                quantity > 1 ? (
                   <div className="flex items-center text-[#8C7A63] text-xl font-medium bg-white px-4 py-2 rounded-sm border border-[#DFD8CC] shadow-sm">
-                    <span>{getConvertedPrice(selectedVariant.price, 1)}</span>
+                    <span>{formatPrice(selectedVariant.price, 1)}</span>
                     <span className="mx-3 opacity-60">×</span>
                     <span>{quantity}</span>
                     <span className="mx-3 opacity-60">=</span>
-                    <span className="text-3xl text-[#3A332C] font-semibold">Total: {getConvertedPrice(selectedVariant.price, quantity)}</span>
+                    <span className="text-3xl text-[#3A332C] font-semibold">Total: {formatPrice(selectedVariant.price, quantity)}</span>
                   </div>
                 ) : (
                   <div className="text-4xl text-[#6B6054] font-light">
-                    {getConvertedPrice(selectedVariant?.price, 1)}
+                    {formatPrice(selectedVariant?.price, 1)}
                   </div>
                 )
               )}
@@ -493,12 +560,18 @@ export default function ProductPage() {
                     return (
                     <Link href={`/product/${item.id}`} key={item.id} className="flex flex-col group cursor-pointer">
                         <div className="aspect-[4/5] w-full bg-[#EBE5DA] mb-4 overflow-hidden rounded-sm shadow-sm relative">
-                            {displayImg && <img src={displayImg} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[1.5s]" />}
+                            {displayImg && (
+                              <img 
+                                src={displayImg} 
+                                alt={item.name} 
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[1.5s]" 
+                              />
+                            )}
                         </div>
                         <div className="flex flex-col text-left">
                             <span className="text-[10px] text-[#C19A6B] uppercase tracking-[0.1em] mb-1">{item.category}</span>
                             <span className="text-base text-[#3A332C] font-serif font-medium leading-tight mb-1 truncate">{item.name}</span>
-                            <span className="text-sm text-[#6B6054]">{getConvertedPrice(item.price, 1)}</span>
+                            <span className="text-sm text-[#6B6054]">{formatPrice(item.price, 1)}</span>
                         </div>
                     </Link>
                 )})}
@@ -506,6 +579,7 @@ export default function ProductPage() {
         </div>
       )}
       
+      {/* LIGHTBOX */}
       <AnimatePresence>
         {isLightboxOpen && product && (
           <motion.div

@@ -5,10 +5,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "../../lib/supabase";
 import { compressAndConvertToWebP } from "@/lib/compressImage";
-
 import { deleteStorageImage } from "@/lib/deleteStorageImage";
-
-
 
 const InputField = ({ label, name, placeholder, required = false, type = "text", value, onChange }: any) => (
   <div className="w-full">
@@ -35,9 +32,9 @@ export default function AdminUpload() {
   const [editingProductId, setEditingProductId] = useState<string>("");
 
   const [images, setImages] = useState<ImageFile[]>([]);
-  
   const [availableProducts, setAvailableProducts] = useState<any[]>([]);
-  // ✅ YAHAN PASTE KAREIN (Component ke andar):
+
+  // 🌟 Storage se auto cleanup ke saath delete
   const handleRemoveImage = async (indexToRemove: number) => {
     const imageToRemove = images[indexToRemove];
 
@@ -60,9 +57,10 @@ export default function AdminUpload() {
   const dragOverItem = useRef<number | null>(null);
 
   const defaultCategories = [
-    "Rectangular",
-    "Round & Oval",
-    "Runners",
+    "Rectangle",
+    "Round",
+    "Oval",
+    "Runner",
     "Traditional"
   ];
 
@@ -213,6 +211,7 @@ export default function AdminUpload() {
     });
   };
 
+  // 🌟 Auto WebP Compress on Selection
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const selectedFiles = Array.from(e.target.files);
@@ -221,7 +220,6 @@ export default function AdminUpload() {
       const processedFiles: ImageFile[] = [];
 
       for (const file of selectedFiles) {
-        // 🌟 Auto WebP & Compression
         const optimizedWebpFile = await compressAndConvertToWebP(file);
         
         processedFiles.push({
@@ -236,8 +234,6 @@ export default function AdminUpload() {
       setStatusMsg("");
     }
   };
-
-  const removeImage = (indexToRemove: number) => setImages(images.filter((_, index) => index !== indexToRemove));
 
   const handleDragStart = (e: React.DragEvent, position: number) => { dragItem.current = position; };
   const handleDragEnter = (e: React.DragEvent, position: number) => { dragOverItem.current = position; };
@@ -282,9 +278,12 @@ export default function AdminUpload() {
         if (img.isExisting) {
           finalImageUrls.push(img.preview);
         } else if (img.file) {
-          const fileExt = img.file.name.split(".").pop();
-          const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
-          const { error: uploadError } = await supabase.storage.from("product-images").upload(fileName, img.file);
+          // 🌟 Auto WebP Extension guarantee
+          const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.webp`;
+          const { error: uploadError } = await supabase.storage.from("product-images").upload(fileName, img.file, {
+            contentType: "image/webp",
+            cacheControl: "31536000",
+          });
           if (uploadError) throw uploadError;
           const { data: publicUrlData } = supabase.storage.from("product-images").getPublicUrl(fileName);
           finalImageUrls.push(publicUrlData.publicUrl);
@@ -348,7 +347,6 @@ export default function AdminUpload() {
 
       if (submittedId) setNewlyCreatedId(submittedId);
       
-      // Stop Loader and Show Animated Tick
       setLoadingAction(null);
       setShowCelebration(true);
       
@@ -374,7 +372,6 @@ export default function AdminUpload() {
           
           <div className="flex flex-col items-end gap-3">
             <div className="flex items-center gap-2">
-              {/* 🌟 EDIT WEB BUTTON INSIDE ADMIN */}
               <Link
                 href="/admin/content"
                 className="px-4 py-2 text-xs font-bold uppercase tracking-widest bg-[#3A332C] text-[#F8F5F0] hover:bg-[#C19A6B] transition-colors rounded-sm shadow-sm flex items-center gap-1.5"
@@ -515,7 +512,7 @@ export default function AdminUpload() {
                 + Select Images
                 <input type="file" multiple accept="image/*" onChange={handleFileChange} className="hidden" />
               </label>
-              <span className="text-xs text-[#7A7065]">Drag and drop to rearrange order.</span>
+              <span className="text-xs text-[#7A7065]">Drag and drop to rearrange order. Automatically converted to WebP.</span>
             </div>
             
             {images.length > 0 && (
@@ -670,7 +667,7 @@ export default function AdminUpload() {
         </form>
       </div>
 
-      {/* 🌟 1. FULLSCREEN LOADING OVERLAY WITH ROUND GREEN SPINNER */}
+      {/* 🌟 1. FULLSCREEN LOADING OVERLAY */}
       <AnimatePresence>
         {loadingAction !== null && (
           <motion.div
@@ -697,7 +694,7 @@ export default function AdminUpload() {
         )}
       </AnimatePresence>
 
-      {/* 🌟 2. SUCCESS MODAL WITH ANIMATED GREEN CHECKMARK */}
+      {/* 🌟 2. SUCCESS MODAL */}
       <AnimatePresence>
         {showCelebration && (
           <motion.div 

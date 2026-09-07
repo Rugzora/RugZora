@@ -7,11 +7,15 @@ import { usePathname } from "next/navigation";
 import { Playfair_Display } from "next/font/google";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "../lib/supabase"; 
+import { useCurrency } from "../context/CurrencyContext";
 
 const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfair" });
 
 export default function Navbar() {
   const pathname = usePathname();
+
+  // 🌟 Global Currency Context
+  const { currency: selectedCurrency, setCurrency, formatPrice } = useCurrency();
 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -21,10 +25,6 @@ export default function Navbar() {
   const [isSearching, setIsSearching] = useState(false);
 
   const headerRef = useRef<HTMLElement>(null);
-
-  // 🌟 Currency State (For Cart Display)
-  const [globalUsdRate, setGlobalUsdRate] = useState<number>(83.50);
-  const [selectedCurrency, setSelectedCurrency] = useState("USD");
   const [isCurrencyDropdownOpen, setIsCurrencyDropdownOpen] = useState(false);
 
   // 🌟 Cart State
@@ -47,21 +47,11 @@ export default function Navbar() {
     { name: "Contact", href: "/contact" },
   ];
 
-  // 🌟 Load Cart and Currency on Mount
+  // 🌟 Load Cart on Mount and Setup Listeners
   useEffect(() => {
-    const savedCurrency = localStorage.getItem("user_currency") || "USD";
-    setSelectedCurrency(savedCurrency);
-
     const loadCart = () => setCartItems(JSON.parse(localStorage.getItem("rugzora_cart") || "[]"));
     loadCart();
 
-    const fetchGlobalRate = async () => {
-      const { data } = await supabase.from("store_settings").select("usd_rate").eq("id", 1).maybeSingle();
-      if (data && data.usd_rate) setGlobalUsdRate(parseFloat(data.usd_rate));
-    };
-    fetchGlobalRate();
-
-    // Listen for Cart & Currency updates across tabs/components
     window.addEventListener("cart_updated", loadCart);
     window.addEventListener("open_cart", () => setIsCartOpen(true));
     
@@ -72,10 +62,8 @@ export default function Navbar() {
   }, []);
 
   const handleCurrencyChange = (code: string) => {
-    setSelectedCurrency(code);
-    localStorage.setItem("user_currency", code);
+    setCurrency(code);
     setIsCurrencyDropdownOpen(false);
-    window.dispatchEvent(new Event("currency_changed")); 
   };
 
   const removeFromCart = (indexToRemove: number) => {
@@ -85,29 +73,25 @@ export default function Navbar() {
     window.dispatchEvent(new Event("cart_updated"));
   };
 
-  const getConvertedPrice = (inrPriceString: string, qty: number = 1) => {
-    if (!inrPriceString) return 0;
-    const numericInrPrice = parseFloat(inrPriceString.toString().replace(/[^0-9.-]+/g, ""));
-    if (isNaN(numericInrPrice)) return 0;
-
-    const relativeRates: Record<string, number> = { USD: 1.00, EUR: 0.92, GBP: 0.79, CAD: 1.36, AUD: 1.53, INR: globalUsdRate };
-    const targetRate = relativeRates[selectedCurrency] || 1;
-    return (numericInrPrice / globalUsdRate) * targetRate * qty;
-  };
-
-  const formatPrice = (value: number) => {
-    const symbols: Record<string, string> = { USD: "$", EUR: "€", GBP: "£", CAD: "CA$", AUD: "AU$", INR: "₹" };
-    return `${symbols[selectedCurrency] || "$"}${value.toFixed(2)}`;
-  };
-
-  const cartSubtotal = cartItems.reduce((total, item) => total + getConvertedPrice(item.price, item.quantity), 0);
+  const cartSubtotalINR = cartItems.reduce((total, item) => {
+    const numericInr = parseFloat((item.price || "0").toString().replace(/[^0-9.]/g, ""));
+    return total + (isNaN(numericInr) ? 0 : numericInr * (item.quantity || 1));
+  }, 0);
 
   // Search Logic
   useEffect(() => {
     const fetchSearchResults = async () => {
-      if (searchQuery.trim().length < 1) { setSearchResults([]); return; }
+      if (searchQuery.trim().length < 1) { 
+        setSearchResults([]); 
+        return; 
+      }
       setIsSearching(true);
-      const { data, error } = await supabase.from("products").select("id, name, category, price, images").ilike("name", `%${searchQuery}%`).limit(5); 
+      const { data, error } = await supabase
+        .from("products")
+        .select("id, name, category, price, images")
+        .ilike("name", `%${searchQuery}%`)
+        .limit(5); 
+        
       if (!error && data) setSearchResults(data);
       setIsSearching(false);
     };
@@ -117,7 +101,9 @@ export default function Navbar() {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (headerRef.current && !headerRef.current.contains(event.target as Node)) { setIsSearchOpen(false); }
+      if (headerRef.current && !headerRef.current.contains(event.target as Node)) { 
+        setIsSearchOpen(false); 
+      }
     };
     if (isSearchOpen) document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
@@ -158,18 +144,15 @@ export default function Navbar() {
           
           <div className="flex items-center space-x-6 text-[#6B6054]">
 
-
-
-            {/* 🌟 ADMIN & EDIT WEB BUTTONS */}
-<div className="hidden sm:flex items-center gap-2 mr-2">
-  <Link
-    href="/admin"
-    className="px-3 py-1 text-[11px] uppercase tracking-widest font-semibold text-[#3A332C] border border-[#DFD8CC] hover:border-[#C19A6B] hover:text-[#C19A6B] rounded-sm transition-colors"
-  >
-    Admin
-  </Link>
-  
-</div>
+            {/* ADMIN BUTTON */}
+            <div className="hidden sm:flex items-center gap-2 mr-2">
+              <Link
+                href="/admin"
+                className="px-3 py-1 text-[11px] uppercase tracking-widest font-semibold text-[#3A332C] border border-[#DFD8CC] hover:border-[#C19A6B] hover:text-[#C19A6B] rounded-sm transition-colors"
+              >
+                Admin
+              </Link>
+            </div>
             
             {/* CURRENCY SWITCHER */}
             <div className="relative">
@@ -191,16 +174,16 @@ export default function Navbar() {
               </AnimatePresence>
             </div>
 
-            <button onClick={() => { setIsSearchOpen(!isSearchOpen); if (isSearchOpen) setSearchQuery(""); }} className={`${isSearchOpen ? "text-[#C19A6B]" : "hover:text-[#C19A6B]"} transition-colors`} >
+            <button onClick={() => { setIsSearchOpen(!isSearchOpen); if (isSearchOpen) setSearchQuery(""); }} className={`${isSearchOpen ? "text-[#C19A6B]" : "hover:text-[#C19A6B]"} transition-colors`} aria-label="Search">
               {isSearchOpen ? <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" /></svg> : <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>}
             </button>
             
-            <Link href="/wishlist" className="hover:text-[#C19A6B] transition-colors">
+            <Link href="/wishlist" className="hover:text-[#C19A6B] transition-colors" aria-label="Wishlist">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
             </Link>
 
             {/* CART BUTTON */}
-            <button onClick={() => setIsCartOpen(true)} className="hover:text-[#C19A6B] transition-colors flex items-center space-x-1 relative">
+            <button onClick={() => setIsCartOpen(true)} className="hover:text-[#C19A6B] transition-colors flex items-center space-x-1 relative" aria-label="Cart">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
               {cartItems.length > 0 && (
                 <span className="absolute -top-2 -right-2 bg-[#C19A6B] text-white text-[9px] font-bold w-4 h-4 flex items-center justify-center rounded-full">
@@ -233,9 +216,13 @@ export default function Navbar() {
                     <div className="flex flex-col gap-4 max-h-[60vh] overflow-y-auto custom-scrollbar pr-2">
                       {searchResults.map((item) => (
                         <Link key={item.id} href={`/product/${item.id}`} onClick={() => setIsSearchOpen(false)} className="flex items-center gap-4 p-3 hover:bg-[#EBE5DA] rounded-sm transition-colors">
-                          <div className="w-16 h-16 bg-[#DFD8CC] rounded-sm overflow-hidden flex-shrink-0"><img src={item.images?.[0] || ""} alt={item.name} className="w-full h-full object-cover" /></div>
+                          <div className="w-16 h-16 bg-[#DFD8CC] rounded-sm overflow-hidden flex-shrink-0 relative">
+                            {item.images?.[0] && (
+                              <Image src={item.images[0]} alt={item.name} fill sizes="64px" className="object-cover" />
+                            )}
+                          </div>
                           <div className="flex flex-col"><span className="text-[10px] text-[#C19A6B] uppercase tracking-widest">{item.category}</span><span className="text-lg font-serif text-[#3A332C]">{item.name}</span></div>
-                          <div className="ml-auto text-[#6B6054] font-medium">{formatPrice(getConvertedPrice(item.price, 1))}</div>
+                          <div className="ml-auto text-[#6B6054] font-medium">{formatPrice(item.price, 1)}</div>
                         </Link>
                       ))}
                     </div>
@@ -249,7 +236,7 @@ export default function Navbar() {
         </AnimatePresence>
       </header>
 
-      {/* 🌟 CART DRAWER (Slide out from Right) */}
+      {/* 🌟 CART DRAWER */}
       <AnimatePresence>
         {isCartOpen && (
           <>
@@ -259,7 +246,7 @@ export default function Navbar() {
               
               <div className="px-6 py-5 border-b border-[#DFD8CC] flex justify-between items-center bg-white">
                 <h2 className="text-xl font-serif text-[#3A332C]">Your Cart <span className="text-[#8C7A63] text-sm font-sans">({cartItems.length})</span></h2>
-                <button onClick={() => setIsCartOpen(false)} className="w-8 h-8 flex items-center justify-center rounded-full bg-[#EBE5DA] text-[#3A332C] hover:bg-[#C19A6B] hover:text-white transition-colors">
+                <button onClick={() => setIsCartOpen(false)} className="w-8 h-8 flex items-center justify-center rounded-full bg-[#EBE5DA] text-[#3A332C] hover:bg-[#C19A6B] hover:text-white transition-colors" aria-label="Close Cart">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
               </div>
@@ -278,11 +265,11 @@ export default function Navbar() {
                   <div className="flex flex-col gap-6">
                     {cartItems.map((item, idx) => (
                       <div key={idx} className="flex gap-4 bg-white p-4 rounded-sm border border-[#EBE5DA] relative">
-                        <button onClick={() => removeFromCart(idx)} className="absolute top-2 right-2 text-[#8C7A63] hover:text-red-500 transition-colors">
+                        <button onClick={() => removeFromCart(idx)} className="absolute top-2 right-2 text-[#8C7A63] hover:text-red-500 transition-colors" aria-label="Remove item">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                         </button>
-                        <div className="w-20 h-20 bg-[#F8F5F0] rounded-sm overflow-hidden shrink-0">
-                          {item.image && <img src={item.image} alt={item.name} className="w-full h-full object-cover" />}
+                        <div className="w-20 h-20 bg-[#F8F5F0] rounded-sm overflow-hidden shrink-0 relative">
+                          {item.image && <Image src={item.image} alt={item.name} fill sizes="80px" className="object-cover" />}
                         </div>
                         <div className="flex flex-col flex-1">
                           <span className="text-[10px] text-[#C19A6B] uppercase tracking-[0.1em]">{item.category}</span>
@@ -290,7 +277,7 @@ export default function Navbar() {
                           <span className="text-xs text-[#7A7065] mb-2">Size: {item.size}</span>
                           <div className="flex items-center justify-between mt-auto">
                             <span className="text-sm text-[#8C7A63]">Qty: {item.quantity}</span>
-                            <span className="text-sm font-semibold text-[#3A332C]">{formatPrice(getConvertedPrice(item.price, item.quantity))}</span>
+                            <span className="text-sm font-semibold text-[#3A332C]">{formatPrice(item.price, item.quantity)}</span>
                           </div>
                         </div>
                       </div>
@@ -302,7 +289,7 @@ export default function Navbar() {
               <div className="p-6 bg-white border-t border-[#DFD8CC]">
                 <div className="flex justify-between mb-4 text-[#3A332C] font-semibold text-lg">
                   <span>Subtotal</span>
-                  <span>{formatPrice(cartSubtotal)}</span>
+                  <span>{formatPrice(cartSubtotalINR)}</span>
                 </div>
                 <p className="text-xs text-[#8C7A63] mb-4 text-center">Shipping & taxes calculated at checkout</p>
                 <button disabled={cartItems.length === 0} className="w-full bg-[#3A332C] text-[#F8F5F0] py-4 text-xs tracking-[0.2em] uppercase font-bold hover:bg-[#C19A6B] transition-colors rounded-sm disabled:opacity-50 disabled:cursor-not-allowed">

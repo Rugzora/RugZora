@@ -26,10 +26,10 @@ function ScrollFadeImage({
         src={src}
         alt={alt}
         fill
-        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 70vw, 50vw"
         priority={fetchPriority === "high"}
         loading={fetchPriority === "high" ? "eager" : "lazy"}
-        quality={80}
+        quality={90} // 🌟 80 ki jagah 90 karein taaki bilkul sharp dikhe
         onLoad={() => setLoaded(true)}
         className={`object-cover transition-opacity duration-500 ease-out ${
           loaded ? "opacity-100" : "opacity-0"
@@ -83,20 +83,19 @@ export default function Home() {
 
   const defaultEthos = [
     { 
-      img: "", 
+      num: "01",
       title: "Japandi & Modern Boho", 
-      desc: "Warm neutral tones and marled textures designed to blend into Minimalist, Scandinavian, and Modern living spaces." 
+      desc: "Warm neutral tones and marled textures designed to blend seamlessly into Minimalist, Scandinavian, and Modern living spaces." 
     },
     { 
-      img: "", 
+      num: "02",
       title: "100% Reversible Architecture", 
-      desc: "Completely unbacked with identical texture on both sides. Flip your rug anytime to double its usable lifespan.", 
-      extraClass: "md:mt-16" 
+      desc: "Completely unbacked with identical texture on both sides. Flip your rug anytime to double its usable lifespan and endurance." 
     },
     { 
-      img: "", 
+      num: "03",
       title: "Reinforced Zigzag Craft", 
-      desc: "Hand-braided chunky cords spiraled and locked using heavy-duty zigzag machine stitching to eliminate edge curl." 
+      desc: "Hand-braided chunky cords spiraled and locked using heavy-duty zigzag machine stitching to eliminate edge curl completely." 
     }
   ];
 
@@ -142,7 +141,7 @@ export default function Home() {
               src={siteData.hero.bgImage}
               alt="RugZora Premium Living Room"
               fill
-              priority // 🌟 Sabse pehle instant load karega
+              priority
               quality={85}
               sizes="100vw"
               className="object-cover opacity-85"
@@ -213,35 +212,30 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 2. THE BRAND ETHOS (ZERO SLIDING - PURE SMOOTH FADE-IN) */}
-      <section className="w-full max-w-[1400px] mx-auto px-6 py-32">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+      {/* 2. THE BRAND ETHOS (CLEAN EDITORIAL PILLARS - NO IMAGES, ZERO LAG) */}
+      <section className="w-full max-w-[1400px] mx-auto px-6 py-28 border-b border-[#EBE5DA]">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-16">
           {(siteData?.ethos || defaultEthos).map((item: any, index: number) => {
-            const itemImg = typeof item.img === "string" ? item.img : item.img?.url || defaultEthos[index]?.img;
+            const numLabel = `0${index + 1}`;
             return (
               <motion.div 
                 key={index}
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
-                viewport={{ once: true, margin: "-40px" }}
-                transition={{ duration: 0.6, delay: index * 0.1, ease: "easeOut" }}
-                className={`flex flex-col group cursor-pointer ${index === 1 ? "md:mt-16" : ""}`}
+                viewport={{ once: true, margin: "-30px" }}
+                transition={{ duration: 0.5, delay: index * 0.1, ease: "easeOut" }}
+                className="flex flex-col justify-start bg-white/60 border border-[#EBE5DA] p-8 md:p-10 rounded-sm hover:border-[#C19A6B] transition-colors duration-300 shadow-sm"
               >
-                <div className="aspect-[4/3] overflow-hidden mb-8 rounded-sm bg-[#EBE5DA] flex items-center justify-center relative">
-                  {itemImg ? (
-                    <img 
-                      src={itemImg} 
-                      alt={item.title || "Ethos Card"} 
-                      loading="lazy" 
-                      decoding="async" 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" 
-                    />
-                  ) : (
-                    <span className="text-xs uppercase text-[#8C7A63] tracking-widest font-semibold">No Image</span>
-                  )}
-                </div>
-                <h3 className="text-xl font-serif text-[#3A332C] mb-3">{item.title}</h3>
-                <p className="text-[#7A7065] font-light leading-relaxed">{item.desc}</p>
+                <span className="text-[#C19A6B] font-serif text-2xl font-bold mb-4 block">
+                  {numLabel}
+                </span>
+                <h3 className="text-xl md:text-2xl font-serif text-[#3A332C] mb-4">
+                  {item.title}
+                </h3>
+                <div className="w-12 h-[1.5px] bg-[#DFD8CC] mb-6"></div>
+                <p className="text-[#7A7065] font-light leading-relaxed text-sm md:text-base">
+                  {item.desc}
+                </p>
               </motion.div>
             );
           })}
@@ -249,7 +243,7 @@ export default function Home() {
       </section>
 
       {/* 3. SPLIT STORY - The Bhadohi Heritage */}
-      <section className="w-full max-w-[1400px] mx-auto px-6 py-24 border-t border-[#EBE5DA]">
+      <section className="w-full max-w-[1400px] mx-auto px-6 py-24 border-b border-[#EBE5DA]">
         <div className="flex flex-col md:flex-row items-center gap-20">
           <motion.div 
             initial={{ opacity: 0 }}

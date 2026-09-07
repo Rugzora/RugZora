@@ -2,6 +2,7 @@
 
 import { useState, useEffect, use } from "react";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import { supabase } from "../../../lib/supabase";
 
 export default function ProductDetails({ params }: { params: Promise<{ id: string }> }) {
@@ -94,9 +95,18 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
                   <button 
                     key={idx} 
                     onClick={() => setActiveImage(img)}
-                    className={`w-20 h-24 shrink-0 bg-[#EBE5DA] rounded-sm overflow-hidden border-2 transition-all ${activeImage === img ? 'border-[#C19A6B]' : 'border-transparent hover:border-[#DFD8CC]'}`}
+                    className={`relative w-20 h-24 shrink-0 bg-[#EBE5DA] rounded-sm overflow-hidden border-2 transition-all ${
+                      activeImage === img ? 'border-[#C19A6B]' : 'border-transparent hover:border-[#DFD8CC]'
+                    }`}
                   >
-                    <img src={img} alt={`Thumbnail ${idx}`} className="w-full h-full object-cover" />
+                    <Image 
+                      src={img} 
+                      alt={`Thumbnail ${idx}`} 
+                      fill
+                      sizes="80px"
+                      quality={70}
+                      className="object-cover" 
+                    />
                   </button>
                 ))}
               </div>
@@ -107,15 +117,25 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
               key={activeImage}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.5 }}
-              className="w-full h-[400px] md:h-full bg-[#EBE5DA] rounded-sm overflow-hidden relative"
+              transition={{ duration: 0.4, ease: "easeOut" }}
+              className="w-full h-[400px] md:h-full bg-[#EBE5DA] rounded-sm overflow-hidden relative shadow-sm"
             >
               {product.stock_quantity === 0 && (
                 <div className="absolute top-4 left-4 bg-[#3A332C] text-white text-[10px] uppercase tracking-widest px-3 py-1 z-10">
                   Sold Out
                 </div>
               )}
-              <img src={activeImage} alt={product.name} className="w-full h-full object-cover" />
+              {activeImage && (
+                <Image 
+                  src={activeImage} 
+                  alt={product.name} 
+                  fill
+                  priority
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  quality={85}
+                  className="object-cover" 
+                />
+              )}
             </motion.div>
           </div>
 
@@ -190,13 +210,13 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
             <div className="flex flex-col sm:flex-row gap-4 mb-14">
               <button 
                 disabled={product.stock_quantity === 0}
-                className="w-full sm:w-1/2 bg-[#3A332C] text-[#F8F5F0] py-4 text-xs tracking-[0.2em] uppercase hover:bg-[#C19A6B] hover:text-white transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full sm:w-1/2 bg-[#3A332C] text-[#F8F5F0] py-4 text-xs tracking-[0.2em] uppercase hover:bg-[#C19A6B] hover:text-white transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
               >
                 {product.stock_quantity === 0 ? "Out of Stock" : "Add to Cart"}
               </button>
               <button 
                 disabled={product.stock_quantity === 0}
-                className="w-full sm:w-1/2 border border-[#3A332C] text-[#3A332C] py-4 text-xs tracking-[0.2em] uppercase hover:bg-[#3A332C] hover:text-[#F8F5F0] transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full sm:w-1/2 border border-[#3A332C] text-[#3A332C] py-4 text-xs tracking-[0.2em] uppercase hover:bg-[#3A332C] hover:text-[#F8F5F0] transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed font-semibold"
               >
                 Buy It Now
               </button>

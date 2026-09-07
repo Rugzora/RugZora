@@ -3,7 +3,9 @@
 import { useState, useEffect } from "react";
 import { motion, Variants, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 import { supabase } from "../../lib/supabase";
+import { useCurrency } from "@/context/CurrencyContext";
 
 const ProductSkeleton = () => (
   <div className="flex flex-col h-full animate-pulse">
@@ -25,10 +27,13 @@ const SkeletonProductGrid = () => (
 );
 
 export default function Shop() {
+  // 🌟 Global Currency Context Integration
+  const { formatPrice } = useCurrency();
+
   const [activeCategory, setActiveCategory] = useState("All");
   const [dbProducts, setDbProducts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [mounted, setMounted] = useState(false); // 🌟 Hydration guard
+  const [mounted, setMounted] = useState(false);
 
   const [pageContent, setPageContent] = useState<any>(() => {
     if (typeof window !== "undefined") {
@@ -43,7 +48,7 @@ export default function Shop() {
   });
 
   useEffect(() => {
-    setMounted(true); // 🌟 Client mount confirmation
+    setMounted(true);
     const fetchPageContent = async () => {
       try {
         const { data } = await supabase
@@ -81,9 +86,11 @@ export default function Shop() {
   }, []);
 
   const categories = [
-    "Rectangular",
-    "Round & Oval",
-    "Runners",
+    "All",
+    "Rectangle",
+    "Round",
+    "Oval",
+    "Runner",
     "Traditional"
   ];
 
@@ -96,19 +103,18 @@ export default function Shop() {
   })();
 
   const fadeUpVariant: Variants = {
-    hidden: { opacity: 0, y: 15 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.25, 1, 0.5, 1] } }
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { duration: 0.6, ease: "easeOut" } }
   };
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { delayChildren: 0.1, staggerChildren: 0.05 } },
+    visible: { opacity: 1, transition: { staggerChildren: 0.05 } },
   };
   const buttonVariants: Variants = {
-    hidden: { opacity: 0, y: 8 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.25, 1, 0.5, 1] } }
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { duration: 0.4, ease: "easeOut" } }
   };
 
-  // Jab tak client mount na ho, tab tak safe fallback render karein taaki hydration error na aaye
   if (!mounted) {
     return <div className="min-h-screen bg-[#F8F5F0]" />;
   }
@@ -123,10 +129,14 @@ export default function Shop() {
         {/* Page Header */}
         {hasBgImage ? (
           <div className="relative w-full h-[220px] md:h-[300px] mb-8 rounded-sm overflow-hidden flex items-center justify-center text-center shadow-md">
-            <img
+            <Image
               src={heroBg}
               alt="Collections Header"
-              className="absolute inset-0 w-full h-full object-cover"
+              fill
+              priority
+              quality={85}
+              sizes="100vw"
+              className="object-cover"
             />
             <div className="absolute inset-0 bg-[#241F1A]/55 backdrop-blur-[1px]"></div>
             
@@ -200,26 +210,31 @@ export default function Shop() {
                   <motion.div 
                     key={item.id} 
                     layout 
-                    initial={{ opacity: 0, scale: 0.95, y: 25 }} 
-                    animate={{ opacity: 1, scale: 1, y: 0 }} 
-                    exit={{ opacity: 0, scale: 0.9, y: 20 }} 
+                    initial={{ opacity: 0 }} 
+                    animate={{ opacity: 1 }} 
+                    exit={{ opacity: 0 }} 
                     transition={{ 
-                      duration: 0.7, 
-                      delay: index * 0.05, 
-                      ease: [0.25, 1, 0.5, 1] 
+                      duration: 0.5, 
+                      delay: index * 0.03, 
+                      ease: "easeOut" 
                     }}
                     className="flex flex-col group h-full"
                   >
                     <Link href={`/product/${item.id}`} className="flex flex-col h-full w-full cursor-pointer">
                       <div className="aspect-[4/5] w-full bg-[#EBE5DA] mb-4 overflow-hidden relative rounded-sm shadow-sm">
                         {displayImg && (
-                          <img 
+                          <Image 
                             src={displayImg} 
                             alt={item.name} 
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[1.5s] opacity-95 group-hover:opacity-100" 
+                            fill
+                            priority={index < 4}
+                            loading={index < 4 ? "eager" : "lazy"}
+                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+                            quality={85}
+                            className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out" 
                           />
                         )}
-                        <div className="absolute inset-x-0 bottom-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                        <div className="absolute inset-x-0 bottom-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10">
                           <div className="w-full block text-center bg-white/90 backdrop-blur-sm text-[#3A332C] py-3 text-xs tracking-[0.2em] uppercase font-semibold hover:bg-[#3A332C] hover:text-white transition-colors duration-300">
                             View Details
                           </div>
@@ -229,7 +244,10 @@ export default function Shop() {
                       <div className="flex flex-col items-center text-center mt-auto space-y-1">
                         <span className="text-[11px] text-[#C19A6B] uppercase tracking-[0.1em]">{item.category}</span>
                         <span className="text-base md:text-lg text-[#3A332C] font-serif font-medium leading-tight line-clamp-1">{item.name}</span>
-                        <span className="text-sm text-[#6B6054] tracking-wider font-medium">{item.price}</span>
+                        {/* 🌟 Dynamic Currency Price Format */}
+                        <span className="text-sm text-[#6B6054] tracking-wider font-medium">
+                          {formatPrice(item.price, 1)}
+                        </span>
                       </div>
                     </Link>
                   </motion.div>
