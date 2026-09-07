@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
+import Image from "next/image";
 
-// 🌟 केवल प्योर फेड-इन (कोई स्लाइड नहीं)
 function ScrollFadeImage({
   src,
   alt,
@@ -16,19 +16,26 @@ function ScrollFadeImage({
   className?: string;
   fetchPriority?: "high" | "low" | "auto";
 }) {
+  const [loaded, setLoaded] = useState(false);
+
+  if (!src) return null;
+
   return (
-    <motion.img
-      src={src}
-      alt={alt}
-      loading={fetchPriority === "high" ? "eager" : "lazy"}
-      decoding="async"
-      fetchPriority={fetchPriority}
-      initial={{ opacity: 0 }}
-      whileInView={{ opacity: 1 }}
-      viewport={{ once: true, margin: "-20px" }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
-      className={className}
-    />
+    <div className={`relative w-full h-full overflow-hidden ${className}`}>
+      <Image
+        src={src}
+        alt={alt}
+        fill
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+        priority={fetchPriority === "high"}
+        loading={fetchPriority === "high" ? "eager" : "lazy"}
+        quality={80}
+        onLoad={() => setLoaded(true)}
+        className={`object-cover transition-opacity duration-500 ease-out ${
+          loaded ? "opacity-100" : "opacity-0"
+        }`}
+      />
+    </div>
   );
 }
 
@@ -131,11 +138,14 @@ export default function Home() {
       <section className="relative w-full h-[95vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 w-full h-full bg-[#EBE5DA]">
           {siteData?.hero?.bgImage && (
-            <ScrollFadeImage 
-              src={siteData.hero.bgImage} 
-              alt="Handcrafted RugZora Interior" 
-              fetchPriority="high"
-              className="w-full h-full object-cover" 
+            <Image
+              src={siteData.hero.bgImage}
+              alt="RugZora Premium Living Room"
+              fill
+              priority // 🌟 Sabse pehle instant load karega
+              quality={85}
+              sizes="100vw"
+              className="object-cover opacity-85"
             />
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-[#F8F5F0] via-[#F8F5F0]/30 to-transparent"></div>
