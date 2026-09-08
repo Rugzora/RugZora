@@ -316,10 +316,15 @@ export default function SiteContentAdmin() {
         await deleteStorageImage(oldUrl);
       }
 
-      // 2. Nayi image ko WebP me convert karein
-      setStatusMsg(`Compressing & converting to WebP...`);
-      const optimizedFile = await compressAndConvertToWebP(file);
-      const fileName = `site-${Date.now()}-${Math.random().toString(36).substring(2, 7)}.webp`;
+     // 2. Nayi image ko WebP me convert karein
+     setStatusMsg(`Compressing & converting to WebP...`);
+     const optimizedFile = await compressAndConvertToWebP(file);
+
+     console.log(
+       `[CMS Upload] ${file.name} | Original: ${(file.size / 1024).toFixed(0)} KB -> Compressed: ${(optimizedFile.size / 1024).toFixed(0)} KB`
+     );
+
+     const fileName = `site-${Date.now()}-${Math.random().toString(36).substring(2, 7)}.webp`;
 
       setStatusMsg(`Uploading optimized WebP image...`);
 

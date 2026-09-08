@@ -6,11 +6,11 @@ export async function compressAndConvertToWebP(file: File): Promise<File> {
   }
 
   const options = {
-    maxSizeMB: 1.2,              // 🌟 1.2MB tak allow karein (rug ke barik dhage sharp rahenge)
-    maxWidthOrHeight: 2400,      // 🌟 2400px (4K/Retina displays par crisp texture ke liye)
+    maxSizeMB: 0.24,         // 1.2MB हटाकर 0.28MB (280KB) करें
+    maxWidthOrHeight: 1700,  // 1800px (ज़ूम के लिए काफ़ी शार्प)
     useWebWorker: true,
     fileType: "image/webp",
-    initialQuality: 0.90,        // 🌟 90% High Visual Fidelity (zero blurriness)
+    initialQuality: 0.78,    // 82% क्वालिटी
   };
 
   try {
@@ -20,7 +20,7 @@ export async function compressAndConvertToWebP(file: File): Promise<File> {
       type: "image/webp",
     });
   } catch (error) {
-    console.warn("Compression fallback to original:", error);
+    console.error("Compression error:", error);
     return file;
   }
 }

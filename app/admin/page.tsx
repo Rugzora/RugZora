@@ -211,29 +211,34 @@ export default function AdminUpload() {
     });
   };
 
-  // 🌟 Auto WebP Compress on Selection
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const selectedFiles = Array.from(e.target.files);
-      setStatusMsg("Optimizing & converting images to WebP...");
+// 🌟 Auto WebP Compress on Selection
+const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  if (e.target.files) {
+    const selectedFiles = Array.from(e.target.files);
+    setStatusMsg("Optimizing & converting images to WebP...");
 
-      const processedFiles: ImageFile[] = [];
+    const processedFiles: ImageFile[] = [];
 
-      for (const file of selectedFiles) {
-        const optimizedWebpFile = await compressAndConvertToWebP(file);
-        
-        processedFiles.push({
-          id: Math.random().toString(36).substring(2, 9),
-          file: optimizedWebpFile,
-          preview: URL.createObjectURL(optimizedWebpFile),
-          isExisting: false,
-        });
-      }
+    for (const file of selectedFiles) {
+      const optimizedWebpFile = await compressAndConvertToWebP(file);
 
-      setImages((prev) => [...prev, ...processedFiles]);
-      setStatusMsg("");
+      // 🌟 यहाँ पर लॉग जुड़ेगा
+      console.log(
+        `Image: ${file.name} | Original: ${(file.size / 1024).toFixed(0)} KB -> Compressed: ${(optimizedWebpFile.size / 1024).toFixed(0)} KB`
+      );
+      
+      processedFiles.push({
+        id: Math.random().toString(36).substring(2, 9),
+        file: optimizedWebpFile,
+        preview: URL.createObjectURL(optimizedWebpFile),
+        isExisting: false,
+      });
     }
-  };
+
+    setImages((prev) => [...prev, ...processedFiles]);
+    setStatusMsg("");
+  }
+};
 
   const handleDragStart = (e: React.DragEvent, position: number) => { dragItem.current = position; };
   const handleDragEnter = (e: React.DragEvent, position: number) => { dragOverItem.current = position; };
