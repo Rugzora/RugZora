@@ -43,7 +43,7 @@ export default function ProductPage() {
   const lightboxImageRef = useRef<HTMLImageElement>(null);
   const lightboxBackdropRef = useRef<HTMLDivElement>(null);
 
-  // ✅ Cart Status Listener (Navbar se item delete hote hi instant sync hoga)
+  // ✅ Cart Status Listener
   useEffect(() => {
     const checkCartStatus = () => {
       if (!product || !selectedVariant) return;
@@ -253,31 +253,69 @@ export default function ProductPage() {
     </div>
   );
 
+  const productImagesList = Array.isArray(product.images) && product.images.length > 0 
+    ? product.images 
+    : [product.image || ""];
+
+  const productSchema = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    image: productImagesList.filter(Boolean),
+    description: product.description || `Handcrafted ${product.name} carpet by RugZora.`,
+    brand: {
+      "@type": "Brand",
+      name: "RugZora",
+    },
+    offers: {
+      "@type": "Offer",
+      priceCurrency: "INR",
+      price: product.price ? product.price.toString().replace(/[^0-9.]/g, "") : "0",
+      availability: (product.stock_quantity ?? 1) > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      url: `https://rugzora.com/product/${product.id}`,
+    },
+  };
+
   return (
     <div className="bg-[#F8F5F0] pt-3 md:pt-4 pb-40 min-h-screen font-sans">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+      />
       
       <div className="w-full max-w-[1600px] mx-auto px-4 md:px-6 mb-16 md:mb-20">
         
-        {/* BIG HERO IMAGE WITH LEFT/RIGHT ARROWS */}
+        {/* 🌟 ZERO-LAG PRE-RENDERED BIG HERO IMAGE STACK */}
         <div 
           className="w-full h-[65vh] md:h-[85vh] bg-[#DFD8CC] overflow-hidden rounded-sm cursor-pointer group relative flex items-center justify-center shadow-md select-none"
           onClick={() => setIsLightboxOpen(true)}
         >
-          {activeImage && (
-            <Image 
-              key={activeImage}
-              src={activeImage} 
-              alt={product.name} 
-              fill
-              priority
-              sizes="(max-width: 768px) 100vw, 85vw"
-              quality={85}
-              className="object-cover transition-transform duration-[1.5s] group-hover:scale-105" 
-            />
-          )}
+          {productImagesList.map((img: string, idx: number) => {
+            const isCurrent = activeImage === img;
+            return (
+              <div
+                key={idx}
+                className={`absolute inset-0 w-full h-full transition-opacity duration-300 ease-out will-change-transform ${
+                  isCurrent ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
+                }`}
+                style={{ transform: "translateZ(0)" }}
+              >
+                <Image 
+                  src={img} 
+                  alt={`${product.name} - View ${idx + 1}`} 
+                  fill
+                  priority={idx === 0}
+                  loading={idx < 3 ? "eager" : "lazy"}
+                  sizes="(max-width: 768px) 100vw, (max-width: 1536px) 90vw, 1600px"
+                  quality={90}
+                  className="object-cover transition-transform duration-[1.5s] group-hover:scale-105 pointer-events-none" 
+                />
+              </div>
+            );
+          })}
 
           {/* 🌟 LEFT ARROW BUTTON */}
-          {Array.isArray(product.images) && product.images.length > 1 && (
+          {productImagesList.length > 1 && (
             <button
               type="button"
               onClick={(e) => handleNavigateImage("prev", e)}
@@ -291,7 +329,7 @@ export default function ProductPage() {
           )}
 
           {/* 🌟 RIGHT ARROW BUTTON */}
-          {Array.isArray(product.images) && product.images.length > 1 && (
+          {productImagesList.length > 1 && (
             <button
               type="button"
               onClick={(e) => handleNavigateImage("next", e)}
@@ -305,10 +343,10 @@ export default function ProductPage() {
           )}
         </div>
         
-        {/* THUMBNAILS (Instant response with native decoding) */}
-        {Array.isArray(product.images) && product.images.length > 1 && (
+        {/* THUMBNAILS (Instant switch on click) */}
+        {productImagesList.length > 1 && (
           <div className="flex flex-wrap justify-center gap-3 sm:gap-4 mt-6">
-            {product.images.map((img: string, idx: number) => (
+            {productImagesList.map((img: string, idx: number) => (
               <button 
                 key={idx} 
                 type="button" 
@@ -323,6 +361,7 @@ export default function ProductPage() {
                   src={img} 
                   fill
                   sizes="96px"
+                  quality={85}
                   className="object-cover pointer-events-none" 
                   alt={`Thumbnail view ${idx + 1}`}
                 />
@@ -331,24 +370,24 @@ export default function ProductPage() {
           </div>
         )}
 
-        {/* ETSY & WISHLIST CONTAINER (Full visibility without clipping) */}
-        <div className="flex flex-col items-end gap-4 mt-8 md:mt-10 px-2 sm:px-4">
+        {/* ETSY & WISHLIST CONTAINER */}
+        <div className="flex flex-row flex-wrap items-center justify-between sm:justify-end gap-3 sm:gap-4 mt-6 sm:mt-8 md:mt-10 px-2 sm:px-4">
           {product.show_etsy && product.etsy_url && (
             <a
               href={product.etsy_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center px-6 py-3 bg-[#F1641E] hover:bg-[#D95314] text-white text-xs uppercase tracking-[0.18em] font-bold rounded-sm transition-colors duration-300 shadow-sm"
+              className="inline-flex items-center justify-center px-5 py-2.5 sm:px-6 sm:py-3 bg-[#F1641E] hover:bg-[#D95314] text-white text-xs uppercase tracking-[0.15em] sm:tracking-[0.18em] font-bold rounded-sm transition-colors duration-300 shadow-sm"
             >
               View on Etsy
             </a>
           )}
 
-          {/* 🌟 Fully Visible Wishlist Heart Button */}
+          {/* Wishlist Heart Button */}
           <button 
             type="button"
             onClick={toggleWishlist}
-            className="inline-flex items-center gap-2.5 py-1.5 px-2 text-xs md:text-sm uppercase tracking-[0.15em] font-semibold transition-all duration-200 hover:opacity-80 focus:outline-none select-none"
+            className="inline-flex items-center gap-2 py-2 px-2 text-xs md:text-sm uppercase tracking-[0.15em] font-semibold transition-all duration-200 hover:opacity-80 focus:outline-none select-none min-h-[40px]"
           >
             {isWishlisted ? (
               <svg 
@@ -428,16 +467,16 @@ export default function ProductPage() {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 mb-4">
-              <div className="flex items-center justify-between border border-[#DFD8CC] rounded-sm px-4 py-3 sm:w-1/4 bg-[#F8F5F0]">
-                <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="text-[#6B6054] hover:text-[#C19A6B] px-3 text-xl font-medium select-none" aria-label="Decrease quantity">-</button>
-                <span className="text-[#3A332C] font-semibold text-lg select-none">{quantity}</span>
-                <button onClick={() => setQuantity(q => Math.min(q + 1, product.stock_quantity || 999))} className="text-[#6B6054] hover:text-[#C19A6B] px-3 text-xl font-medium select-none" aria-label="Increase quantity">+</button>
+              <div className="flex items-center justify-between border border-[#DFD8CC] rounded-sm px-4 py-2 sm:w-1/3 md:w-1/4 bg-[#F8F5F0]">
+                <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="text-[#6B6054] hover:text-[#C19A6B] w-10 h-10 flex items-center justify-center text-2xl font-medium select-none focus:outline-none" aria-label="Decrease quantity">-</button>
+                <span className="text-[#3A332C] font-semibold text-lg select-none px-2">{quantity}</span>
+                <button onClick={() => setQuantity(q => Math.min(q + 1, product.stock_quantity || 999))} className="text-[#6B6054] hover:text-[#C19A6B] w-10 h-10 flex items-center justify-center text-2xl font-medium select-none focus:outline-none" aria-label="Increase quantity">+</button>
               </div>
               
               <button 
                 onClick={handleAddToCart}
                 disabled={isAddingToCart || isInCart}
-                className={`flex-1 border-2 py-4 uppercase tracking-[0.15em] text-sm font-semibold transition-colors duration-300 rounded-sm disabled:opacity-90 ${
+                className={`flex-1 min-h-[50px] border-2 py-3.5 px-6 uppercase tracking-[0.15em] text-sm font-semibold transition-colors duration-300 rounded-sm disabled:opacity-90 flex items-center justify-center text-center ${
                   isInCart 
                     ? "border-emerald-600 bg-emerald-600 text-white cursor-default" 
                     : "border-[#3A332C] bg-[#3A332C] text-[#F8F5F0] hover:bg-transparent hover:text-[#3A332C]"
@@ -450,7 +489,7 @@ export default function ProductPage() {
             {product.is_customizable && (
               <Link 
                 href={`/product/${product.id}/customize`}
-                className="w-full border-2 border-[#C19A6B] text-[#C19A6B] py-4 uppercase tracking-[0.15em] text-sm font-semibold hover:bg-[#C19A6B] hover:text-white transition-colors duration-300 rounded-sm mb-6 flex items-center justify-center text-center"
+                className="w-full min-h-[50px] border-2 border-[#C19A6B] text-[#C19A6B] py-3.5 px-4 uppercase tracking-[0.15em] text-sm font-semibold hover:bg-[#C19A6B] hover:text-white transition-colors duration-300 rounded-sm mb-6 flex items-center justify-center text-center"
               >
                 Customise Product Yourself
               </Link>
@@ -570,8 +609,8 @@ export default function ProductPage() {
                                 src={displayImg} 
                                 alt={item.name} 
                                 fill
-                                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 250px"
-                                quality={80}
+                                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 350px"
+                                quality={88}
                                 className="object-cover group-hover:scale-105 transition-transform duration-[1.5s]" 
                               />
                             )}
@@ -606,9 +645,9 @@ export default function ProductPage() {
               </div>
               
               <div className="flex gap-4 pointer-events-auto">
-                {Array.isArray(product.images) && product.images.length > 1 && (
+                {productImagesList.length > 1 && (
                   <span className="text-sm font-medium bg-[#DFD8CC]/80 backdrop-blur-md px-4 py-2 rounded-full shadow-lg flex items-center">
-                    {getLightboxIndex() + 1} / {product.images.length}
+                    {getLightboxIndex() + 1} / {productImagesList.length}
                   </span>
                 )}
                 <button onClick={(e) => { e.stopPropagation(); setIsLightboxOpen(false); }} className="w-12 h-12 flex items-center justify-center rounded-full bg-[#DFD8CC]/80 backdrop-blur-md hover:bg-[#C19A6B] hover:text-white transition-colors shadow-lg" aria-label="Close Viewer">
@@ -623,7 +662,7 @@ export default function ProductPage() {
                 className="max-w-[90%] max-h-[85vh] object-contain shadow-[0_0_80px_rgba(0,0,0,0.4)] rounded-sm select-none"
                 style={{ willChange: 'transform', transformOrigin: '0 0' }} onClick={(e) => e.stopPropagation()} 
               />
-              {Array.isArray(product.images) && product.images.length > 1 && (
+              {productImagesList.length > 1 && (
                 <>
                   <button onClick={(e) => navigateLightbox(-1, e)} className="absolute left-6 top-1/2 -translate-y-1/2 w-16 h-16 flex items-center justify-center rounded-full bg-[#DFD8CC]/80 hover:bg-[#C19A6B] transition-all text-[#3A332C] hover:text-white group z-20 shadow-xl backdrop-blur-md">
                     <svg className="w-8 h-8 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" /></svg>

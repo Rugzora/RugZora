@@ -4,7 +4,9 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
 import Image from "next/image";
+import Link from "next/link";
 
+// 🌟 Ultra-Smooth Single-Run Slide + Fade Image Component (Lag-Free & GPU Accelerated)
 function ScrollFadeImage({
   src,
   alt,
@@ -19,18 +21,25 @@ function ScrollFadeImage({
   if (!src) return null;
 
   return (
-    <div className={`relative w-full h-full overflow-hidden ${className}`}>
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-40px" }}
+      transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+      className="relative w-full h-full overflow-hidden will-change-transform"
+      style={{ transform: "translateZ(0)" }}
+    >
       <Image
         src={src}
         alt={alt}
         fill
-        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 70vw, 50vw"
+        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
         priority={fetchPriority === "high"}
         loading={fetchPriority === "high" ? "eager" : "lazy"}
-        quality={80}
-        className="object-cover"
+        quality={88}
+        className={`object-cover ${className}`}
       />
-    </div>
+    </motion.div>
   );
 }
 
@@ -99,6 +108,12 @@ const defaultSiteData = {
     bgImage: "https://qjpjltaiazwybhsmnkve.supabase.co/storage/v1/object/public/product-images/site-1788885350236-wdp51.webp"
   },
   ethos: defaultEthos,
+  curatedGallery: {
+    tag: "Visual Perspectives",
+    title: "Artisan Silhouettes in Motion",
+    desc: "A closer look at texture, depth, and the natural drape of hand-braided rPET cords.",
+    images: ["", "", "", ""]
+  },
   story: {
     tag: "The Heritage of Bhadohi",
     image: "https://qjpjltaiazwybhsmnkve.supabase.co/storage/v1/object/public/product-images/site-1788886800397-5cw5v.webp",
@@ -124,7 +139,8 @@ const defaultSiteData = {
   spaces: defaultSpaces,
   bespoke: {
     mainImage: "https://qjpjltaiazwybhsmnkve.supabase.co/storage/v1/object/public/product-images/site-1788886447966-jvzf4.webp",
-    detailImage: "https://qjpjltaiazwybhsmnkve.supabase.co/storage/v1/object/public/product-images/site-1788886455661-3etz7.webp"
+    detailImage: "https://qjpjltaiazwybhsmnkve.supabase.co/storage/v1/object/public/product-images/site-1788886455661-3etz7.webp",
+    btnLink: "/customize"
   },
   promise: {
     image: "https://qjpjltaiazwybhsmnkve.supabase.co/storage/v1/object/public/product-images/site-1788885376486-16q3c.webp",
@@ -138,7 +154,6 @@ export default function Home() {
   const [siteData, setSiteData] = useState<any>(defaultSiteData);
 
   useEffect(() => {
-    // 1. Client mount hone ke baad localStorage se sync karein (Hydration safe)
     try {
       const cached = localStorage.getItem("rz_home_content");
       if (cached) {
@@ -148,7 +163,6 @@ export default function Home() {
       console.error(e);
     }
 
-    // 2. Supabase se fresh content fetch karein
     async function getDynamicContent() {
       try {
         const { data, error } = await supabase
@@ -180,15 +194,23 @@ export default function Home() {
       <section className="relative w-full h-[95vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 w-full h-full bg-[#EBE5DA]">
           {siteData?.hero?.bgImage && (
-            <Image
-              src={siteData.hero.bgImage}
-              alt="RugZora Premium Living Room"
-              fill
-              priority
-              quality={80}
-              sizes="100vw"
-              className="object-cover opacity-85"
-            />
+            <motion.div
+              initial={{ opacity: 0, scale: 1.05 }}
+              animate={{ opacity: 0.85, scale: 1 }}
+              transition={{ duration: 1.2, ease: "easeOut" }}
+              className="relative w-full h-full will-change-transform"
+              style={{ transform: "translateZ(0)" }}
+            >
+              <Image
+                src={siteData.hero.bgImage}
+                alt="RugZora Premium Living Room"
+                fill
+                priority
+                quality={90}
+                sizes="100vw"
+                className="object-cover"
+              />
+            </motion.div>
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-[#F8F5F0] via-[#F8F5F0]/30 to-transparent"></div>
         </div>
@@ -234,11 +256,11 @@ export default function Home() {
           )}
 
           {/* Symmetrical Action Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-5 mt-4">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-5 mt-4 w-full max-w-xl mx-auto px-2">
             {siteData?.hero?.ctaText && (
               <a 
                 href={siteData?.hero?.ctaLink || "/collections"} 
-                className="w-full sm:w-80 h-14 flex items-center justify-center bg-[#3A332C] text-[#F8F5F0] text-xs tracking-[0.18em] uppercase hover:bg-[#C19A6B] hover:text-white transition duration-500 shadow-xl font-semibold px-6 text-center whitespace-nowrap"
+                className="w-full sm:flex-1 min-h-[52px] py-4 px-4 sm:px-6 flex items-center justify-center bg-[#3A332C] text-[#F8F5F0] text-xs tracking-[0.14em] sm:tracking-[0.18em] uppercase hover:bg-[#C19A6B] hover:text-white transition duration-300 shadow-xl font-semibold text-center rounded-sm"
               >
                 {siteData.hero.ctaText}
               </a>
@@ -246,10 +268,10 @@ export default function Home() {
 
             <a 
               href="/process" 
-              className="w-full sm:w-80 h-14 flex items-center justify-center bg-white/90 backdrop-blur-md text-[#3A332C] border border-[#DFD8CC] text-xs tracking-[0.18em] uppercase hover:bg-[#3A332C] hover:text-white hover:border-[#3A332C] transition duration-500 shadow-md font-semibold px-6 text-center whitespace-nowrap"
+              className="w-full sm:flex-1 min-h-[52px] py-4 px-4 sm:px-6 flex items-center justify-center bg-white/90 backdrop-blur-md text-[#3A332C] border border-[#DFD8CC] text-xs tracking-[0.14em] sm:tracking-[0.18em] uppercase hover:bg-[#3A332C] hover:text-white hover:border-[#3A332C] transition duration-300 shadow-md font-semibold text-center rounded-sm"
             >
               <span>See What We Do When You Order</span>
-              <span className="ml-2 text-sm">→</span>
+              <span className="ml-1.5 text-sm shrink-0">→</span>
             </a>
           </div>
         </div>
@@ -285,6 +307,69 @@ export default function Home() {
         </div>
       </section>
 
+      {/* 🌟 2.5 CURATED VISUAL GALLERY (IMAGE BLANKS WITH SLIDE ANIMATION) */}
+      <section className="w-full max-w-[1400px] mx-auto px-6 py-24 border-b border-[#EBE5DA]">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-4"
+        >
+          <div>
+            <span className="text-[#C19A6B] uppercase tracking-[0.2em] font-semibold text-xs mb-3 block">
+              {siteData?.curatedGallery?.tag || "Visual Perspectives"}
+            </span>
+            <h2 className="text-3xl md:text-4xl font-serif text-[#3A332C]">
+              {siteData?.curatedGallery?.title || "Artisan Silhouettes in Motion"}
+            </h2>
+          </div>
+          <p className="text-sm text-[#7A7065] font-light max-w-md">
+            {siteData?.curatedGallery?.desc || "A closer look at texture, depth, and the natural drape of hand-braided rPET cords."}
+          </p>
+        </motion.div>
+
+        {/* 4 Image Slots (Masonry/Mosaic Balance) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[0, 1, 2, 3].map((idx) => {
+            const raw = siteData?.curatedGallery?.images?.[idx];
+            const imgUrl = typeof raw === "string" && raw.trim().length > 0 ? raw : raw?.url || "";
+
+            return (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: idx * 0.1, ease: [0.22, 1, 0.36, 1] }}
+                className="aspect-[4/5] bg-[#EBE5DA] rounded-sm overflow-hidden relative group border border-[#DFD8CC] shadow-sm flex items-center justify-center will-change-transform"
+                style={{ transform: "translateZ(0)" }}
+              >
+                {imgUrl ? (
+                  <ScrollFadeImage
+                    src={imgUrl}
+                    alt={`Curated Frame ${idx + 1}`}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center p-6 text-center text-[#8C7A63]">
+                    <div className="w-10 h-10 rounded-full border border-dashed border-[#C19A6B] flex items-center justify-center mb-3">
+                      <span className="text-[#C19A6B] text-lg font-light">+</span>
+                    </div>
+                    <span className="text-[11px] uppercase tracking-wider font-semibold">
+                      Spotlight Frame #{idx + 1}
+                    </span>
+                    <span className="text-[9px] text-[#A89F91] mt-1 uppercase tracking-widest font-mono">
+                      Empty Slot
+                    </span>
+                  </div>
+                )}
+              </motion.div>
+            );
+          })}
+        </div>
+      </section>
+
       {/* 3. SPLIT STORY - The Bhadohi Heritage */}
       <section className="w-full max-w-[1400px] mx-auto px-6 py-24 border-b border-[#EBE5DA]">
         <div className="flex flex-col md:flex-row items-center gap-20">
@@ -313,7 +398,7 @@ export default function Home() {
               <ScrollFadeImage 
                 src={siteData.story.image} 
                 alt="Bespoke Chunky Braided Rug" 
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" 
+                className="group-hover:scale-105 transition-transform duration-700 ease-out" 
               />
             ) : (
               <span className="text-xs uppercase text-[#8C7A63] tracking-widest font-semibold">No Image Configured</span>
@@ -339,7 +424,7 @@ export default function Home() {
           </p>
         </motion.div>
 
-        <div className="max-w-[1400px] mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-10 items-start">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10 items-stretch">
           {(siteData?.silhouettes || defaultSilhouettes).map((item: any, index: number) => {
             const silhouetteImg = typeof item.img === "string" ? item.img : item.img?.url || defaultSilhouettes[index]?.img;
             const isCenterCard = index === 1;
@@ -351,15 +436,15 @@ export default function Home() {
                 whileInView={{ opacity: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
-                className={`bg-[#F8F5F0] p-8 shadow-sm hover:shadow-2xl transition-all duration-300 group flex flex-col h-[600px] ${
-                  isCenterCard ? "md:-translate-y-12 shadow-md" : ""
+                className={`bg-[#F8F5F0] p-6 sm:p-8 shadow-sm hover:shadow-2xl transition-all duration-300 group flex flex-col min-h-[480px] sm:min-h-[540px] ${
+                  isCenterCard ? "lg:-translate-y-8 shadow-md" : ""
                 }`}
               >
                 <div className="flex-grow overflow-hidden relative mb-8 rounded-sm bg-[#DFD8CC] flex items-center justify-center">
                   {silhouetteImg ? (
                     <ScrollFadeImage 
                       src={silhouetteImg} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" 
+                      className="group-hover:scale-105 transition-transform duration-700 ease-out" 
                       alt={item.title} 
                     />
                   ) : (
@@ -408,7 +493,7 @@ export default function Home() {
               <ScrollFadeImage 
                 src={siteData.materialScience.img} 
                 alt="Micro-spun recycled yarn detail" 
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" 
+                className="group-hover:scale-105 transition-transform duration-700 ease-out" 
               />
             ) : (
               <span className="text-xs uppercase text-[#8C7A63] tracking-widest font-semibold">No Image Configured</span>
@@ -454,7 +539,7 @@ export default function Home() {
                   <ScrollFadeImage
                     src={imageUrl}
                     alt={`Braided texture swatch ${idx + 1}`}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                    className="group-hover:scale-105 transition-transform duration-500 ease-out"
                   />
                 ) : (
                   <span className="text-[10px] uppercase text-[#8C7A63] tracking-widest font-semibold">No Swatch</span>
@@ -492,7 +577,7 @@ export default function Home() {
                   <ScrollFadeImage
                     src={spaceImg}
                     alt={spaceItem?.title || "Living space"}
-                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                    className="group-hover:scale-105 transition-transform duration-700 ease-out"
                   />
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center text-xs uppercase text-[#8C7A63] font-semibold">No Space Image</div>
@@ -523,7 +608,6 @@ export default function Home() {
               <ScrollFadeImage 
                 src={siteData.bespoke.mainImage} 
                 alt={siteData?.bespoke?.title || "Custom RugZora Braided Floor Covering"} 
-                className="w-full h-full object-cover" 
               />
             ) : (
               <span className="text-xs uppercase text-[#8C7A63] tracking-widest font-semibold">No Main Bespoke Image</span>
@@ -552,19 +636,23 @@ export default function Home() {
                  <ScrollFadeImage 
                     src={siteData.bespoke.detailImage} 
                     alt="Close-up braided cord finish" 
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-500 ease-out" 
+                    className="hover:scale-105 transition-transform duration-500 ease-out" 
                  />
                ) : (
                  <span className="text-[10px] uppercase text-[#8C7A63] tracking-widest font-semibold">No Detail Image</span>
                )}
             </div>
 
-            <a 
-              href={siteData?.bespoke?.btnLink || "/collections"} 
-              className="w-full block text-center border border-[#3A332C] text-[#3A332C] py-4 text-xs tracking-[0.2em] uppercase hover:bg-[#3A332C] hover:text-[#F8F5F0] transition duration-300 font-semibold"
+            <Link 
+              href={
+                siteData?.bespoke?.btnLink && siteData.bespoke.btnLink !== "/collections"
+                  ? siteData.bespoke.btnLink
+                  : "/customize"
+              } 
+              className="w-full min-h-[48px] flex items-center justify-center text-center border border-[#3A332C] text-[#3A332C] py-3.5 px-4 text-xs tracking-[0.18em] uppercase hover:bg-[#3A332C] hover:text-[#F8F5F0] transition duration-300 font-semibold rounded-sm"
             >
               {siteData?.bespoke?.btnText || "Customize Your Rug"}
-            </a>
+            </Link>
           </motion.div>
         </div>
       </section>
@@ -619,7 +707,7 @@ export default function Home() {
             <ScrollFadeImage 
               src={siteData.promise.image} 
               alt="Artisanal RugZora Workshop" 
-              className="w-full h-full object-cover opacity-85" 
+              className="opacity-85" 
             />
           )}
           <div className="absolute inset-0 bg-[#241F1A]/85"></div>

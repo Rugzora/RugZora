@@ -6,11 +6,11 @@ export async function compressAndConvertToWebP(file: File): Promise<File> {
   }
 
   const options = {
-    maxSizeMB: 0.24,         // 1.2MB हटाकर 0.28MB (280KB) करें
-    maxWidthOrHeight: 1700,  // 1800px (ज़ूम के लिए काफ़ी शार्प)
+    maxSizeMB: 0.65,         // High fidelity: crisp threads without heavy bloat
+    maxWidthOrHeight: 2000,  // Sharp for 2K & Retina displays
     useWebWorker: true,
     fileType: "image/webp",
-    initialQuality: 0.78,    // 82% क्वालिटी
+    initialQuality: 0.88,    // 88% WebP preserves fine carpet weave details
   };
 
   try {

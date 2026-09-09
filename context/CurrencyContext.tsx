@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from "react";
 import { supabase } from "@/lib/supabase";
 
 type CurrencyContextType = {
@@ -17,14 +17,33 @@ const CurrencyContext = createContext<CurrencyContextType>({
   formatPrice: () => "",
 });
 
+const relativeRates: Record<string, number> = {
+  USD: 1.0,
+  EUR: 0.92,
+  GBP: 0.79,
+  CAD: 1.36,
+  AUD: 1.53,
+};
+
+const symbols: Record<string, string> = {
+  USD: "$",
+  EUR: "€",
+  GBP: "£",
+  CAD: "CA$",
+  AUD: "AU$",
+  INR: "₹",
+};
+
 export const CurrencyProvider = ({ children }: { children: React.ReactNode }) => {
   const [currency, setCurrencyState] = useState("USD");
   const [usdRate, setUsdRate] = useState(83.5);
 
   useEffect(() => {
-    // 1. Initial LocalStorage Read
-    const saved = localStorage.getItem("user_currency") || "USD";
-    setCurrencyState(saved);
+    // 1. Initial LocalStorage Read safely
+    try {
+      const saved = localStorage.getItem("user_currency") || "USD";
+      setCurrencyState(saved);
+    } catch (e) {}
 
     // 2. Fetch Rate from Supabase
     const fetchRate = async () => {
@@ -36,12 +55,14 @@ export const CurrencyProvider = ({ children }: { children: React.ReactNode }) =>
     fetchRate();
   }, []);
 
-  const setCurrency = (code: string) => {
+  const setCurrency = useCallback((code: string) => {
     setCurrencyState(code);
-    localStorage.setItem("user_currency", code);
-  };
+    try {
+      localStorage.setItem("user_currency", code);
+    } catch (e) {}
+  }, []);
 
-  const formatPrice = (inrPrice: any, qty: number = 1): string => {
+  const formatPrice = useCallback((inrPrice: any, qty: number = 1): string => {
     if (!inrPrice && inrPrice !== 0) return "Price on Request";
     const cleaned = inrPrice.toString().replace(/[^0-9.]/g, "");
     const numericInr = parseFloat(cleaned);
@@ -53,32 +74,20 @@ export const CurrencyProvider = ({ children }: { children: React.ReactNode }) =>
       return `₹${Math.round(totalInr).toLocaleString("en-IN")}`;
     }
 
-    const relativeRates: Record<string, number> = {
-      USD: 1.0,
-      EUR: 0.92,
-      GBP: 0.79,
-      CAD: 1.36,
-      AUD: 1.53,
-    };
-
-    const symbols: Record<string, string> = {
-      USD: "$",
-      EUR: "€",
-      GBP: "£",
-      CAD: "CA$",
-      AUD: "AU$",
-      INR: "₹",
-    };
-
     const targetMultiplier = relativeRates[currency] || 1.0;
     const priceInUSD = totalInr / (usdRate || 83.5);
     const finalConverted = Math.round(priceInUSD * targetMultiplier);
 
     return `${symbols[currency] || "$"}${finalConverted.toLocaleString()}`;
-  };
+  }, [currency, usdRate]);
+
+  const contextValue = useMemo(
+    () => ({ currency, usdRate, setCurrency, formatPrice }),
+    [currency, usdRate, setCurrency, formatPrice]
+  );
 
   return (
-    <CurrencyContext.Provider value={{ currency, usdRate, setCurrency, formatPrice }}>
+    <CurrencyContext.Provider value={contextValue}>
       {children}
     </CurrencyContext.Provider>
   );

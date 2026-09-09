@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Image from "next/image";
 import { supabase } from "@/lib/supabase";
 import { motion } from "framer-motion";
 
@@ -167,7 +168,16 @@ export default function CustomizePage() {
             </p>
             
             <div className="aspect-square bg-[#EBE5DA] rounded-sm overflow-hidden shadow-inner relative mb-8">
-              <img src={product.images?.[0]} alt="Preview" className="w-full h-full object-cover mix-blend-multiply opacity-80" />
+              {product.images?.[0] && (
+                <Image 
+                  src={product.images[0]} 
+                  alt={product.name || "Preview"} 
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 500px"
+                  quality={80}
+                  className="object-cover mix-blend-multiply opacity-80" 
+                />
+              )}
               {/* Dynamic Overlay Box just for visual feedback */}
               <div 
                 className="absolute inset-4 border-2 border-dashed border-white/60 flex items-center justify-center backdrop-blur-sm bg-black/10 transition-all duration-500"

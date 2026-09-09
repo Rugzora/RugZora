@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Playfair_Display } from "next/font/google";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "../lib/supabase"; 
@@ -13,12 +13,31 @@ const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-playfa
 
 export default function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
+
+  // 🌟 User Auth State
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   // 🌟 Global Currency Context
   const { currency: selectedCurrency, setCurrency, formatPrice } = useCurrency();
 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
@@ -117,18 +136,109 @@ export default function Navbar() {
 
   useEffect(() => {
     setIsSearchOpen(false);
+    setIsMobileMenuOpen(false);
     setSearchQuery("");
   }, [pathname]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        if (isSearchOpen) {
+          setIsSearchOpen(false);
+          setSearchQuery("");
+        }
+        if (isCartOpen) setIsCartOpen(false);
+        if (isCurrencyDropdownOpen) setIsCurrencyDropdownOpen(false);
+        if (isMobileMenuOpen) setIsMobileMenuOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isSearchOpen, isCartOpen, isCurrencyDropdownOpen, isMobileMenuOpen]);
+
+  // 🌟 Global Mobile Swipe Gesture: Left-to-Right swipe opens sidebar on any page
+  useEffect(() => {
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchStartTime = 0;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches.length !== 1) return;
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+      touchStartTime = Date.now();
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      if (e.changedTouches.length !== 1) return;
+      const touchEndX = e.changedTouches[0].clientX;
+      const touchEndY = e.changedTouches[0].clientY;
+      const touchDuration = Date.now() - touchStartTime;
+
+      const deltaX = touchEndX - touchStartX;
+      const deltaY = touchEndY - touchStartY;
+
+      // Only on mobile/tablet screens
+      if (typeof window !== "undefined" && window.innerWidth >= 1024) return;
+
+      // Only handle swipes that complete within 700ms
+      if (touchDuration > 700) return;
+
+      // Horizontal gesture check (deltaX must exceed deltaY)
+      const isHorizontal = Math.abs(deltaX) > Math.abs(deltaY) * 1.2;
+      if (!isHorizontal) return;
+
+      // 1. Swipe Left-to-Right: Open sidebar if swipe started on left side of screen
+      if (deltaX > 40 && touchStartX < window.innerWidth * 0.65) {
+        setIsMobileMenuOpen(true);
+      }
+
+      // 2. Swipe Right-to-Left: Close sidebar if already open
+      if (deltaX < -40) {
+        setIsMobileMenuOpen((open) => (open ? false : open));
+      }
+    };
+
+    window.addEventListener("touchstart", handleTouchStart, { passive: true });
+    window.addEventListener("touchend", handleTouchEnd, { passive: true });
+
+    return () => {
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, []);
 
   return (
     <>
       <header ref={headerRef} className="w-full bg-[#F8F5F0]/95 backdrop-blur-md border-b border-[#EBE5DA] sticky top-0 z-50 transition-all duration-300">
         <div className="max-w-[1600px] mx-auto px-6 py-4 flex items-center justify-between relative bg-transparent z-20">
           
-          <Link href="/" className="flex items-center space-x-3 group cursor-pointer">
-            <Image src="/logo.png" alt="RugZora Logo" width={40} height={40} priority className="object-contain rounded-sm" />
-            <span className={`text-2xl md:text-3xl tracking-wider text-[#3A332C] font-semibold ${playfair.className}`}>RugZora</span>
-          </Link>
+          <button
+            type="button"
+            onClick={(e) => {
+              if (typeof window !== "undefined" && window.innerWidth < 1024) {
+                e.preventDefault();
+                setIsMobileMenuOpen((prev) => !prev);
+              } else {
+                router.push("/");
+              }
+            }}
+            className="flex items-center space-x-2 sm:space-x-3 group cursor-pointer shrink-0 text-left focus:outline-none select-none"
+            aria-label="RugZora Logo - Tap to open menu on mobile"
+            title="RugZora"
+          >
+            <Image
+              src="/logo.png"
+              alt="RugZora Logo"
+              width={36}
+              height={36}
+              priority
+              className="object-contain rounded-sm sm:w-10 sm:h-10 transition-transform active:scale-95 duration-150"
+            />
+            <span className={`text-xl sm:text-2xl md:text-3xl tracking-wider text-[#3A332C] font-semibold ${playfair.className}`}>
+              RugZora
+            </span>
+          </button>
           
           <nav className="hidden lg:flex space-x-8 text-[12px] tracking-[0.15em] font-medium uppercase">
             {navLinks.map((link) => {
@@ -142,21 +252,24 @@ export default function Navbar() {
             })}
           </nav>
           
-          <div className="flex items-center space-x-6 text-[#6B6054]">
+          <div className="flex items-center space-x-2.5 sm:space-x-4 md:space-x-6 text-[#6B6054]">
 
-            {/* ADMIN BUTTON */}
-            <div className="hidden sm:flex items-center gap-2 mr-2">
+            {/* ADMIN BUTTON (Desktop/Tablet) */}
+            <div className="hidden sm:flex items-center gap-2 mr-1">
               <Link
                 href="/admin"
-                className="px-3 py-1 text-[11px] uppercase tracking-widest font-semibold text-[#3A332C] border border-[#DFD8CC] hover:border-[#C19A6B] hover:text-[#C19A6B] rounded-sm transition-colors"
+                className="px-2.5 py-1 text-[11px] uppercase tracking-widest font-semibold text-[#3A332C] border border-[#DFD8CC] hover:border-[#C19A6B] hover:text-[#C19A6B] rounded-sm transition-colors"
               >
                 Admin
               </Link>
             </div>
             
-            {/* CURRENCY SWITCHER */}
-            <div className="relative">
-              <button onClick={() => setIsCurrencyDropdownOpen(!isCurrencyDropdownOpen)} className="flex items-center space-x-1 text-sm font-semibold hover:text-[#C19A6B] transition-colors">
+            {/* CURRENCY SWITCHER (Desktop/Tablet) */}
+            <div className="relative hidden sm:block">
+              <button 
+                onClick={() => setIsCurrencyDropdownOpen(!isCurrencyDropdownOpen)} 
+                className="flex items-center space-x-1 text-sm font-semibold hover:text-[#C19A6B] transition-colors"
+              >
                 <span>{selectedCurrency}</span>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
               </button>
@@ -174,23 +287,48 @@ export default function Navbar() {
               </AnimatePresence>
             </div>
 
-            <button onClick={() => { setIsSearchOpen(!isSearchOpen); if (isSearchOpen) setSearchQuery(""); }} className={`${isSearchOpen ? "text-[#C19A6B]" : "hover:text-[#C19A6B]"} transition-colors`} aria-label="Search">
+            <button 
+              onClick={() => { setIsSearchOpen(!isSearchOpen); if (isSearchOpen) setSearchQuery(""); }} 
+              className={`${isSearchOpen ? "text-[#C19A6B]" : "hover:text-[#C19A6B]"} transition-colors p-1`}
+              aria-label="Search"
+            >
               {isSearchOpen ? <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" /></svg> : <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>}
             </button>
             
-            <Link href="/wishlist" className="hover:text-[#C19A6B] transition-colors" aria-label="Wishlist">
+            {/* USER ACCOUNT BUTTON */}
+            <Link
+              href={user ? "/account" : "/login"}
+              className="hover:text-[#C19A6B] transition-colors relative flex items-center p-1"
+              aria-label={user ? "My Account" : "Sign In / Register"}
+              title={user ? "My Account" : "Sign In / Register"}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
+                />
+              </svg>
+              {user && (
+                <span className="absolute top-0 right-0 w-2 h-2 bg-[#C19A6B] rounded-full ring-2 ring-[#F8F5F0]" />
+              )}
+            </Link>
+
+            <Link href="/wishlist" className="hover:text-[#C19A6B] transition-colors p-1" aria-label="View Wishlist">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
             </Link>
 
             {/* CART BUTTON */}
-            <button onClick={() => setIsCartOpen(true)} className="hover:text-[#C19A6B] transition-colors flex items-center space-x-1 relative" aria-label="Cart">
+            <button onClick={() => setIsCartOpen(true)} className="hover:text-[#C19A6B] transition-colors flex items-center space-x-1 relative p-1" aria-label="Open Shopping Bag">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
               {cartItems.length > 0 && (
-                <span className="absolute -top-2 -right-2 bg-[#C19A6B] text-white text-[9px] font-bold w-4 h-4 flex items-center justify-center rounded-full">
+                <span className="absolute -top-1 -right-1 bg-[#C19A6B] text-white text-[9px] font-bold w-4 h-4 flex items-center justify-center rounded-full">
                   {cartItems.length}
                 </span>
               )}
             </button>
+
           </div>
         </div>
 
@@ -200,7 +338,15 @@ export default function Navbar() {
             <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="absolute top-full left-0 w-full bg-[#F8F5F0] border-b border-[#DFD8CC] shadow-xl overflow-hidden z-10">
               <div className="max-w-3xl mx-auto px-6 py-8">
                 <div className="relative">
-                  <input type="text" autoFocus value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search for carpets, colors, styles..." className="w-full bg-transparent border-b-2 border-[#3A332C] text-2xl md:text-3xl font-serif text-[#3A332C] placeholder-[#8C7A63]/50 focus:outline-none pb-3" />
+                  <input 
+                    type="text" 
+                    autoFocus 
+                    value={searchQuery} 
+                    onChange={(e) => setSearchQuery(e.target.value)} 
+                    placeholder="Search for carpets, colors, styles..." 
+                    aria-label="Search for carpets, colors, styles"
+                    className="w-full bg-transparent border-b-2 border-[#3A332C] text-2xl md:text-3xl font-serif text-[#3A332C] placeholder-[#8C7A63]/50 focus:outline-none pb-3" 
+                  />
                   {isSearching && <div className="absolute right-2 bottom-4 w-5 h-5 border-2 border-[#C19A6B] border-t-transparent rounded-full animate-spin"></div>}
                 </div>
 
@@ -235,6 +381,150 @@ export default function Navbar() {
           )}
         </AnimatePresence>
       </header>
+
+      {/* 🌟 MOBILE NAVIGATION DRAWER */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="fixed inset-0 z-[120] bg-black/40 backdrop-blur-sm lg:hidden"
+            />
+            <motion.div
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "tween", duration: 0.3, ease: "easeInOut" }}
+              className="fixed top-0 left-0 h-full w-4/5 max-w-sm bg-[#F8F5F0] z-[121] shadow-2xl flex flex-col border-r border-[#DFD8CC] lg:hidden"
+            >
+              {/* Mobile Drawer Header */}
+              <div className="p-6 border-b border-[#DFD8CC] flex items-center justify-between bg-white">
+                <div className="flex items-center space-x-3">
+                  <Image src="/logo.png" alt="RugZora Logo" width={32} height={32} className="object-contain rounded-sm" />
+                  <span className={`text-xl font-serif font-semibold text-[#3A332C] ${playfair.className}`}>RugZora</span>
+                </div>
+                <button
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="w-8 h-8 rounded-full bg-[#EBE5DA] flex items-center justify-center text-[#3A332C] hover:bg-[#C19A6B] hover:text-white transition-colors"
+                  aria-label="Close menu"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Mobile Drawer Links */}
+              <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                <div className="space-y-4">
+                  <span className="text-[10px] uppercase tracking-[0.25em] text-[#8C7A63] font-bold block">
+                    Explore Atelier
+                  </span>
+                  {navLinks.map((link) => (
+                    <Link
+                      key={link.name}
+                      href={link.href}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={`block text-lg font-serif transition-colors py-1 ${
+                        pathname === link.href ? "text-[#C19A6B] font-bold" : "text-[#3A332C] hover:text-[#C19A6B]"
+                      }`}
+                    >
+                      {link.name}
+                    </Link>
+                  ))}
+                  <Link
+                    href="/customize"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="block text-lg font-serif text-[#C19A6B] font-semibold py-1"
+                  >
+                    Bespoke Customizer Studio ★
+                  </Link>
+                </div>
+
+                <div className="pt-6 border-t border-[#DFD8CC] space-y-4">
+                  <span className="text-[10px] uppercase tracking-[0.25em] text-[#8C7A63] font-bold block">
+                    Account & Orders
+                  </span>
+                  {user ? (
+                    <div className="space-y-3">
+                      <Link
+                        href="/account"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="flex items-center gap-3 text-sm text-[#3A332C] font-semibold py-1"
+                      >
+                        <span>Patron Profile & Order History</span>
+                      </Link>
+                      <Link
+                        href="/wishlist"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="flex items-center gap-3 text-sm text-[#7A7065] hover:text-[#3A332C] py-1"
+                      >
+                        <span>Saved Wishlist ({cartItems.length > 0 ? "Saved" : "0"})</span>
+                      </Link>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-2.5">
+                      <Link
+                        href="/login"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="w-full text-center py-3 text-xs uppercase tracking-widest font-bold bg-[#3A332C] text-white rounded-sm"
+                      >
+                        Sign In
+                      </Link>
+                      <Link
+                        href="/signup"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="w-full text-center py-3 text-xs uppercase tracking-widest font-bold border border-[#3A332C] text-[#3A332C] rounded-sm"
+                      >
+                        Create Account
+                      </Link>
+                    </div>
+                  )}
+                </div>
+
+                {/* Currency in Mobile Menu */}
+                <div className="pt-6 border-t border-[#DFD8CC]">
+                  <span className="text-[10px] uppercase tracking-[0.25em] text-[#8C7A63] font-bold block mb-2.5">
+                    Currency: {selectedCurrency}
+                  </span>
+                  <div className="grid grid-cols-3 gap-2">
+                    {currencies.map((c) => (
+                      <button
+                        key={c.code}
+                        onClick={() => {
+                          handleCurrencyChange(c.code);
+                          setIsMobileMenuOpen(false);
+                        }}
+                        className={`py-2 px-1 text-xs uppercase font-bold border rounded-sm transition-colors ${
+                          selectedCurrency === c.code
+                            ? "border-[#C19A6B] bg-[#C19A6B] text-white"
+                            : "border-[#DFD8CC] bg-white text-[#3A332C]"
+                        }`}
+                      >
+                        {c.code}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Admin Shortcut in Mobile */}
+                <div className="pt-4 border-t border-[#DFD8CC]">
+                  <Link
+                    href="/admin"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="block text-center py-2.5 text-[11px] uppercase tracking-widest text-[#8C7A63] border border-[#DFD8CC] rounded-sm hover:border-[#C19A6B]"
+                  >
+                    Admin Dashboard
+                  </Link>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* 🌟 CART DRAWER */}
       <AnimatePresence>
@@ -292,7 +582,14 @@ export default function Navbar() {
                   <span>{formatPrice(cartSubtotalINR)}</span>
                 </div>
                 <p className="text-xs text-[#8C7A63] mb-4 text-center">Shipping & taxes calculated at checkout</p>
-                <button disabled={cartItems.length === 0} className="w-full bg-[#3A332C] text-[#F8F5F0] py-4 text-xs tracking-[0.2em] uppercase font-bold hover:bg-[#C19A6B] transition-colors rounded-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                <button
+                  disabled={cartItems.length === 0}
+                  onClick={() => {
+                    setIsCartOpen(false);
+                    router.push("/checkout");
+                  }}
+                  className="w-full bg-[#3A332C] text-[#F8F5F0] py-4 text-xs tracking-[0.2em] uppercase font-bold hover:bg-[#C19A6B] transition-colors rounded-sm disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                >
                   Checkout Now
                 </button>
               </div>

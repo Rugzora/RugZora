@@ -121,8 +121,8 @@ export default function Wishlist() {
                       src={item.image} 
                       alt={item.name} 
                       fill
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 300px"
-                      quality={80}
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
+                      quality={88}
                       className="object-cover group-hover:scale-105 transition-transform duration-[1.5s]" 
                     />
                   )}

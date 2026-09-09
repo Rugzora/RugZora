@@ -104,7 +104,7 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
                       alt={`Thumbnail ${idx}`} 
                       fill
                       sizes="80px"
-                      quality={70}
+                      quality={85}
                       className="object-cover" 
                     />
                   </button>
@@ -131,8 +131,8 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
                   alt={product.name} 
                   fill
                   priority
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  quality={85}
+                  sizes="(max-width: 1024px) 100vw, 800px"
+                  quality={90}
                   className="object-cover" 
                 />
               )}

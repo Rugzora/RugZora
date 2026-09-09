@@ -26,7 +26,6 @@ function ImageUploader({
     e.preventDefault();
     setIsDragging(false);
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      // 🌟 Purani image ki value pass karein
       onUpload(e.dataTransfer.files[0], onChange, value);
     }
   };
@@ -65,7 +64,6 @@ function ImageUploader({
                   className="hidden"
                   onChange={(e) => {
                     if (e.target.files?.[0]) {
-                      // 🌟 Purani image ki value pass karein
                       onUpload(e.target.files[0], onChange, value);
                     }
                   }}
@@ -102,7 +100,7 @@ function ImageUploader({
   );
 }
 
-// 🌟 Zero External Unsplash/Pexels URLs - Only User Uploaded Assets
+// 🌟 Default Configuration Data
 const defaultData: Record<string, any> = {
   home: {
     hero: {
@@ -118,11 +116,12 @@ const defaultData: Record<string, any> = {
       ctaLink: "/collections",
       bgImage: ""
     },
-    ethos: [
-      { title: "Japandi & Modern Boho", desc: "Warm neutral tones and marled textures designed to blend into Minimalist, Scandinavian, and Modern living spaces.", img: "" },
-      { title: "100% Reversible Architecture", desc: "Completely unbacked with identical texture on both sides. Flip your rug anytime to double its usable lifespan.", img: "" },
-      { title: "Reinforced Zigzag Craft", desc: "Hand-braided chunky cords spiraled and locked using heavy-duty zigzag machine stitching to eliminate edge curl.", img: "" }
-    ],
+    curatedGallery: {
+      tag: "Visual Perspectives",
+      title: "Artisan Silhouettes in Motion",
+      desc: "A closer look at texture, depth, and the natural drape of hand-braided rPET cords.",
+      images: ["", "", "", ""]
+    },
     story: {
       tag: "The Heritage of Bhadohi",
       title: "Centuries of Tradition. Reimagined with rPET.",
@@ -166,7 +165,7 @@ const defaultData: Record<string, any> = {
       mainImage: "",
       detailImage: "",
       btnText: "Customize Your Rug",
-      btnLink: "/collections"
+      btnLink: "/customize"
     },
     promise: {
       title: "Sustainable Braided Luxury. Straight from our Workshop in Bhadohi.",
@@ -310,21 +309,19 @@ export default function SiteContentAdmin() {
     setStatusMsg(`Optimizing "${file.name}" to WebP...`);
 
     try {
-      // 1. Agar koi purani image pehle se lagi hui thi, toh use Supabase storage se delete karein
       if (oldUrl) {
         setStatusMsg("Cleaning up old image from storage...");
         await deleteStorageImage(oldUrl);
       }
 
-     // 2. Nayi image ko WebP me convert karein
-     setStatusMsg(`Compressing & converting to WebP...`);
-     const optimizedFile = await compressAndConvertToWebP(file);
+      setStatusMsg(`Compressing & converting to WebP...`);
+      const optimizedFile = await compressAndConvertToWebP(file);
 
-     console.log(
-       `[CMS Upload] ${file.name} | Original: ${(file.size / 1024).toFixed(0)} KB -> Compressed: ${(optimizedFile.size / 1024).toFixed(0)} KB`
-     );
+      console.log(
+        `[CMS Upload] ${file.name} | Original: ${(file.size / 1024).toFixed(0)} KB -> Compressed: ${(optimizedFile.size / 1024).toFixed(0)} KB`
+      );
 
-     const fileName = `site-${Date.now()}-${Math.random().toString(36).substring(2, 7)}.webp`;
+      const fileName = `site-${Date.now()}-${Math.random().toString(36).substring(2, 7)}.webp`;
 
       setStatusMsg(`Uploading optimized WebP image...`);
 
@@ -352,6 +349,7 @@ export default function SiteContentAdmin() {
       setIsUploading(false);
     }
   };
+
   const handleSaveCurrentPage = async () => {
     setIsSaving(true);
     setStatusMsg(`Saving changes for ${activeTab.toUpperCase()}...`);
@@ -369,7 +367,6 @@ export default function SiteContentAdmin() {
 
       if (error) throw error;
 
-      // LocalStorage cache sync for instant rendering across all tabs
       if (typeof window !== "undefined") {
         try {
           localStorage.setItem(`rz_${activeTab}_content`, JSON.stringify(siteContent[activeTab]));
@@ -488,7 +485,7 @@ export default function SiteContentAdmin() {
     <div className="bg-[#F8F5F0] min-h-screen pt-20 pb-32 px-6 font-sans">
       <div className="max-w-5xl mx-auto">
         
-        {/* 🌟 1. INTERACTIVE LIVE SEARCH BAR (TOP) */}
+        {/* 🌟 1. INTERACTIVE LIVE SEARCH BAR */}
         <div ref={searchContainerRef} className="relative mb-6 z-40">
           <div className="relative flex items-center bg-white border border-[#DFD8CC] rounded-sm shadow-sm focus-within:border-[#C19A6B] focus-within:ring-2 focus-within:ring-[#C19A6B]/20 transition-all">
             <div className="pl-4 pr-2 text-[#8C7A63]">
@@ -756,57 +753,82 @@ export default function SiteContentAdmin() {
               </div>
             </div>
 
-            {/* THREE ETHOS CARDS */}
+            {/* 🌟 2. CURATED VISUAL PERSPECTIVES (4 SPOTLIGHT FRAMES) */}
             <div className="bg-white p-8 border border-[#EBE5DA] rounded-sm shadow-sm">
-              <h2 className="text-lg font-serif text-[#3A332C] mb-6 border-b border-[#DFD8CC] pb-3">2. Three Brand Ethos Cards</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {(currentContent.ethos || defaultData.home.ethos).map((card: any, idx: number) => (
-                  <div key={idx} className="border border-[#DFD8CC] p-4 bg-[#F8F5F0]/60 rounded-sm space-y-4">
+              <h2 className="text-lg font-serif text-[#3A332C] mb-6 border-b border-[#DFD8CC] pb-3">
+                2. Curated Visual Perspectives (4 Spotlight Frames)
+              </h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Section Tag</label>
+                  <input
+                    id="home-curatedGallery-tag"
+                    type="text"
+                    value={currentContent.curatedGallery?.tag || "Visual Perspectives"}
+                    onChange={(e) => updateField("curatedGallery", "tag", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-2.5 text-sm outline-none transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Section Title</label>
+                  <input
+                    id="home-curatedGallery-title"
+                    type="text"
+                    value={currentContent.curatedGallery?.title || "Artisan Silhouettes in Motion"}
+                    onChange={(e) => updateField("curatedGallery", "title", e.target.value)}
+                    className="w-full border border-[#DFD8CC] p-2.5 text-sm outline-none transition-all"
+                  />
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8C7A63] mb-2">Section Description</label>
+                <textarea
+                  id="home-curatedGallery-desc"
+                  rows={2}
+                  value={currentContent.curatedGallery?.desc || ""}
+                  onChange={(e) => updateField("curatedGallery", "desc", e.target.value)}
+                  placeholder="A closer look at texture, depth, and the natural drape..."
+                  className="w-full border border-[#DFD8CC] p-3 text-sm outline-none transition-all"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {[0, 1, 2, 3].map((idx) => (
+                  <div key={idx} className="border border-[#DFD8CC] p-4 bg-[#F8F5F0]/60 rounded-sm">
                     <ImageUploader
-                      label={`Card #${idx + 1} Image`}
-                      value={card.img}
+                      label={`Spotlight Frame #${idx + 1}`}
+                      value={
+                        typeof currentContent.curatedGallery?.images?.[idx] === "string"
+                          ? currentContent.curatedGallery.images[idx]
+                          : currentContent.curatedGallery?.images?.[idx]?.url || ""
+                      }
                       onChange={(url) => {
-                        const updated = [...(currentContent.ethos || defaultData.home.ethos)];
-                        updated[idx].img = url;
-                        setSiteContent((prev) => ({ ...prev, home: { ...prev.home, ethos: updated } }));
+                        const updated = [
+                          ...(currentContent.curatedGallery?.images || defaultData.home.curatedGallery.images),
+                        ];
+                        updated[idx] = url;
+                        setSiteContent((prev) => ({
+                          ...prev,
+                          home: {
+                            ...prev.home,
+                            curatedGallery: {
+                              ...prev.home?.curatedGallery,
+                              images: updated,
+                            },
+                          },
+                        }));
                       }}
                       onUpload={handleImageUpload}
                       isUploading={isUploading}
                     />
-                    <div>
-                      <label className="block text-[10px] uppercase font-bold text-[#8C7A63] mb-1">Title</label>
-                      <input
-                        id={`home-ethos-${idx}-title`}
-                        type="text"
-                        value={card.title}
-                        onChange={(e) => {
-                          const updated = [...(currentContent.ethos || defaultData.home.ethos)];
-                          updated[idx].title = e.target.value;
-                          setSiteContent((prev) => ({ ...prev, home: { ...prev.home, ethos: updated } }));
-                        }}
-                        className="w-full border border-[#DFD8CC] p-2 text-sm bg-white outline-none transition-all"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] uppercase font-bold text-[#8C7A63] mb-1">Description</label>
-                      <textarea
-                        id={`home-ethos-${idx}-desc`}
-                        rows={3}
-                        value={card.desc}
-                        onChange={(e) => {
-                          const updated = [...(currentContent.ethos || defaultData.home.ethos)];
-                          updated[idx].desc = e.target.value;
-                          setSiteContent((prev) => ({ ...prev, home: { ...prev.home, ethos: updated } }));
-                        }}
-                        className="w-full border border-[#DFD8CC] p-2 text-sm bg-white outline-none transition-all"
-                      />
-                    </div>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* STORY */}
+            {/* 3. STORY */}
             <div className="bg-white p-8 border border-[#EBE5DA] rounded-sm shadow-sm">
               <h2 className="text-lg font-serif text-[#3A332C] mb-6 border-b border-[#DFD8CC] pb-3">3. Heritage & Story Section</h2>
               <div className="space-y-6">
@@ -850,7 +872,7 @@ export default function SiteContentAdmin() {
               </div>
             </div>
 
-            {/* SILHOUETTES */}
+            {/* 4. SILHOUETTES */}
             <div className="bg-white p-8 border border-[#EBE5DA] rounded-sm shadow-sm">
               <h2 className="text-lg font-serif text-[#3A332C] mb-6 border-b border-[#DFD8CC] pb-3">4. Signature Silhouettes</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -923,7 +945,7 @@ export default function SiteContentAdmin() {
               </div>
             </div>
 
-            {/* MATERIAL SCIENCE */}
+            {/* 5. MATERIAL SCIENCE */}
             <div className="bg-white p-8 border border-[#EBE5DA] rounded-sm shadow-sm">
               <h2 className="text-lg font-serif text-[#3A332C] mb-6 border-b border-[#DFD8CC] pb-3">5. Material Science Section</h2>
               <div className="space-y-6">
@@ -967,8 +989,7 @@ export default function SiteContentAdmin() {
                     className="w-full border border-[#DFD8CC] p-3 text-sm outline-none transition-all"
                   />
                 </div>
-               {/* Material Science Side Image */}
-               <ImageUploader
+                <ImageUploader
                   label="Material Science Side Image"
                   value={currentContent.materialScience?.img || ""}
                   onChange={(url) => updateField("materialScience", "img", url)}
@@ -1038,7 +1059,7 @@ export default function SiteContentAdmin() {
               </div>
             </div>
 
-            {/* LIVING SPACES */}
+            {/* 7. LIVING SPACES */}
             <div className="bg-white p-8 border border-[#EBE5DA] rounded-sm shadow-sm">
               <h2 className="text-lg font-serif text-[#3A332C] mb-6 border-b border-[#DFD8CC] pb-3">7. Designed For Living Spaces</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -1111,7 +1132,7 @@ export default function SiteContentAdmin() {
               </div>
             </div>
 
-            {/* BESPOKE STUDIO SPOTLIGHT (TWO IMAGES CONTROL) */}
+            {/* 8. BESPOKE STUDIO SPOTLIGHT */}
             <div className="bg-white p-8 border border-[#EBE5DA] rounded-sm shadow-sm">
               <h2 className="text-lg font-serif text-[#3A332C] mb-6 border-b border-[#DFD8CC] pb-3">
                 8. Bespoke Studio Spotlight (Two Images & Content)
@@ -1294,7 +1315,6 @@ export default function SiteContentAdmin() {
         {/* --- TAB 3: OUR LEGACY --- */}
         {activeTab === "legacy" && (
           <div className="space-y-10">
-            {/* 1. HERO */}
             <div className="bg-white p-8 border border-[#EBE5DA] rounded-sm shadow-sm">
               <h2 className="text-lg font-serif text-[#3A332C] mb-6 border-b border-[#DFD8CC] pb-3">1. Cinematic Hero Section</h2>
               <div className="space-y-6">
@@ -1340,7 +1360,6 @@ export default function SiteContentAdmin() {
               </div>
             </div>
 
-            {/* 2. EDITORIAL INTRO */}
             <div className="bg-white p-8 border border-[#EBE5DA] rounded-sm shadow-sm">
               <h2 className="text-lg font-serif text-[#3A332C] mb-6 border-b border-[#DFD8CC] pb-3">2. Editorial Quote & Intro</h2>
               <div className="space-y-6">
@@ -1367,7 +1386,6 @@ export default function SiteContentAdmin() {
               </div>
             </div>
 
-            {/* 3. WORKSHOP & MACHINERY */}
             <div className="bg-white p-8 border border-[#EBE5DA] rounded-sm shadow-sm">
               <h2 className="text-lg font-serif text-[#3A332C] mb-6 border-b border-[#DFD8CC] pb-3">3. Workshop & Stitch Precision</h2>
               <div className="space-y-6">
@@ -1421,7 +1439,6 @@ export default function SiteContentAdmin() {
               </div>
             </div>
 
-            {/* 4. TALE OF TWO TEXTURES */}
             <div className="bg-white p-8 border border-[#EBE5DA] rounded-sm shadow-sm">
               <h2 className="text-lg font-serif text-[#3A332C] mb-6 border-b border-[#DFD8CC] pb-3">4. Tale of Two Textures (Two Pillars)</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -1448,7 +1465,6 @@ export default function SiteContentAdmin() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Pillar 1 */}
                 <div className="border border-[#DFD8CC] p-4 bg-[#F8F5F0]/60 rounded-sm space-y-4">
                   <span className="font-bold text-xs uppercase tracking-wider text-[#C19A6B]">Pillar 1 (Earthy)</span>
                   <div>
@@ -1490,7 +1506,6 @@ export default function SiteContentAdmin() {
                   />
                 </div>
 
-                {/* Pillar 2 */}
                 <div className="border border-[#DFD8CC] p-4 bg-[#F8F5F0]/60 rounded-sm space-y-4">
                   <span className="font-bold text-xs uppercase tracking-wider text-[#C19A6B]">Pillar 2 (Luxurious)</span>
                   <div>
@@ -1534,7 +1549,6 @@ export default function SiteContentAdmin() {
               </div>
             </div>
 
-            {/* 5. CALL TO ACTION */}
             <div className="bg-white p-8 border border-[#EBE5DA] rounded-sm shadow-sm">
               <h2 className="text-lg font-serif text-[#3A332C] mb-6 border-b border-[#DFD8CC] pb-3">5. Final Call To Action</h2>
               <div className="space-y-6">
@@ -1676,7 +1690,7 @@ export default function SiteContentAdmin() {
                     rows={3}
                     value={currentContent.header?.description || ""}
                     onChange={(e) => updateField("header", "description", e.target.value)}
-                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none focus:border-[#C19A6B] transition-all"
+                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none transition-all"
                   />
                 </div>
                 <div>
@@ -1686,7 +1700,7 @@ export default function SiteContentAdmin() {
                     type="text"
                     value={currentContent.header?.btnText || ""}
                     onChange={(e) => updateField("header", "btnText", e.target.value)}
-                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none focus:border-[#C19A6B] transition-all"
+                    className="w-full border border-[#DFD8CC] p-3 text-sm outline-none transition-all"
                   />
                 </div>
               </div>

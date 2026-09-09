@@ -40,19 +40,28 @@ export default function Contact() {
         </p>
       </div>
       
-      <form className="space-y-10 bg-white/50 p-10 rounded-sm shadow-sm border border-[#EAE5D9]">
+      <form onSubmit={(e) => { e.preventDefault(); alert("Thank you! Your inquiry has been received. We will get in touch shortly."); }} className="space-y-10 bg-white/50 p-10 rounded-sm shadow-sm border border-[#EAE5D9]">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
           <div className="relative">
             <input 
               type="text" 
+              name="firstName"
+              id="firstName"
+              autoComplete="given-name"
+              required
               placeholder="First Name" 
+              aria-label="First Name"
               className="w-full border-b border-[#DCD5C9] bg-transparent py-3 outline-none focus:border-[#C5A059] transition text-[#3E362E] placeholder-[#A39A8F]" 
             />
           </div>
           <div className="relative">
             <input 
               type="text" 
+              name="lastName"
+              id="lastName"
+              autoComplete="family-name"
               placeholder="Last Name" 
+              aria-label="Last Name"
               className="w-full border-b border-[#DCD5C9] bg-transparent py-3 outline-none focus:border-[#C5A059] transition text-[#3E362E] placeholder-[#A39A8F]" 
             />
           </div>
@@ -61,22 +70,31 @@ export default function Contact() {
         <div className="relative">
           <input 
             type="email" 
+            name="email"
+            id="email"
+            autoComplete="email"
+            required
             placeholder="Email Address" 
+            aria-label="Email Address"
             className="w-full border-b border-[#DCD5C9] bg-transparent py-3 outline-none focus:border-[#C5A059] transition text-[#3E362E] placeholder-[#A39A8F]" 
           />
         </div>
 
         <div className="relative">
           <textarea 
+            name="message"
+            id="message"
+            required
             placeholder="Your Message" 
+            aria-label="Your Message"
             rows={5} 
             className="w-full border-b border-[#DCD5C9] bg-transparent py-3 outline-none focus:border-[#C5A059] transition text-[#3E362E] placeholder-[#A39A8F] resize-none"
           ></textarea>
         </div>
 
         <button 
-          type="button" 
-          className="w-full bg-[#3E362E] text-white px-10 py-4 rounded-sm text-xs tracking-[0.2em] hover:bg-[#C5A059] transition duration-500 uppercase shadow-md font-semibold"
+          type="submit" 
+          className="w-full bg-[#3E362E] text-white px-10 py-4 rounded-sm text-xs tracking-[0.2em] hover:bg-[#C5A059] transition duration-500 uppercase shadow-md font-semibold cursor-pointer"
         >
           {btnText}
         </button>

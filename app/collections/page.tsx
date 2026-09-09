@@ -134,7 +134,7 @@ export default function Shop() {
               alt="Collections Header"
               fill
               priority
-              quality={85}
+              quality={90}
               sizes="100vw"
               className="object-cover"
             />
@@ -171,14 +171,14 @@ export default function Shop() {
           variants={containerVariants} 
           initial="hidden" 
           animate="visible" 
-          className="flex flex-wrap justify-center items-center gap-6 sm:gap-10 md:gap-14 mb-10 pb-3"
+          className="flex flex-wrap justify-center items-center gap-3 sm:gap-6 md:gap-10 lg:gap-14 mb-10 pb-3 px-2"
         >
           {categories.map((category) => (
             <motion.button
               variants={buttonVariants}
               key={category}
               onClick={() => setActiveCategory(category)}
-              className={`text-sm md:text-base tracking-[0.18em] uppercase pb-2 transition-all duration-300 relative ${
+              className={`text-xs sm:text-sm md:text-base tracking-[0.12em] sm:tracking-[0.18em] uppercase pb-2 transition-all duration-300 relative py-1 ${
                 activeCategory === category 
                   ? "text-[#C19A6B] font-bold" 
                   : "text-[#7A7065] hover:text-[#3A332C] font-medium"
@@ -229,8 +229,8 @@ export default function Shop() {
                             fill
                             priority={index < 4}
                             loading={index < 4 ? "eager" : "lazy"}
-                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
-                            quality={85}
+                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1440px) 33vw, 400px"
+                            quality={88}
                             className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out" 
                           />
                         )}
