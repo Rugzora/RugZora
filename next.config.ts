@@ -2,7 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
-    qualities: [75, 80, 85, 90], // 🌟 Next.js ko high-fidelity qualities render karne ki permission
+    unoptimized: true, // 🌟 Vercel server bottleneck ko bypass karega aur instant image serve karega
     remotePatterns: [
       {
         protocol: "https",
