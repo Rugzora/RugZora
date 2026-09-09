@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "../../../lib/supabase";
 import { useCurrency } from "@/context/CurrencyContext";
@@ -263,11 +264,15 @@ export default function ProductPage() {
           onClick={() => setIsLightboxOpen(true)}
         >
           {activeImage && (
-            <img 
+            <Image 
               key={activeImage}
               src={activeImage} 
               alt={product.name} 
-              className="w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-105" 
+              fill
+              priority
+              sizes="(max-width: 768px) 100vw, 85vw"
+              quality={85}
+              className="object-cover transition-transform duration-[1.5s] group-hover:scale-105" 
             />
           )}
 
@@ -314,12 +319,12 @@ export default function ProductPage() {
                     : 'opacity-60 hover:opacity-100'
                 }`}
               >
-                <img 
+                <Image 
                   src={img} 
-                  className="w-full h-full object-cover pointer-events-none" 
+                  fill
+                  sizes="96px"
+                  className="object-cover pointer-events-none" 
                   alt={`Thumbnail view ${idx + 1}`}
-                  loading="eager"
-                  decoding="async"
                 />
               </button>
             ))}
@@ -561,10 +566,13 @@ export default function ProductPage() {
                     <Link href={`/product/${item.id}`} key={item.id} className="flex flex-col group cursor-pointer">
                         <div className="aspect-[4/5] w-full bg-[#EBE5DA] mb-4 overflow-hidden rounded-sm shadow-sm relative">
                             {displayImg && (
-                              <img 
+                              <Image 
                                 src={displayImg} 
                                 alt={item.name} 
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[1.5s]" 
+                                fill
+                                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 250px"
+                                quality={80}
+                                className="object-cover group-hover:scale-105 transition-transform duration-[1.5s]" 
                               />
                             )}
                         </div>

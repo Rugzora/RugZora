@@ -126,7 +126,7 @@ export default function Navbar() {
         <div className="max-w-[1600px] mx-auto px-6 py-4 flex items-center justify-between relative bg-transparent z-20">
           
           <Link href="/" className="flex items-center space-x-3 group cursor-pointer">
-            <Image src="/logo.png" alt="RugZora Logo" width={40} height={40} className="object-contain rounded-sm" />
+            <Image src="/logo.png" alt="RugZora Logo" width={40} height={40} priority className="object-contain rounded-sm" />
             <span className={`text-2xl md:text-3xl tracking-wider text-[#3A332C] font-semibold ${playfair.className}`}>RugZora</span>
           </Link>
           

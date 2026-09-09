@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { supabase } from "../../lib/supabase";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -115,7 +116,16 @@ export default function Wishlist() {
                 }`}
               >
                 <Link href={`/product/${item.id}`} className="aspect-[4/5] w-full bg-[#EBE5DA] mb-4 overflow-hidden rounded-sm shadow-sm relative block">
-                  {item.image && <img src={item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[1.5s]" />}
+                  {item.image && (
+                    <Image 
+                      src={item.image} 
+                      alt={item.name} 
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 300px"
+                      quality={80}
+                      className="object-cover group-hover:scale-105 transition-transform duration-[1.5s]" 
+                    />
+                  )}
                 </Link>
                 
                 <button 

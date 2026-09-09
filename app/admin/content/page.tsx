@@ -332,6 +332,7 @@ export default function SiteContentAdmin() {
         .from("product-images")
         .upload(fileName, optimizedFile, {
           contentType: "image/webp",
+          cacheControl: "31536000",
           upsert: true,
         });
 

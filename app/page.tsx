@@ -16,8 +16,6 @@ function ScrollFadeImage({
   className?: string;
   fetchPriority?: "high" | "low" | "auto";
 }) {
-  const [loaded, setLoaded] = useState(false);
-
   if (!src) return null;
 
   return (
@@ -30,10 +28,7 @@ function ScrollFadeImage({
         priority={fetchPriority === "high"}
         loading={fetchPriority === "high" ? "eager" : "lazy"}
         quality={80}
-        onLoad={() => setLoaded(true)}
-        className={`object-cover transition-opacity duration-500 ease-out ${
-          loaded ? "opacity-100" : "opacity-0"
-        }`}
+        className="object-cover"
       />
     </div>
   );
@@ -59,55 +54,95 @@ const defaultEthos = [
 
 const defaultSilhouettes = [
   { 
-    img: "", 
+    img: "https://qjpjltaiazwybhsmnkve.supabase.co/storage/v1/object/public/product-images/site-1788886012994-8g4u8.webp", 
     title: "Chunky Braided Oval & Rectangular", 
     desc: "Heavy-gauge cord construction that frames living and dining areas with organic marled depth." 
   },
   { 
-    img: "", 
+    img: "https://qjpjltaiazwybhsmnkve.supabase.co/storage/v1/object/public/product-images/site-1788886024241-zce9i.webp", 
     title: "Round Medallions", 
     desc: "Spiraled center-out to accentuate entryways, reading nooks, and circular seating layouts.", 
     extraClass: "md:-translate-y-12" 
   },
   { 
-    img: "", 
+    img: "https://qjpjltaiazwybhsmnkve.supabase.co/storage/v1/object/public/product-images/site-1788886038028-z7xhf.webp", 
     title: "Architectural Bespoke", 
     desc: "Custom hallway runners and oversized rugs tailored to your exact floor plan dimensions." 
   }
 ];
 
-const defaultTextures = ["", "", "", ""];
-
-const defaultSpaces = [
-  { img: "", title: "Living Room Statement", link: "Shop Area Rugs" },
-  { img: "", title: "Pet & Kid Friendly", link: "Zero-Shed Textures" },
-  { img: "", title: "Covered Patio & Hallways", link: "Shop Runners" }
+const defaultTextures = [
+  "https://qjpjltaiazwybhsmnkve.supabase.co/storage/v1/object/public/product-images/site-1788886295894-ffj9q.webp",
+  "https://qjpjltaiazwybhsmnkve.supabase.co/storage/v1/object/public/product-images/site-1788886306008-81jhk.webp",
+  "https://qjpjltaiazwybhsmnkve.supabase.co/storage/v1/object/public/product-images/site-1788886347448-6x1b3.webp",
+  "https://qjpjltaiazwybhsmnkve.supabase.co/storage/v1/object/public/product-images/site-1788886380175-ve8io.webp"
 ];
 
+const defaultSpaces = [
+  { img: "https://qjpjltaiazwybhsmnkve.supabase.co/storage/v1/object/public/product-images/site-1788886388939-yniy5.webp", title: "Living Room Statement", link: "Shop Area Rugs" },
+  { img: "https://qjpjltaiazwybhsmnkve.supabase.co/storage/v1/object/public/product-images/site-1788886406504-masi0.webp", title: "Pet & Kid Friendly", link: "Zero-Shed Textures" },
+  { img: "https://qjpjltaiazwybhsmnkve.supabase.co/storage/v1/object/public/product-images/site-1788886436771-unhjx.webp", title: "Covered Patio & Hallways", link: "Shop Runners" }
+];
+
+const defaultSiteData = {
+  hero: {
+    tag: "",
+    tagSize: 21,
+    title: "RugZora Premium Rugs & Carpets",
+    titleSize: 63,
+    subtitle: "",
+    subtitleSize: undefined,
+    description: "RUGZORA. CRAFTED WITH CARE IN INDIA.",
+    descriptionSize: 19,
+    ctaText: "Explore Handcrafted Rugs",
+    ctaLink: "/collections",
+    bgImage: "https://qjpjltaiazwybhsmnkve.supabase.co/storage/v1/object/public/product-images/site-1788885350236-wdp51.webp"
+  },
+  ethos: defaultEthos,
+  story: {
+    tag: "The Heritage of Bhadohi",
+    image: "https://qjpjltaiazwybhsmnkve.supabase.co/storage/v1/object/public/product-images/site-1788886800397-5cw5v.webp",
+    title: "Centuries of Tradition. Reimagined with rPET.",
+    description: "Operating right from Bhadohi, India's world-renowned 'Carpet City', RugZora bridges ancient braiding legacy with conscious innovation. We turn post-consumer plastic waste into micro-spun yarns that mimic pure wool—delivering an itch-free, luxuriously soft step directly from the loom to your room."
+  },
+  silhouettes: defaultSilhouettes,
+  silhouettesHeader: {
+    title: "Signature Silhouettes",
+    desc: "Braided profiles tailored to balance your home's geometry."
+  },
+  spacesHeader: {
+    title: "Built for Family & High Traffic",
+    desc: "Hydrophobic, stain-resistant fibers designed for effortless living."
+  },
+  materialScience: {
+    img: "https://qjpjltaiazwybhsmnkve.supabase.co/storage/v1/object/public/product-images/site-1788886853069-vqtwe.webp",
+    tag: "Material Science",
+    desc: "Zero plastic stiffness. By micro-spinning recycled polyester, our rugs offer pure wool-grade plushness without scratching skin. Naturally hydrophobic, they repel liquid spills and maintain pristine air quality with 100% shed-free construction.",
+    title: "The Softness of Wool. The Strength of rPET.",
+    btnText: "Explore Our Fiber Craft"
+  },
+  spaces: defaultSpaces,
+  bespoke: {
+    mainImage: "https://qjpjltaiazwybhsmnkve.supabase.co/storage/v1/object/public/product-images/site-1788886447966-jvzf4.webp",
+    detailImage: "https://qjpjltaiazwybhsmnkve.supabase.co/storage/v1/object/public/product-images/site-1788886455661-3etz7.webp"
+  },
+  promise: {
+    image: "https://qjpjltaiazwybhsmnkve.supabase.co/storage/v1/object/public/product-images/site-1788885376486-16q3c.webp",
+    title: "Sustainable Braided Luxury. Straight from our Workshop in Bhadohi.",
+    ctaText: "Explore All Handcrafted Rugs"
+  },
+  textureLibrary: { images: defaultTextures }
+};
+
 export default function Home() {
-  // 🌟 Hydration Mismatch se bachne ke liye safe default fallback
-  const [siteData, setSiteData] = useState<any>({
-    hero: {
-      tag: "Bespoke Artisanal Floor Coverings",
-      title: "Eco-Conscious Luxury.",
-      subtitle: "Born in The Carpet City.",
-      description: "Handcrafted chunky braided rugs woven from sustainable recycled PET fibers. Ultra-soft wool-like feel, 100% reversible, and tailored directly in our Bhadohi workshop.",
-      ctaText: "Explore Handcrafted Rugs",
-      ctaLink: "/collections",
-      bgImage: ""
-    },
-    ethos: defaultEthos,
-    silhouettes: defaultSilhouettes,
-    spaces: defaultSpaces,
-    textureLibrary: { images: defaultTextures }
-  });
+  const [siteData, setSiteData] = useState<any>(defaultSiteData);
 
   useEffect(() => {
-    // 1. Client load hote hi localStorage se instant sync karein
+    // 1. Client mount hone ke baad localStorage se sync karein (Hydration safe)
     try {
       const cached = localStorage.getItem("rz_home_content");
       if (cached) {
-        setSiteData(JSON.parse(cached));
+        setSiteData((prev: any) => ({ ...prev, ...JSON.parse(cached) }));
       }
     } catch (e) {
       console.error(e);
@@ -128,7 +163,7 @@ export default function Home() {
         }
 
         if (data && data.data) {
-          setSiteData(data.data);
+          setSiteData((prev: any) => ({ ...prev, ...data.data }));
           localStorage.setItem("rz_home_content", JSON.stringify(data.data));
         }
       } catch (err) {
