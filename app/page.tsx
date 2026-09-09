@@ -29,7 +29,7 @@ function ScrollFadeImage({
         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 70vw, 50vw"
         priority={fetchPriority === "high"}
         loading={fetchPriority === "high" ? "eager" : "lazy"}
-        quality={90} // 🌟 80 ki jagah 90 karein taaki bilkul sharp dikhe
+        quality={80}
         onLoad={() => setLoaded(true)}
         className={`object-cover transition-opacity duration-500 ease-out ${
           loaded ? "opacity-100" : "opacity-0"
@@ -39,24 +39,81 @@ function ScrollFadeImage({
   );
 }
 
+const defaultEthos = [
+  { 
+    num: "01",
+    title: "Japandi & Modern Boho", 
+    desc: "Warm neutral tones and marled textures designed to blend seamlessly into Minimalist, Scandinavian, and Modern living spaces." 
+  },
+  { 
+    num: "02",
+    title: "100% Reversible Architecture", 
+    desc: "Completely unbacked with identical texture on both sides. Flip your rug anytime to double its usable lifespan and endurance." 
+  },
+  { 
+    num: "03",
+    title: "Reinforced Zigzag Craft", 
+    desc: "Hand-braided chunky cords spiraled and locked using heavy-duty zigzag machine stitching to eliminate edge curl completely." 
+  }
+];
+
+const defaultSilhouettes = [
+  { 
+    img: "", 
+    title: "Chunky Braided Oval & Rectangular", 
+    desc: "Heavy-gauge cord construction that frames living and dining areas with organic marled depth." 
+  },
+  { 
+    img: "", 
+    title: "Round Medallions", 
+    desc: "Spiraled center-out to accentuate entryways, reading nooks, and circular seating layouts.", 
+    extraClass: "md:-translate-y-12" 
+  },
+  { 
+    img: "", 
+    title: "Architectural Bespoke", 
+    desc: "Custom hallway runners and oversized rugs tailored to your exact floor plan dimensions." 
+  }
+];
+
+const defaultTextures = ["", "", "", ""];
+
+const defaultSpaces = [
+  { img: "", title: "Living Room Statement", link: "Shop Area Rugs" },
+  { img: "", title: "Pet & Kid Friendly", link: "Zero-Shed Textures" },
+  { img: "", title: "Covered Patio & Hallways", link: "Shop Runners" }
+];
+
 export default function Home() {
-  const [siteData, setSiteData] = useState<any>(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const cached = localStorage.getItem("rz_home_content");
-        if (cached) return JSON.parse(cached);
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    return null;
+  // 🌟 Hydration Mismatch se bachne ke liye safe default fallback
+  const [siteData, setSiteData] = useState<any>({
+    hero: {
+      tag: "Bespoke Artisanal Floor Coverings",
+      title: "Eco-Conscious Luxury.",
+      subtitle: "Born in The Carpet City.",
+      description: "Handcrafted chunky braided rugs woven from sustainable recycled PET fibers. Ultra-soft wool-like feel, 100% reversible, and tailored directly in our Bhadohi workshop.",
+      ctaText: "Explore Handcrafted Rugs",
+      ctaLink: "/collections",
+      bgImage: ""
+    },
+    ethos: defaultEthos,
+    silhouettes: defaultSilhouettes,
+    spaces: defaultSpaces,
+    textureLibrary: { images: defaultTextures }
   });
-  
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    // 1. Client load hote hi localStorage se instant sync karein
+    try {
+      const cached = localStorage.getItem("rz_home_content");
+      if (cached) {
+        setSiteData(JSON.parse(cached));
+      }
+    } catch (e) {
+      console.error(e);
+    }
 
+    // 2. Supabase se fresh content fetch karein
     async function getDynamicContent() {
       try {
         const { data, error } = await supabase
@@ -81,55 +138,6 @@ export default function Home() {
     getDynamicContent();
   }, []);
 
-  const defaultEthos = [
-    { 
-      num: "01",
-      title: "Japandi & Modern Boho", 
-      desc: "Warm neutral tones and marled textures designed to blend seamlessly into Minimalist, Scandinavian, and Modern living spaces." 
-    },
-    { 
-      num: "02",
-      title: "100% Reversible Architecture", 
-      desc: "Completely unbacked with identical texture on both sides. Flip your rug anytime to double its usable lifespan and endurance." 
-    },
-    { 
-      num: "03",
-      title: "Reinforced Zigzag Craft", 
-      desc: "Hand-braided chunky cords spiraled and locked using heavy-duty zigzag machine stitching to eliminate edge curl completely." 
-    }
-  ];
-
-  const defaultSilhouettes = [
-    { 
-      img: "", 
-      title: "Chunky Braided Oval & Rectangular", 
-      desc: "Heavy-gauge cord construction that frames living and dining areas with organic marled depth." 
-    },
-    { 
-      img: "", 
-      title: "Round Medallions", 
-      desc: "Spiraled center-out to accentuate entryways, reading nooks, and circular seating layouts.", 
-      extraClass: "md:-translate-y-12" 
-    },
-    { 
-      img: "", 
-      title: "Architectural Bespoke", 
-      desc: "Custom hallway runners and oversized rugs tailored to your exact floor plan dimensions." 
-    }
-  ];
-
-  const defaultTextures = ["", "", "", ""];
-
-  const defaultSpaces = [
-    { img: "", title: "Living Room Statement", link: "Shop Area Rugs" },
-    { img: "", title: "Pet & Kid Friendly", link: "Zero-Shed Textures" },
-    { img: "", title: "Covered Patio & Hallways", link: "Shop Runners" }
-  ];
-
-  if (!mounted) {
-    return <div className="min-h-screen bg-[#F8F5F0]" />;
-  }
-
   return (
     <div className="w-full flex flex-col bg-[#F8F5F0] overflow-x-hidden font-sans">
       
@@ -142,7 +150,7 @@ export default function Home() {
               alt="RugZora Premium Living Room"
               fill
               priority
-              quality={85}
+              quality={80}
               sizes="100vw"
               className="object-cover opacity-85"
             />
@@ -219,7 +227,7 @@ export default function Home() {
             const numLabel = `0${index + 1}`;
             return (
               <motion.div 
-                key={index}
+                key={index} 
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
                 viewport={{ once: true, margin: "-30px" }}
@@ -507,9 +515,9 @@ export default function Home() {
             <div className="h-40 bg-[#EBE5DA] mb-8 overflow-hidden rounded-sm flex items-center justify-center">
                {siteData?.bespoke?.detailImage ? (
                  <ScrollFadeImage 
-                   src={siteData.bespoke.detailImage} 
-                   alt="Close-up braided cord finish" 
-                   className="w-full h-full object-cover hover:scale-105 transition-transform duration-500 ease-out" 
+                    src={siteData.bespoke.detailImage} 
+                    alt="Close-up braided cord finish" 
+                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-500 ease-out" 
                  />
                ) : (
                  <span className="text-[10px] uppercase text-[#8C7A63] tracking-widest font-semibold">No Detail Image</span>
