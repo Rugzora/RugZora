@@ -283,9 +283,10 @@ const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (img.isExisting) {
           finalImageUrls.push(img.preview);
         } else if (img.file) {
-          // 🌟 Auto WebP Extension guarantee
+          setStatusMsg(`Optimizing image ${i + 1} of ${images.length} to WebP...`);
+          const compressed = await compressAndConvertToWebP(img.file);
           const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.webp`;
-          const { error: uploadError } = await supabase.storage.from("product-images").upload(fileName, img.file, {
+          const { error: uploadError } = await supabase.storage.from("product-images").upload(fileName, compressed, {
             contentType: "image/webp",
             cacheControl: "31536000",
           });
@@ -363,7 +364,7 @@ const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
   };
 
   return (
-    <div className="bg-[#F8F5F0] min-h-screen pt-20 pb-24 px-6 relative">
+    <div className="bg-[#F8F5F0] min-h-screen pt-6 sm:pt-10 md:pt-12 pb-24 px-4 sm:px-6 relative">
       <div className="max-w-5xl mx-auto bg-white p-10 rounded-sm shadow-sm border border-[#EBE5DA]">
         
         {/* HEADER */}

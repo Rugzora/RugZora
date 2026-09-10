@@ -2,53 +2,55 @@
 
 import { useEffect } from "react";
 import Lenis from "lenis";
+import "lenis/dist/lenis.css";
 
 export default function SmoothScroll({ children }: { children: React.ReactNode }) {
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      window.history.scrollRestoration = "manual";
-      window.scrollTo(0, 0);
-    }
+    if (typeof window === "undefined") return;
 
-    const lenis = new Lenis({
-      duration: 1.1,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      orientation: "vertical",
-      gestureOrientation: "vertical",
-      smoothWheel: true,
-      wheelMultiplier: 1,
-      touchMultiplier: 1.5,
-      lerp: 0.1, // 🌟 Yeh scroll ko ultra-smooth banata hai bina lag ke
-      syncTouch: true, // 🌟 Mobile aur trackpad touch scrolling ko hardware sync karta hai
-    });
-    // 🌟 YEH LINE JODI HAI: Taaki ScrollToTop ishe access karke turant upar laa sake
-    if (typeof window !== "undefined") {
-      (window as any).lenis = lenis;
-    }
-
-    let rafId: number;
-    function raf(time: number) {
-      lenis.raf(time);
-      rafId = requestAnimationFrame(raf);
-    }
-    rafId = requestAnimationFrame(raf);
-
-    const handleInitialSync = () => {
-      lenis.resize();
+    // Check if user is on mobile/tablet or touch-only device
+    const isMobileDevice = () => {
+      const isNarrow = window.innerWidth < 1024;
+      const isTouch = window.matchMedia("(pointer: coarse)").matches && !window.matchMedia("(pointer: fine)").matches;
+      return isNarrow || isTouch;
     };
 
-    window.addEventListener("load", handleInitialSync, { once: true });
-    window.addEventListener("resize", handleInitialSync);
+    if (isMobileDevice()) {
+      // 🌟 MOBILE / TABLET: 100% native hardware smooth scrolling
+      window.history.scrollRestoration = "auto";
+      if ((window as any).lenis) {
+        delete (window as any).lenis;
+      }
+      return;
+    }
 
-    const resizeTimer = setTimeout(() => {
-      lenis.resize();
-    }, 500);
+    // 🌟 DESKTOP ONLY: Frame-rate independent spring damping (butter-smooth, zero image-load lag)
+    window.history.scrollRestoration = "manual";
+
+    const lenis = new Lenis({
+      autoRaf: true,
+      lerp: 0.085, // Spring-damped interpolation (immune to image decode / network micro-stutter)
+      smoothWheel: true,
+      wheelMultiplier: 0.9,
+      touchMultiplier: 1.0,
+      syncTouch: false,
+    });
+
+    (window as any).lenis = lenis;
+
+    const handleResize = () => {
+      if (isMobileDevice()) {
+        lenis.destroy();
+        delete (window as any).lenis;
+      } else {
+        lenis.resize();
+      }
+    };
+
+    window.addEventListener("resize", handleResize, { passive: true });
 
     return () => {
-      clearTimeout(resizeTimer);
-      window.removeEventListener("load", handleInitialSync);
-      window.removeEventListener("resize", handleInitialSync);
-      cancelAnimationFrame(rafId);
+      window.removeEventListener("resize", handleResize);
       lenis.destroy();
       if (typeof window !== "undefined") {
         delete (window as any).lenis;

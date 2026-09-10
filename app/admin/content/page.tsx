@@ -475,14 +475,14 @@ export default function SiteContentAdmin() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#F8F5F0] pt-32 text-center text-[#C19A6B] font-serif text-lg animate-pulse">
+      <div className="min-h-screen bg-[#F8F5F0] pt-16 text-center text-[#C19A6B] font-serif text-lg animate-pulse">
         Loading RugZora Studio CMS...
       </div>
     );
   }
 
   return (
-    <div className="bg-[#F8F5F0] min-h-screen pt-20 pb-32 px-6 font-sans">
+    <div className="bg-[#F8F5F0] min-h-screen pt-6 sm:pt-10 md:pt-12 pb-32 px-4 sm:px-6 font-sans">
       <div className="max-w-5xl mx-auto">
         
         {/* 🌟 1. INTERACTIVE LIVE SEARCH BAR */}

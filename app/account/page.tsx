@@ -88,7 +88,7 @@ export default function AccountPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#F8F5F0] pt-40 pb-40 text-center text-[#C19A6B] font-serif text-lg animate-pulse">
+      <div className="min-h-screen bg-[#F8F5F0] pt-16 pb-20 text-center text-[#C19A6B] font-serif text-lg animate-pulse">
         Loading Your Account...
       </div>
     );
@@ -110,7 +110,7 @@ export default function AccountPage() {
     : "2026";
 
   return (
-    <div className="bg-[#F8F5F0] min-h-screen pt-32 pb-24 font-sans">
+    <div className="bg-[#F8F5F0] min-h-screen pt-8 sm:pt-12 md:pt-14 pb-20 font-sans">
       <div className="max-w-[1200px] mx-auto px-6">
         
         {/* HEADER PROFILE BANNER */}

@@ -241,9 +241,9 @@ export default function ProductPage() {
     setIsWishlisted(!isWishlisted);
   };
 
-  if (isLoading) return <div className="text-center pt-32 pb-40 text-[#C19A6B] font-serif text-xl animate-pulse min-h-screen bg-[#F8F5F0]">Loading details...</div>;
+  if (isLoading) return <div className="text-center pt-16 pb-20 text-[#C19A6B] font-serif text-xl animate-pulse min-h-screen bg-[#F8F5F0]">Loading details...</div>;
   if (error || !product) return (
-    <div className="flex flex-col items-center justify-center pt-32 pb-40 min-h-screen bg-[#F8F5F0] px-6 text-center">
+    <div className="flex flex-col items-center justify-center pt-16 pb-20 min-h-screen bg-[#F8F5F0] px-6 text-center">
       <div className="w-20 h-20 bg-[#EBE5DA] rounded-full flex items-center justify-center text-[#C19A6B] mb-6">
         <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
       </div>
@@ -305,9 +305,10 @@ export default function ProductPage() {
                   alt={`${product.name} - View ${idx + 1}`} 
                   fill
                   priority={idx === 0}
-                  loading={idx < 3 ? "eager" : "lazy"}
-                  sizes="(max-width: 768px) 100vw, (max-width: 1536px) 90vw, 1600px"
-                  quality={90}
+                  loading={idx === 0 ? "eager" : "lazy"}
+                  decoding="async"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1280px) 80vw, 1600px"
+                  quality={95}
                   className="object-cover transition-transform duration-[1.5s] group-hover:scale-105 pointer-events-none" 
                 />
               </div>
@@ -360,8 +361,8 @@ export default function ProductPage() {
                 <Image 
                   src={img} 
                   fill
-                  sizes="96px"
-                  quality={85}
+                  sizes="120px"
+                  quality={90}
                   className="object-cover pointer-events-none" 
                   alt={`Thumbnail view ${idx + 1}`}
                 />
@@ -609,8 +610,9 @@ export default function ProductPage() {
                                 src={displayImg} 
                                 alt={item.name} 
                                 fill
-                                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 350px"
-                                quality={88}
+                                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                                decoding="async"
+                                quality={95}
                                 className="object-cover group-hover:scale-105 transition-transform duration-[1.5s]" 
                               />
                             )}

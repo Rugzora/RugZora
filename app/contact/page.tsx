@@ -30,9 +30,9 @@ export default function Contact() {
   const info = contactData?.info;
 
   return (
-    <div className="pt-40 pb-24 px-6 max-w-2xl mx-auto min-h-screen font-sans">
-      <div className="text-center mb-16">
-        <h1 className="text-5xl font-serif mb-4 text-[#3E362E]">
+    <div className="pt-8 sm:pt-12 md:pt-14 pb-16 sm:pb-24 px-6 max-w-2xl mx-auto min-h-screen font-sans">
+      <div className="text-center mb-8 sm:mb-12">
+        <h1 className="text-4xl sm:text-5xl font-serif mb-3 sm:mb-4 text-[#3E362E]">
           {title}
         </h1>
         <p className="text-[#7A7265] text-sm leading-relaxed max-w-lg mx-auto">

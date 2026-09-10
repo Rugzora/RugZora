@@ -57,7 +57,7 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
 
   if (loading) {
     return (
-      <div className="bg-[#F8F5F0] min-h-screen pt-32 pb-24 flex justify-center items-center">
+      <div className="bg-[#F8F5F0] min-h-screen pt-16 pb-20 flex justify-center items-center">
         <div className="text-[#C19A6B] text-xl font-serif animate-pulse">Loading Luxury...</div>
       </div>
     );
@@ -65,18 +65,18 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
 
   if (error || !product) {
     return (
-      <div className="bg-[#F8F5F0] min-h-screen pt-32 pb-24 flex justify-center items-center">
+      <div className="bg-[#F8F5F0] min-h-screen pt-16 pb-20 flex justify-center items-center">
         <div className="text-[#3A332C] text-xl font-serif">{error || "Product not found"}</div>
       </div>
     );
   }
 
   return (
-    <div className="bg-[#F8F5F0] min-h-screen pt-32 pb-24 px-6 font-sans">
+    <div className="bg-[#F8F5F0] min-h-screen pt-8 sm:pt-12 md:pt-14 pb-20 px-4 sm:px-6 font-sans">
       <div className="max-w-[1400px] mx-auto">
         
         {/* Breadcrumb Navigation */}
-        <div className="text-[11px] tracking-widest uppercase text-[#8C8276] mb-10">
+        <div className="text-[11px] tracking-widest uppercase text-[#8C8276] mb-6 sm:mb-8">
           <a href="/" className="hover:text-[#C19A6B] transition">Home</a>
           <span className="mx-2">/</span>
           <a href="/collections" className="hover:text-[#C19A6B] transition">Collections</a>
@@ -103,8 +103,8 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
                       src={img} 
                       alt={`Thumbnail ${idx}`} 
                       fill
-                      sizes="80px"
-                      quality={85}
+                      sizes="120px"
+                      quality={90}
                       className="object-cover" 
                     />
                   </button>
@@ -131,8 +131,8 @@ export default function ProductDetails({ params }: { params: Promise<{ id: strin
                   alt={product.name} 
                   fill
                   priority
-                  sizes="(max-width: 1024px) 100vw, 800px"
-                  quality={90}
+                  sizes="(max-width: 1024px) 100vw, 1200px"
+                  quality={95}
                   className="object-cover" 
                 />
               )}

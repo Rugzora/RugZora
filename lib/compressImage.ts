@@ -6,11 +6,11 @@ export async function compressAndConvertToWebP(file: File): Promise<File> {
   }
 
   const options = {
-    maxSizeMB: 0.65,         // High fidelity: crisp threads without heavy bloat
-    maxWidthOrHeight: 2000,  // Sharp for 2K & Retina displays
+    maxSizeMB: 0.9,          // Crisp, luxury headroom preserving intricate braided yarn loops & relief (max 900KB)
+    maxWidthOrHeight: 2048,  // Ultra-crisp for 2K, 4K & Retina screens
     useWebWorker: true,
     fileType: "image/webp",
-    initialQuality: 0.88,    // 88% WebP preserves fine carpet weave details
+    initialQuality: 0.92,    // 92% WebP maintains razor-sharp thread clarity without blur
   };
 
   try {

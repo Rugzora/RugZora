@@ -84,11 +84,11 @@ export default function Wishlist() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F5F0] pt-40 pb-20 px-6 font-sans relative">
+    <div className="min-h-screen bg-[#F8F5F0] pt-8 sm:pt-12 md:pt-14 pb-16 sm:pb-20 px-4 sm:px-6 font-sans relative">
       <div className="max-w-[1600px] mx-auto">
-        <div className="mb-16 border-b border-[#DFD8CC] pb-6 flex items-end justify-between">
+        <div className="mb-8 sm:mb-12 border-b border-[#DFD8CC] pb-5 flex items-end justify-between">
           <div>
-            <h1 className="text-4xl md:text-5xl font-serif text-[#3A332C]">Your Wishlist</h1>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif text-[#3A332C]">Your Wishlist</h1>
             <p className="text-[#7A7065] mt-4">{wishlistItems.length} {wishlistItems.length === 1 ? 'item' : 'items'} saved</p>
           </div>
         </div>
@@ -121,8 +121,8 @@ export default function Wishlist() {
                       src={item.image} 
                       alt={item.name} 
                       fill
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
-                      quality={88}
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1440px) 33vw, 25vw"
+                      quality={95}
                       className="object-cover group-hover:scale-105 transition-transform duration-[1.5s]" 
                     />
                   )}

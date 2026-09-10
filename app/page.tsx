@@ -6,40 +6,36 @@ import { supabase } from "@/lib/supabase";
 import Image from "next/image";
 import Link from "next/link";
 
-// 🌟 Ultra-Smooth Single-Run Slide + Fade Image Component (Lag-Free & GPU Accelerated)
+// 🌟 Ultra-Fast & Responsive Image Component (Instant Load & Predictive Viewport)
 function ScrollFadeImage({
   src,
   alt,
   className = "",
+  sizes = "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw",
   fetchPriority,
 }: {
   src: string;
   alt: string;
   className?: string;
+  sizes?: string;
   fetchPriority?: "high" | "low" | "auto";
 }) {
   if (!src) return null;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 24 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-40px" }}
-      transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
-      className="relative w-full h-full overflow-hidden will-change-transform"
-      style={{ transform: "translateZ(0)" }}
-    >
+    <div className="relative w-full h-full overflow-hidden">
       <Image
         src={src}
         alt={alt}
         fill
-        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
+        sizes={sizes}
         priority={fetchPriority === "high"}
         loading={fetchPriority === "high" ? "eager" : "lazy"}
-        quality={88}
-        className={`object-cover ${className}`}
+        decoding="async"
+        quality={95}
+        className={`object-cover transition-opacity duration-300 ${className}`}
       />
-    </motion.div>
+    </div>
   );
 }
 
@@ -191,54 +187,49 @@ export default function Home() {
     <div className="w-full flex flex-col bg-[#F8F5F0] overflow-x-hidden font-sans">
       
       {/* 1. AIRY HERO SECTION */}
-      <section className="relative w-full h-[95vh] flex items-center justify-center overflow-hidden">
+      <section className="relative w-full min-h-[82vh] sm:min-h-[88vh] md:h-[95vh] flex items-center justify-center overflow-hidden py-10 sm:py-14 md:py-20">
         <div className="absolute inset-0 w-full h-full bg-[#EBE5DA]">
           {siteData?.hero?.bgImage && (
-            <motion.div
-              initial={{ opacity: 0, scale: 1.05 }}
-              animate={{ opacity: 0.85, scale: 1 }}
-              transition={{ duration: 1.2, ease: "easeOut" }}
-              className="relative w-full h-full will-change-transform"
-              style={{ transform: "translateZ(0)" }}
-            >
+            <div className="relative w-full h-full">
               <Image
                 src={siteData.hero.bgImage}
                 alt="RugZora Premium Living Room"
                 fill
                 priority
-                quality={90}
+                quality={95}
                 sizes="100vw"
-                className="object-cover"
+                className="object-cover opacity-90"
               />
-            </motion.div>
+            </div>
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#F8F5F0] via-[#F8F5F0]/30 to-transparent"></div>
+          {/* Luxury Multi-Stop Gradient Overlay (Clean contrast on Mobile & Desktop) */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#F8F5F0] via-[#F8F5F0]/75 to-[#F8F5F0]/35 sm:via-[#F8F5F0]/35 sm:to-transparent"></div>
         </div>
         
-        <div className="relative z-10 text-center px-6 mt-20 max-w-6xl w-full mx-auto">
+        <div className="relative z-10 text-center px-4 sm:px-6 max-w-4xl w-full mx-auto flex flex-col items-center justify-center">
           {siteData?.hero?.tag && (
             <span 
-              style={{ fontSize: siteData.hero.tagSize ? `${siteData.hero.tagSize}px` : undefined }}
-              className="text-[#C19A6B] uppercase tracking-[0.3em] font-semibold mb-6 block"
+              style={{ fontSize: siteData.hero.tagSize ? `clamp(10px, 2.5vw, ${siteData.hero.tagSize}px)` : undefined }}
+              className="text-[#C19A6B] uppercase tracking-[0.25em] sm:tracking-[0.3em] font-semibold text-[10px] sm:text-xs mb-3 sm:mb-4 block"
             >
               {siteData.hero.tag}
             </span>
           )}
 
           {(siteData?.hero?.title || siteData?.hero?.subtitle) && (
-            <h1 className="text-[#3A332C] font-serif mb-6 leading-[1.1]">
+            <h1 className="text-[#3A332C] font-serif mb-4 sm:mb-6 tracking-tight leading-[1.12] max-w-3xl">
               {siteData?.hero?.title && (
                 <span 
-                  style={{ fontSize: siteData.hero.titleSize ? `${siteData.hero.titleSize}px` : undefined }} 
-                  className="block md:whitespace-nowrap"
+                  style={{ fontSize: siteData.hero.titleSize ? `clamp(30px, 7.2vw, ${siteData.hero.titleSize}px)` : undefined }} 
+                  className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-normal block leading-tight"
                 >
                   {siteData.hero.title}
                 </span>
               )}
               {siteData?.hero?.subtitle && (
                 <span 
-                  style={{ fontSize: siteData.hero.subtitleSize ? `${siteData.hero.subtitleSize}px` : undefined }}
-                  className="italic font-light text-[#6B6054] block mt-1 md:whitespace-nowrap"
+                  style={{ fontSize: siteData.hero.subtitleSize ? `clamp(20px, 5.2vw, ${siteData.hero.subtitleSize}px)` : undefined }}
+                  className="text-xl sm:text-2xl md:text-3xl lg:text-4xl italic font-light text-[#6B6054] block mt-1 leading-snug"
                 >
                   {siteData.hero.subtitle}
                 </span>
@@ -248,19 +239,19 @@ export default function Home() {
 
           {siteData?.hero?.description && (
             <p 
-              style={{ fontSize: siteData.hero.descriptionSize ? `${siteData.hero.descriptionSize}px` : undefined }}
-              className="text-[#6B6054] mb-12 max-w-2xl mx-auto font-light leading-relaxed"
+              style={{ fontSize: siteData.hero.descriptionSize ? `clamp(11px, 3vw, ${siteData.hero.descriptionSize}px)` : undefined }}
+              className="text-[#5A5044] text-[11px] sm:text-xs md:text-sm mb-6 sm:mb-8 md:mb-10 max-w-xl mx-auto font-medium leading-relaxed uppercase tracking-[0.14em] sm:tracking-[0.18em]"
             >
               {siteData.hero.description}
             </p>
           )}
 
-          {/* Symmetrical Action Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-5 mt-4 w-full max-w-xl mx-auto px-2">
+          {/* Symmetrical Luxury Action Buttons */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full max-w-sm sm:max-w-lg mx-auto">
             {siteData?.hero?.ctaText && (
               <a 
                 href={siteData?.hero?.ctaLink || "/collections"} 
-                className="w-full sm:flex-1 min-h-[52px] py-4 px-4 sm:px-6 flex items-center justify-center bg-[#3A332C] text-[#F8F5F0] text-xs tracking-[0.14em] sm:tracking-[0.18em] uppercase hover:bg-[#C19A6B] hover:text-white transition duration-300 shadow-xl font-semibold text-center rounded-sm"
+                className="w-full sm:flex-1 py-3.5 sm:py-4 px-5 sm:px-6 flex items-center justify-center bg-[#3A332C] text-[#F8F5F0] text-[11px] sm:text-xs tracking-[0.14em] sm:tracking-[0.18em] uppercase hover:bg-[#C19A6B] hover:text-white transition duration-300 shadow-md font-semibold text-center rounded-sm"
               >
                 {siteData.hero.ctaText}
               </a>
@@ -268,18 +259,18 @@ export default function Home() {
 
             <a 
               href="/process" 
-              className="w-full sm:flex-1 min-h-[52px] py-4 px-4 sm:px-6 flex items-center justify-center bg-white/90 backdrop-blur-md text-[#3A332C] border border-[#DFD8CC] text-xs tracking-[0.14em] sm:tracking-[0.18em] uppercase hover:bg-[#3A332C] hover:text-white hover:border-[#3A332C] transition duration-300 shadow-md font-semibold text-center rounded-sm"
+              className="w-full sm:flex-1 py-3.5 sm:py-4 px-5 sm:px-6 flex items-center justify-center bg-white/95 backdrop-blur-md text-[#3A332C] border border-[#DFD8CC] text-[11px] sm:text-xs tracking-[0.14em] sm:tracking-[0.18em] uppercase hover:bg-[#3A332C] hover:text-white hover:border-[#3A332C] transition duration-300 shadow-sm font-semibold text-center rounded-sm"
             >
               <span>See What We Do When You Order</span>
-              <span className="ml-1.5 text-sm shrink-0">→</span>
+              <span className="ml-1.5 text-xs shrink-0">→</span>
             </a>
           </div>
         </div>
       </section>
 
-      {/* 2. THE BRAND ETHOS (CLEAN EDITORIAL PILLARS - NO IMAGES, ZERO LAG) */}
-      <section className="w-full max-w-[1400px] mx-auto px-6 py-28 border-b border-[#EBE5DA]">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-16">
+      {/* 2. THE BRAND ETHOS (CLEAN EDITORIAL PILLARS) */}
+      <section className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 py-16 sm:py-24 border-b border-[#EBE5DA]">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 lg:gap-12">
           {(siteData?.ethos || defaultEthos).map((item: any, index: number) => {
             const numLabel = `0${index + 1}`;
             return (
@@ -289,16 +280,16 @@ export default function Home() {
                 whileInView={{ opacity: 1 }}
                 viewport={{ once: true, margin: "-30px" }}
                 transition={{ duration: 0.5, delay: index * 0.1, ease: "easeOut" }}
-                className="flex flex-col justify-start bg-white/60 border border-[#EBE5DA] p-8 md:p-10 rounded-sm hover:border-[#C19A6B] transition-colors duration-300 shadow-sm"
+                className="flex flex-col justify-start bg-white/70 border border-[#EBE5DA] p-6 sm:p-8 md:p-10 rounded-sm hover:border-[#C19A6B] transition-colors duration-300 shadow-xs"
               >
-                <span className="text-[#C19A6B] font-serif text-2xl font-bold mb-4 block">
+                <span className="text-[#C19A6B] font-serif text-xl sm:text-2xl font-bold mb-3 sm:mb-4 block">
                   {numLabel}
                 </span>
-                <h3 className="text-xl md:text-2xl font-serif text-[#3A332C] mb-4">
+                <h3 className="text-lg sm:text-xl md:text-2xl font-serif text-[#3A332C] mb-3 sm:mb-4">
                   {item.title}
                 </h3>
-                <div className="w-12 h-[1.5px] bg-[#DFD8CC] mb-6"></div>
-                <p className="text-[#7A7065] font-light leading-relaxed text-sm md:text-base">
+                <div className="w-10 sm:w-12 h-[1.5px] bg-[#DFD8CC] mb-4 sm:mb-6"></div>
+                <p className="text-[#7A7065] font-light leading-relaxed text-xs sm:text-sm md:text-base">
                   {item.desc}
                 </p>
               </motion.div>
@@ -307,97 +298,82 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 🌟 2.5 CURATED VISUAL GALLERY (IMAGE BLANKS WITH SLIDE ANIMATION) */}
-      <section className="w-full max-w-[1400px] mx-auto px-6 py-24 border-b border-[#EBE5DA]">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-4"
-        >
+      {/* 🌟 2.5 CURATED VISUAL GALLERY */}
+      <section className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 py-16 sm:py-24 border-b border-[#EBE5DA]">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-14 gap-3 sm:gap-4">
           <div>
-            <span className="text-[#C19A6B] uppercase tracking-[0.2em] font-semibold text-xs mb-3 block">
+            <span className="text-[#C19A6B] uppercase tracking-[0.2em] font-semibold text-[10px] sm:text-xs mb-2 sm:mb-3 block">
               {siteData?.curatedGallery?.tag || "Visual Perspectives"}
             </span>
-            <h2 className="text-3xl md:text-4xl font-serif text-[#3A332C]">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif text-[#3A332C]">
               {siteData?.curatedGallery?.title || "Artisan Silhouettes in Motion"}
             </h2>
           </div>
-          <p className="text-sm text-[#7A7065] font-light max-w-md">
+          <p className="text-xs sm:text-sm text-[#7A7065] font-light max-w-md leading-relaxed">
             {siteData?.curatedGallery?.desc || "A closer look at texture, depth, and the natural drape of hand-braided rPET cords."}
           </p>
-        </motion.div>
+        </div>
 
-        {/* 4 Image Slots (Masonry/Mosaic Balance) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* 4 Image Slots (Balanced 2-col on Mobile, 4-col on Desktop) */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
           {[0, 1, 2, 3].map((idx) => {
             const raw = siteData?.curatedGallery?.images?.[idx];
             const imgUrl = typeof raw === "string" && raw.trim().length > 0 ? raw : raw?.url || "";
 
             return (
-              <motion.div
+              <div
                 key={idx}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: idx * 0.1, ease: [0.22, 1, 0.36, 1] }}
-                className="aspect-[4/5] bg-[#EBE5DA] rounded-sm overflow-hidden relative group border border-[#DFD8CC] shadow-sm flex items-center justify-center will-change-transform"
-                style={{ transform: "translateZ(0)" }}
+                className="aspect-[4/5] bg-[#EBE5DA] rounded-sm overflow-hidden relative group border border-[#DFD8CC] shadow-xs flex items-center justify-center"
               >
                 {imgUrl ? (
                   <ScrollFadeImage
                     src={imgUrl}
                     alt={`Curated Frame ${idx + 1}`}
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 50vw, 25vw"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
                   />
                 ) : (
-                  <div className="flex flex-col items-center justify-center p-6 text-center text-[#8C7A63]">
-                    <div className="w-10 h-10 rounded-full border border-dashed border-[#C19A6B] flex items-center justify-center mb-3">
-                      <span className="text-[#C19A6B] text-lg font-light">+</span>
+                  <div className="flex flex-col items-center justify-center p-4 sm:p-6 text-center text-[#8C7A63]">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border border-dashed border-[#C19A6B] flex items-center justify-center mb-2 sm:mb-3">
+                      <span className="text-[#C19A6B] text-base sm:text-lg font-light">+</span>
                     </div>
-                    <span className="text-[11px] uppercase tracking-wider font-semibold">
-                      Spotlight Frame #{idx + 1}
+                    <span className="text-[10px] sm:text-[11px] uppercase tracking-wider font-semibold">
+                      Frame #{idx + 1}
                     </span>
-                    <span className="text-[9px] text-[#A89F91] mt-1 uppercase tracking-widest font-mono">
+                    <span className="text-[8px] sm:text-[9px] text-[#A89F91] mt-0.5 uppercase tracking-widest font-mono">
                       Empty Slot
                     </span>
                   </div>
                 )}
-              </motion.div>
+              </div>
             );
           })}
         </div>
       </section>
 
       {/* 3. SPLIT STORY - The Bhadohi Heritage */}
-      <section className="w-full max-w-[1400px] mx-auto px-6 py-24 border-b border-[#EBE5DA]">
-        <div className="flex flex-col md:flex-row items-center gap-20">
-          <motion.div 
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="w-full md:w-1/2"
-          >
-            <span className="text-[#C19A6B] uppercase tracking-[0.2em] font-semibold text-xs mb-4 block">
+      <section className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 py-16 sm:py-24 border-b border-[#EBE5DA]">
+        <div className="flex flex-col md:flex-row items-center gap-10 md:gap-16 lg:gap-20">
+          <div className="w-full md:w-1/2">
+            <span className="text-[#C19A6B] uppercase tracking-[0.2em] font-semibold text-[10px] sm:text-xs mb-3 block">
               {siteData?.story?.tag || "The Heritage of Bhadohi"}
             </span>
-            <h2 className="text-4xl md:text-5xl font-serif text-[#3A332C] mb-8 leading-[1.2]">
+            <h2 className="text-2xl sm:text-4xl md:text-5xl font-serif text-[#3A332C] mb-4 sm:mb-6 leading-[1.2]">
               {siteData?.story?.title || "Centuries of Tradition. Reimagined with rPET."}
             </h2>
-            <p className="text-[#6B6054] text-lg leading-relaxed font-light mb-10 whitespace-pre-line">
+            <p className="text-[#6B6054] text-sm sm:text-base md:text-lg leading-relaxed font-light mb-6 sm:mb-8 whitespace-pre-line">
               {siteData?.story?.description || "Operating right from Bhadohi, India's world-renowned 'Carpet City', RugZora bridges ancient braiding legacy with conscious innovation."}
             </p>
-            <a href="/about" className="inline-flex items-center text-[#3A332C] uppercase tracking-[0.15em] text-xs font-semibold hover:text-[#C19A6B] transition-colors border-b border-[#3A332C] hover:border-[#C19A6B] pb-1">
-              Read Our Full Story
+            <a href="/about" className="inline-flex items-center text-[#3A332C] uppercase tracking-[0.15em] text-[11px] sm:text-xs font-semibold hover:text-[#C19A6B] transition-colors border-b border-[#3A332C] hover:border-[#C19A6B] pb-1">
+              Read Our Full Story →
             </a>
-          </motion.div>
-          <div className="w-full md:w-1/2 relative h-[600px] rounded-sm overflow-hidden group bg-[#EBE5DA] flex items-center justify-center">
+          </div>
+          <div className="w-full md:w-1/2 relative h-[280px] sm:h-[420px] md:h-[550px] rounded-sm overflow-hidden group bg-[#EBE5DA] flex items-center justify-center">
             {siteData?.story?.image ? (
               <ScrollFadeImage 
                 src={siteData.story.image} 
                 alt="Bespoke Chunky Braided Rug" 
+                sizes="(max-width: 768px) 100vw, 50vw"
                 className="group-hover:scale-105 transition-transform duration-700 ease-out" 
               />
             ) : (
@@ -408,42 +384,33 @@ export default function Home() {
       </section>
 
       {/* 4. SIGNATURE CATALOG PROFILES */}
-      <section className="w-full bg-[#EBE5DA] py-40">
-        <motion.div 
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="max-w-[1400px] mx-auto px-6 text-center mb-24"
-        >
-          <h2 className="text-4xl md:text-5xl font-serif text-[#3A332C] mb-6">
+      <section className="w-full bg-[#EBE5DA] py-16 sm:py-24 md:py-32">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 text-center mb-10 sm:mb-16">
+          <h2 className="text-2xl sm:text-4xl md:text-5xl font-serif text-[#3A332C] mb-3 sm:mb-4">
             {siteData?.silhouettesHeader?.title || "Signature Silhouettes"}
           </h2>
-          <p className="text-[#6B6054] font-light text-lg">
+          <p className="text-[#6B6054] font-light text-xs sm:text-base md:text-lg max-w-xl mx-auto">
             {siteData?.silhouettesHeader?.desc || "Braided profiles tailored to balance your home's geometry."}
           </p>
-        </motion.div>
+        </div>
 
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 sm:gap-10 items-stretch">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-10 items-stretch">
           {(siteData?.silhouettes || defaultSilhouettes).map((item: any, index: number) => {
             const silhouetteImg = typeof item.img === "string" ? item.img : item.img?.url || defaultSilhouettes[index]?.img;
             const isCenterCard = index === 1;
 
             return (
-              <motion.div 
+              <div 
                 key={index} 
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                className={`bg-[#F8F5F0] p-6 sm:p-8 shadow-sm hover:shadow-2xl transition-all duration-300 group flex flex-col min-h-[480px] sm:min-h-[540px] ${
-                  isCenterCard ? "lg:-translate-y-8 shadow-md" : ""
+                className={`bg-[#F8F5F0] p-5 sm:p-7 shadow-xs hover:shadow-xl transition-all duration-300 group flex flex-col min-h-[360px] sm:min-h-[440px] rounded-sm ${
+                  isCenterCard ? "lg:-translate-y-6 shadow-md" : ""
                 }`}
               >
-                <div className="flex-grow overflow-hidden relative mb-8 rounded-sm bg-[#DFD8CC] flex items-center justify-center">
+                <div className="flex-grow overflow-hidden relative mb-5 sm:mb-6 rounded-sm bg-[#DFD8CC] flex items-center justify-center min-h-[220px]">
                   {silhouetteImg ? (
                     <ScrollFadeImage 
                       src={silhouetteImg} 
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                       className="group-hover:scale-105 transition-transform duration-700 ease-out" 
                       alt={item.title} 
                     />
@@ -451,44 +418,38 @@ export default function Home() {
                     <span className="text-xs uppercase text-[#8C7A63] tracking-widest font-semibold">No Image</span>
                   )}
                 </div>
-                <h3 className="text-3xl font-serif text-[#3A332C] mb-3">{item.title}</h3>
-                <p className="text-[#7A7065] font-light mb-8">{item.desc}</p>
+                <h3 className="text-xl sm:text-2xl font-serif text-[#3A332C] mb-2">{item.title}</h3>
+                <p className="text-[#7A7065] font-light text-xs sm:text-sm mb-5 leading-relaxed">{item.desc}</p>
                 <a 
                   href="/collections" 
-                  className="text-xs uppercase tracking-[0.1em] text-[#C19A6B] font-semibold mt-auto inline-block"
+                  className="text-[11px] sm:text-xs uppercase tracking-[0.14em] text-[#C19A6B] font-semibold mt-auto inline-block"
                 >
                   Shop Silhouettes →
                 </a>
-              </motion.div>
+              </div>
             );
           })}
         </div>
       </section>
 
       {/* 5. MATERIAL SCIENCE */}
-      <section className="w-full max-w-[1400px] mx-auto px-6 py-32 border-b border-[#EBE5DA]">
-        <div className="flex flex-col md:flex-row items-center gap-16">
-          <motion.div 
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="w-full md:w-5/12 order-2 md:order-1"
-          >
-            <span className="text-[#C19A6B] uppercase tracking-[0.2em] font-semibold text-xs mb-4 block">
+      <section className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 py-16 sm:py-24 md:py-28 border-b border-[#EBE5DA]">
+        <div className="flex flex-col md:flex-row items-center gap-10 sm:gap-14 md:gap-16">
+          <div className="w-full md:w-5/12 order-2 md:order-1">
+            <span className="text-[#C19A6B] uppercase tracking-[0.2em] font-semibold text-[10px] sm:text-xs mb-3 block">
               {siteData?.materialScience?.tag || "Material Science"}
             </span>
-            <h2 className="text-4xl md:text-5xl font-serif text-[#3A332C] mb-8 leading-[1.2]">
+            <h2 className="text-2xl sm:text-4xl md:text-5xl font-serif text-[#3A332C] mb-4 sm:mb-6 leading-[1.2]">
               {siteData?.materialScience?.title || "The Softness of Wool. The Strength of rPET."}
             </h2>
-            <p className="text-[#6B6054] text-lg leading-relaxed font-light mb-10">
+            <p className="text-[#6B6054] text-xs sm:text-base md:text-lg leading-relaxed font-light mb-6 sm:mb-8">
               {siteData?.materialScience?.desc || "Zero plastic stiffness. By micro-spinning recycled polyester, our rugs offer pure wool-grade plushness without scratching skin."}
             </p>
-            <a href="/about" className="inline-block border border-[#3A332C] px-10 py-4 text-xs tracking-[0.2em] uppercase text-[#3A332C] hover:bg-[#3A332C] hover:text-[#F8F5F0] transition duration-300">
+            <a href="/about" className="inline-block border border-[#3A332C] px-6 sm:px-8 py-3.5 text-[11px] sm:text-xs tracking-[0.18em] uppercase text-[#3A332C] hover:bg-[#3A332C] hover:text-[#F8F5F0] transition duration-300 font-semibold rounded-sm">
               {siteData?.materialScience?.btnText || "Explore Our Fiber Craft"}
             </a>
-          </motion.div>
-          <div className="w-full md:w-7/12 order-1 md:order-2 relative h-[600px] md:h-[700px] rounded-sm overflow-hidden group bg-[#EBE5DA] flex items-center justify-center">
+          </div>
+          <div className="w-full md:w-7/12 order-1 md:order-2 relative h-[280px] sm:h-[420px] md:h-[580px] rounded-sm overflow-hidden group bg-[#EBE5DA] flex items-center justify-center">
             {siteData?.materialScience?.img ? (
               <ScrollFadeImage 
                 src={siteData.materialScience.img} 
@@ -503,25 +464,25 @@ export default function Home() {
       </section>
 
       {/* 6. THE TEXTURE LIBRARY */}
-      <section className="w-full max-w-[1400px] mx-auto px-6 py-28 border-b border-[#EBE5DA]">
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-4">
+      <section className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 py-16 sm:py-24 border-b border-[#EBE5DA]">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-12 gap-3 sm:gap-4">
           <div>
-            <span className="text-[#C19A6B] uppercase tracking-[0.2em] font-semibold text-xs mb-3 block">
+            <span className="text-[#C19A6B] uppercase tracking-[0.2em] font-semibold text-[10px] sm:text-xs mb-2 block">
               {siteData?.textureLibrary?.tag || "Natural Warmth"}
             </span>
-            <h2 className="text-3xl md:text-5xl font-serif text-[#3A332C]">
+            <h2 className="text-2xl sm:text-4xl md:text-5xl font-serif text-[#3A332C]">
               {siteData?.textureLibrary?.title || "Neutral & Marled Palettes"}
             </h2>
           </div>
           <a
             href="/collections"
-            className="text-xs uppercase tracking-[0.15em] font-bold text-[#8C7A63] hover:text-[#3A332C] transition-colors underline underline-offset-8"
+            className="text-[11px] sm:text-xs uppercase tracking-[0.15em] font-bold text-[#8C7A63] hover:text-[#3A332C] transition-colors underline underline-offset-4 sm:underline-offset-8"
           >
-            View All Textures
+            View All Textures →
           </a>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6">
           {[0, 1, 2, 3].map((idx) => {
             const raw = siteData?.textureLibrary?.images?.[idx];
             const imageUrl = typeof raw === "string" && raw.trim().length > 0 
@@ -533,7 +494,7 @@ export default function Home() {
             return (
               <div
                 key={idx}
-                className="aspect-square bg-[#EBE5DA] rounded-sm overflow-hidden relative group shadow-sm flex items-center justify-center"
+                className="aspect-square bg-[#EBE5DA] rounded-sm overflow-hidden relative group shadow-xs flex items-center justify-center border border-[#DFD8CC]"
               >
                 {imageUrl ? (
                   <ScrollFadeImage
@@ -542,7 +503,7 @@ export default function Home() {
                     className="group-hover:scale-105 transition-transform duration-500 ease-out"
                   />
                 ) : (
-                  <span className="text-[10px] uppercase text-[#8C7A63] tracking-widest font-semibold">No Swatch</span>
+                  <span className="text-[9px] sm:text-[10px] uppercase text-[#8C7A63] tracking-widest font-semibold">No Swatch</span>
                 )}
               </div>
             );
@@ -551,17 +512,17 @@ export default function Home() {
       </section>
 
       {/* 7. DESIGNED FOR LIVING SPACES */}
-      <section className="w-full max-w-[1400px] mx-auto px-6 py-28">
-        <div className="mb-16 text-center md:text-left">
-          <h2 className="text-3xl md:text-5xl font-serif text-[#3A332C] mb-3">
+      <section className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 py-16 sm:py-24">
+        <div className="mb-8 sm:mb-12 text-center md:text-left">
+          <h2 className="text-2xl sm:text-4xl md:text-5xl font-serif text-[#3A332C] mb-2 sm:mb-3">
             {siteData?.spacesHeader?.title || "Built for Family & High Traffic"}
           </h2>
-          <p className="text-[#6B6054] text-base font-light">
+          <p className="text-[#6B6054] text-xs sm:text-base font-light max-w-xl">
             {siteData?.spacesHeader?.desc || "Hydrophobic, stain-resistant fibers designed for effortless living."}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
           {[0, 1, 2].map((idx) => {
             const spaceItem = siteData?.spaces?.[idx] || defaultSpaces[idx];
             const spaceImg = typeof spaceItem?.img === "string" && spaceItem.img.trim().length > 0 
@@ -571,7 +532,7 @@ export default function Home() {
             return (
               <div
                 key={idx}
-                className="group relative h-[480px] md:h-[580px] rounded-sm overflow-hidden bg-[#EBE5DA] shadow-md flex flex-col justify-end p-8"
+                className="group relative h-[320px] sm:h-[420px] md:h-[520px] rounded-sm overflow-hidden bg-[#EBE5DA] shadow-md flex flex-col justify-end p-5 sm:p-7"
               >
                 {spaceImg ? (
                   <ScrollFadeImage
@@ -582,14 +543,14 @@ export default function Home() {
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center text-xs uppercase text-[#8C7A63] font-semibold">No Space Image</div>
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#241F1A]/80 via-black/20 to-transparent"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-[#241F1A]/85 via-black/25 to-transparent"></div>
 
                 <div className="relative z-10">
-                  <h3 className="text-2xl font-serif text-[#F8F5F0] mb-2">
+                  <h3 className="text-lg sm:text-2xl font-serif text-[#F8F5F0] mb-1 sm:mb-2">
                     {spaceItem?.title}
                   </h3>
                   {spaceItem?.link && (
-                    <span className="text-xs uppercase tracking-[0.2em] font-semibold text-[#C19A6B] group-hover:underline">
+                    <span className="text-[10px] sm:text-xs uppercase tracking-[0.2em] font-semibold text-[#C19A6B] group-hover:underline">
                       {spaceItem.link}
                     </span>
                   )}
@@ -601,9 +562,9 @@ export default function Home() {
       </section>
 
       {/* 8. BESPOKE STUDIO SPOTLIGHT */}
-      <section className="w-full max-w-[1400px] mx-auto px-6 py-32 relative">
-        <div className="flex flex-col md:flex-row gap-10">
-          <div className="w-full md:w-2/3 h-[700px] bg-[#EBE5DA] relative overflow-hidden rounded-sm flex items-center justify-center">
+      <section className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 py-16 sm:py-24 md:py-28 relative">
+        <div className="flex flex-col md:flex-row gap-6 sm:gap-10">
+          <div className="w-full md:w-2/3 h-[280px] sm:h-[420px] md:h-[600px] bg-[#EBE5DA] relative overflow-hidden rounded-sm flex items-center justify-center">
             {siteData?.bespoke?.mainImage ? (
               <ScrollFadeImage 
                 src={siteData.bespoke.mainImage} 
@@ -614,24 +575,20 @@ export default function Home() {
             )}
           </div>
 
-          <motion.div 
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="w-full md:w-1/3 md:absolute md:right-10 md:top-48 bg-white p-12 shadow-2xl max-w-md"
+          <div 
+            className="w-full md:w-1/3 md:absolute md:right-10 md:top-36 bg-white p-6 sm:p-8 md:p-10 shadow-xl border border-[#EBE5DA] max-w-md rounded-sm"
           >
-            <span className="text-[#C19A6B] font-semibold tracking-[0.2em] uppercase text-xs mb-4 block">
+            <span className="text-[#C19A6B] font-semibold tracking-[0.2em] uppercase text-[10px] sm:text-xs mb-3 block">
               {siteData?.bespoke?.tag || "End-to-End Bespoke"}
             </span>
-            <h2 className="text-4xl font-serif text-[#3A332C] mb-6">
+            <h2 className="text-2xl sm:text-3xl font-serif text-[#3A332C] mb-3 sm:mb-4">
               {siteData?.bespoke?.title || "Tailored to Your Floor Plan"}
             </h2>
-            <p className="text-[#6B6054] font-light leading-relaxed mb-10">
+            <p className="text-[#6B6054] font-light leading-relaxed text-xs sm:text-sm mb-6 sm:mb-8">
               {siteData?.bespoke?.description || "Need non-standard proportions? Customize shapes, custom foot measurements, and duo-tone palette contrasts crafted individually in our Bhadohi facility."}
             </p>
             
-            <div className="h-40 bg-[#EBE5DA] mb-8 overflow-hidden rounded-sm flex items-center justify-center">
+            <div className="h-32 sm:h-36 bg-[#EBE5DA] mb-6 overflow-hidden rounded-sm flex items-center justify-center border border-[#DFD8CC]">
                {siteData?.bespoke?.detailImage ? (
                  <ScrollFadeImage 
                     src={siteData.bespoke.detailImage} 
@@ -649,24 +606,24 @@ export default function Home() {
                   ? siteData.bespoke.btnLink
                   : "/customize"
               } 
-              className="w-full min-h-[48px] flex items-center justify-center text-center border border-[#3A332C] text-[#3A332C] py-3.5 px-4 text-xs tracking-[0.18em] uppercase hover:bg-[#3A332C] hover:text-[#F8F5F0] transition duration-300 font-semibold rounded-sm"
+              className="w-full min-h-[46px] flex items-center justify-center text-center border border-[#3A332C] text-[#3A332C] py-3 px-4 text-[11px] sm:text-xs tracking-[0.16em] uppercase hover:bg-[#3A332C] hover:text-[#F8F5F0] transition duration-300 font-semibold rounded-sm"
             >
               {siteData?.bespoke?.btnText || "Customize Your Rug"}
             </Link>
-          </motion.div>
+          </div>
         </div>
       </section>
 
       {/* 9. THE RUGZORA DISTINCTION */}
-      <section className="w-full bg-[#F4F0E8] border-y border-[#E8E1D5] py-24 px-6">
+      <section className="w-full bg-[#F4F0E8] border-y border-[#E8E1D5] py-16 sm:py-24 px-4 sm:px-6">
         <div className="max-w-[1200px] mx-auto text-center">
-          <span className="text-[#C19A6B] uppercase tracking-[0.25em] font-semibold text-xs mb-4 block">The RugZora Standard</span>
-          <h3 className="text-3xl md:text-4xl font-serif text-[#3A332C] mb-6">Conscious Luxury. Uncompromised Resilience.</h3>
-          <p className="text-[#6B6054] text-base md:text-lg font-light leading-relaxed max-w-3xl mx-auto mb-16">
+          <span className="text-[#C19A6B] uppercase tracking-[0.25em] font-semibold text-[10px] sm:text-xs mb-3 block">The RugZora Standard</span>
+          <h3 className="text-2xl sm:text-3xl md:text-4xl font-serif text-[#3A332C] mb-4 sm:mb-6">Conscious Luxury. Uncompromised Resilience.</h3>
+          <p className="text-[#6B6054] text-xs sm:text-base md:text-lg font-light leading-relaxed max-w-3xl mx-auto mb-10 sm:mb-14">
             Engineered for longevity and hand-locked with industrial zigzag stitching. Each piece honors the handmade mark with unique speckle subtleties and genuine Indian craft.
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 text-left border-t border-[#E0D8CA] pt-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 text-left border-t border-[#E0D8CA] pt-8 sm:pt-12">
             {[
               { 
                 num: "01", 
@@ -684,24 +641,18 @@ export default function Home() {
                 desc: "No middlemen or retail markup. Every reversible carpet is shipped straight from our workshop looms to your doorstep." 
               }
             ].map((item, i) => (
-              <motion.div 
-                key={i}
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: i * 0.1 }}
-              >
-                <span className="text-[#C19A6B] font-serif text-2xl font-bold mb-2 block">{item.num}</span>
-                <h4 className="text-lg font-serif text-[#3A332C] mb-2">{item.title}</h4>
-                <p className="text-sm text-[#7A7065] font-light leading-relaxed">{item.desc}</p>
-              </motion.div>
+              <div key={i} className="p-2">
+                <span className="text-[#C19A6B] font-serif text-xl sm:text-2xl font-bold mb-1.5 block">{item.num}</span>
+                <h4 className="text-base sm:text-lg font-serif text-[#3A332C] mb-1.5">{item.title}</h4>
+                <p className="text-xs sm:text-sm text-[#7A7065] font-light leading-relaxed">{item.desc}</p>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
       {/* 10. THE ARTISAN PROMISE */}
-      <section className="relative w-full py-40 flex items-center justify-center text-center px-6 overflow-hidden">
+      <section className="relative w-full py-24 sm:py-36 md:py-40 flex items-center justify-center text-center px-4 sm:px-6 overflow-hidden">
         <div className="absolute inset-0 z-0 bg-[#241F1A]">
           {siteData?.promise?.image && (
             <ScrollFadeImage 
@@ -713,15 +664,15 @@ export default function Home() {
           <div className="absolute inset-0 bg-[#241F1A]/85"></div>
         </div>
         <div className="relative z-10 max-w-4xl mx-auto">
-          <svg className="w-10 h-10 text-[#C19A6B] mx-auto mb-8 drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-8 h-8 sm:w-10 sm:h-10 text-[#C19A6B] mx-auto mb-6 sm:mb-8 drop-shadow-md" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
           </svg>
-          <h2 className="text-3xl md:text-5xl font-serif text-[#F8F5F0] mb-6 leading-snug drop-shadow-lg">
+          <h2 className="text-2xl sm:text-3xl md:text-5xl font-serif text-[#F8F5F0] mb-4 sm:mb-6 leading-snug drop-shadow-lg">
             {siteData?.promise?.title || "Sustainable Braided Luxury. Straight from our Workshop in Bhadohi."}
           </h2>
           <a 
             href="/collections" 
-            className="text-[#C19A6B] border-b border-[#C19A6B] pb-1 uppercase tracking-[0.2em] text-xs md:text-sm hover:text-white hover:border-white transition-colors duration-300"
+            className="text-[#C19A6B] border-b border-[#C19A6B] pb-1 uppercase tracking-[0.16em] sm:tracking-[0.2em] text-[11px] sm:text-xs md:text-sm hover:text-white hover:border-white transition-colors duration-300"
           >
             {siteData?.promise?.ctaText || "Explore All Handcrafted Rugs"}
           </a>

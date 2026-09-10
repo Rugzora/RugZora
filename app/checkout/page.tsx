@@ -257,11 +257,11 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="bg-[#F8F5F0] min-h-screen pt-32 pb-24 font-sans">
-      <div className="max-w-[1300px] mx-auto px-6">
+    <div className="bg-[#F8F5F0] min-h-screen pt-8 sm:pt-12 md:pt-14 pb-16 sm:pb-24 font-sans">
+      <div className="max-w-[1300px] mx-auto px-4 sm:px-6">
         
         {/* TOP BREADCRUMB */}
-        <div className="flex items-center justify-between border-b border-[#DFD8CC] pb-6 mb-10">
+        <div className="flex items-center justify-between border-b border-[#DFD8CC] pb-5 mb-6 sm:mb-8">
           <div>
             <span className="text-[11px] uppercase tracking-[0.2em] text-[#C19A6B] font-bold block mb-1">
               Secure Checkout
@@ -713,27 +713,44 @@ export default function CheckoutPage() {
               <div className="divide-y divide-[#EBE5DA] max-h-72 overflow-y-auto custom-scrollbar mb-6 pr-1">
                 {cartItems.map((item, idx) => (
                   <div key={idx} className="py-4 first:pt-0 last:pb-0 flex items-center gap-4">
-                    <div className="w-16 h-16 bg-[#DFD8CC] rounded-sm overflow-hidden relative shrink-0">
+                    <div className="w-16 h-16 bg-[#FAF8F5] rounded-sm overflow-hidden relative shrink-0 border border-[#DFD8CC] p-1 flex items-center justify-center">
                       {item.image && (
-                        <Image
-                          src={item.image}
-                          alt={item.name}
-                          fill
-                          sizes="64px"
-                          className="object-cover"
-                        />
+                        item.image.startsWith("data:") ? (
+                          <img
+                            src={item.image}
+                            alt={item.name}
+                            className="w-full h-full object-contain"
+                          />
+                        ) : (
+                          <Image
+                            src={item.image}
+                            alt={item.name}
+                            fill
+                            sizes="64px"
+                            className="object-cover"
+                          />
+                        )
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
+                      {item.isCustom && (
+                        <span className="bg-[#C19A6B] text-white px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded-xs inline-block mb-1">
+                          CUSTOM ORDER
+                        </span>
+                      )}
                       <h4 className="text-sm font-serif font-medium text-[#3A332C] truncate">
                         {item.name}
                       </h4>
-                      <div className="text-xs text-[#7A7065] mt-0.5">
+                      <div className="text-xs text-[#7A7065] mt-0.5 leading-snug">
                         <span>Size: {item.size}</span>
-                        {item.isCustom && (
-                          <span className="ml-2 text-[#C19A6B] font-bold">(Bespoke)</span>
-                        )}
                       </div>
+                      {item.isCustom && item.customDetails && (
+                        <div className="flex items-center gap-1.5 mt-1 text-[10px] text-[#8C7A63]">
+                          <span>Fibers:</span>
+                          <span className="w-2.5 h-2.5 rounded-full border border-black/20" style={{ backgroundColor: item.customDetails.brownFiberColor }} title="1st (Brown) Fiber" />
+                          <span className="w-2.5 h-2.5 rounded-full border border-black/20" style={{ backgroundColor: item.customDetails.whiteFiberColor }} title="2nd (White) Fiber" />
+                        </div>
+                      )}
                       <div className="text-xs text-[#8C7A63] mt-1">Qty: {item.quantity || 1}</div>
                     </div>
                     <div className="text-sm font-semibold text-[#3A332C] shrink-0">

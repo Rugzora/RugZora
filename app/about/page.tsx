@@ -85,16 +85,16 @@ export default function About() {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="pt-40 pb-24 px-6 max-w-4xl mx-auto text-center min-h-screen font-sans"
+      className="pt-8 sm:pt-12 md:pt-14 pb-16 sm:pb-24 px-6 max-w-4xl mx-auto text-center min-h-screen font-sans"
     >
       {tag && (
-        <motion.h3 variants={itemVariants} className="tracking-[0.2em] text-xs font-semibold mb-6 text-[#C5A059] uppercase">
+        <motion.h3 variants={itemVariants} className="tracking-[0.2em] text-xs font-semibold mb-4 sm:mb-6 text-[#C5A059] uppercase">
           {tag}
         </motion.h3>
       )}
       
       {title && (
-        <motion.h1 variants={itemVariants} className="text-5xl md:text-6xl font-serif mb-12 text-[#3E362E]">
+        <motion.h1 variants={itemVariants} className="text-4xl sm:text-5xl md:text-6xl font-serif mb-8 sm:mb-10 text-[#3E362E]">
           {title}
         </motion.h1>
       )}
@@ -127,8 +127,9 @@ export default function About() {
               src={displayImage} 
               alt={title || "RugZora Workshop"} 
               fill
-              sizes="(max-width: 1024px) 100vw, 896px"
+              sizes="(max-width: 1024px) 100vw, 1200px"
               priority
+              quality={95}
               className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out" 
             />
           ) : (

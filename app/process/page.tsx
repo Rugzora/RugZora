@@ -86,11 +86,11 @@ const steps = [
 
 export default function OrderProcessTimeline() {
   return (
-    <div className="bg-[#F8F5F0] min-h-screen font-sans pt-28 pb-32 px-6">
+    <div className="bg-[#F8F5F0] min-h-screen font-sans pt-8 sm:pt-12 md:pt-14 pb-24 px-4 sm:px-6">
       <div className="max-w-4xl mx-auto">
         
         {/* Top Breadcrumb & Header */}
-        <div className="text-center mb-20">
+        <div className="text-center mb-10 sm:mb-14">
           <Link 
             href="/" 
             className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-[#C19A6B] font-semibold mb-4 hover:text-[#3A332C] transition-colors"

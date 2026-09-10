@@ -95,7 +95,7 @@ export default function Legacy() {
               alt={hero?.title || "Bhadohi Heritage"} 
               fill
               priority // 🌟 Sabse pehle instant load hoga
-              quality={90}
+              quality={95}
               sizes="100vw"
               className="object-cover opacity-80" 
             />
@@ -165,8 +165,8 @@ export default function Legacy() {
                 src={workshopImg} 
                 alt={workshop?.title || "Workshop Machinery"} 
                 fill
-                sizes="(max-width: 768px) 100vw, 800px"
-                quality={88}
+                sizes="(max-width: 768px) 100vw, 1200px"
+                quality={95}
                 className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out" 
               />
             ) : (
@@ -230,8 +230,8 @@ export default function Legacy() {
                 src={pillar1Img} 
                 alt={materials?.pillar1?.title || "Pillar 1 Material"} 
                 fill
-                sizes="(max-width: 768px) 100vw, 700px"
-                quality={88}
+                sizes="(max-width: 768px) 100vw, 1000px"
+                quality={95}
                 className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out" 
               />
             ) : (
@@ -266,8 +266,8 @@ export default function Legacy() {
                 src={pillar2Img} 
                 alt={materials?.pillar2?.title || "Pillar 2 Material"} 
                 fill
-                sizes="(max-width: 768px) 100vw, 700px"
-                quality={88}
+                sizes="(max-width: 768px) 100vw, 1000px"
+                quality={95}
                 className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out" 
               />
             ) : (

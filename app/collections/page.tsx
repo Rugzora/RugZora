@@ -123,7 +123,7 @@ export default function Shop() {
   const hasBgImage = typeof heroBg === "string" && heroBg.trim() !== "";
 
   return (
-    <div className="bg-[#F8F5F0] pt-20 pb-20 px-6 min-h-screen font-sans">
+    <div className="bg-[#F8F5F0] pt-6 sm:pt-10 md:pt-12 pb-20 px-4 sm:px-6 min-h-screen font-sans">
       <div className="max-w-[1600px] mx-auto">
         
         {/* Page Header */}
@@ -134,7 +134,7 @@ export default function Shop() {
               alt="Collections Header"
               fill
               priority
-              quality={90}
+              quality={95}
               sizes="100vw"
               className="object-cover"
             />
@@ -199,8 +199,8 @@ export default function Shop() {
         {isLoading ? (
           <SkeletonProductGrid />
         ) : (
-          <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-12">
-            <AnimatePresence mode="popLayout">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-12">
+            <AnimatePresence>
               {filteredProducts.map((item, index) => {
                 const displayImg = Array.isArray(item.images) && item.images.length > 0 
                   ? item.images[0] 
@@ -209,15 +209,14 @@ export default function Shop() {
                 return (
                   <motion.div 
                     key={item.id} 
-                    layout 
                     initial={{ opacity: 0 }} 
                     animate={{ opacity: 1 }} 
                     exit={{ opacity: 0 }} 
                     transition={{ 
-                      duration: 0.5, 
-                      delay: index * 0.03, 
+                      duration: 0.35, 
+                      delay: Math.min(index * 0.02, 0.15), 
                       ease: "easeOut" 
-                    }}
+                    }} 
                     className="flex flex-col group h-full"
                   >
                     <Link href={`/product/${item.id}`} className="flex flex-col h-full w-full cursor-pointer">
@@ -227,10 +226,11 @@ export default function Shop() {
                             src={displayImg} 
                             alt={item.name} 
                             fill
-                            priority={index < 4}
-                            loading={index < 4 ? "eager" : "lazy"}
-                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1440px) 33vw, 400px"
-                            quality={88}
+                            priority={index < 2}
+                            loading={index < 2 ? "eager" : "lazy"}
+                            decoding="async"
+                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1440px) 33vw, 25vw"
+                            quality={95}
                             className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out" 
                           />
                         )}
@@ -254,7 +254,7 @@ export default function Shop() {
                 );
               })}
             </AnimatePresence>
-          </motion.div>
+          </div>
         )}
 
         {!isLoading && filteredProducts.length === 0 && (
@@ -274,8 +274,9 @@ export default function Shop() {
                 {pageContent.banner.description}
               </p>
             </div>
+            {/* 🌟 Button explicitly routed to /customize */}
             <Link
-              href={pageContent.banner.ctaLink || "/collections"}
+              href="/customize"
               className="bg-[#3A332C] text-white hover:bg-[#C19A6B] px-8 py-3.5 text-xs tracking-[0.2em] uppercase font-semibold transition-colors duration-300 rounded-sm shadow-md shrink-0"
             >
               {pageContent.banner.ctaText || "Start Custom Order"}

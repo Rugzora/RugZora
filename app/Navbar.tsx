@@ -558,15 +558,40 @@ export default function Navbar() {
                         <button onClick={() => removeFromCart(idx)} className="absolute top-2 right-2 text-[#8C7A63] hover:text-red-500 transition-colors" aria-label="Remove item">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                         </button>
-                        <div className="w-20 h-20 bg-[#F8F5F0] rounded-sm overflow-hidden shrink-0 relative">
-                          {item.image && <Image src={item.image} alt={item.name} fill sizes="80px" className="object-cover" />}
+                        <div className="w-20 h-20 bg-[#FAF8F5] rounded-sm overflow-hidden shrink-0 relative border border-[#EBE5DA] p-1 flex items-center justify-center">
+                          {item.image && (
+                            item.image.startsWith("data:") ? (
+                              <img
+                                src={item.image}
+                                alt={item.name}
+                                className="w-full h-full object-contain drop-shadow-xs"
+                              />
+                            ) : (
+                              <Image src={item.image} alt={item.name} fill sizes="80px" className="object-cover" />
+                            )
+                          )}
                         </div>
-                        <div className="flex flex-col flex-1">
-                          <span className="text-[10px] text-[#C19A6B] uppercase tracking-[0.1em]">{item.category}</span>
-                          <span className="text-base text-[#3A332C] font-serif font-medium leading-tight my-1">{item.name}</span>
-                          <span className="text-xs text-[#7A7065] mb-2">Size: {item.size}</span>
-                          <div className="flex items-center justify-between mt-auto">
-                            <span className="text-sm text-[#8C7A63]">Qty: {item.quantity}</span>
+                        <div className="flex flex-col flex-1 min-w-0">
+                          {item.isCustom ? (
+                            <span className="bg-[#C19A6B] text-white px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded-xs self-start mb-1 shadow-2xs">
+                              CUSTOM ORDER
+                            </span>
+                          ) : (
+                            <span className="text-[10px] text-[#C19A6B] uppercase tracking-[0.1em]">{item.category}</span>
+                          )}
+                          <span className="text-sm text-[#3A332C] font-serif font-medium leading-tight mb-1 truncate">{item.name}</span>
+                          <span className="text-xs text-[#7A7065] font-medium leading-snug">Size: {item.size}</span>
+                          {item.isCustom && item.customDetails && (
+                            <div className="flex items-center gap-1.5 mt-1 text-[10px] text-[#8C7A63]">
+                              <span>Fibers:</span>
+                              <div className="flex items-center gap-1">
+                                <span className="w-2.5 h-2.5 rounded-full border border-black/20" style={{ backgroundColor: item.customDetails.brownFiberColor }} title="1st (Brown) Fiber" />
+                                <span className="w-2.5 h-2.5 rounded-full border border-black/20" style={{ backgroundColor: item.customDetails.whiteFiberColor }} title="2nd (White) Fiber" />
+                              </div>
+                            </div>
+                          )}
+                          <div className="flex items-center justify-between mt-auto pt-1.5">
+                            <span className="text-xs text-[#8C7A63]">Qty: {item.quantity}</span>
                             <span className="text-sm font-semibold text-[#3A332C]">{formatPrice(item.price, item.quantity)}</span>
                           </div>
                         </div>

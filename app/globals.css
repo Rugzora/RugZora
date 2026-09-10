@@ -5,7 +5,12 @@
 ========================================= */
 html, body {
   scroll-behavior: auto !important;
-  overscroll-behavior-y: none;
+}
+
+@media (min-width: 1024px) {
+  html, body {
+    overscroll-behavior-y: none;
+  }
 }
 
 html.lenis, html.lenis body {

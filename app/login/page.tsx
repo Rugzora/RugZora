@@ -61,7 +61,7 @@ function LoginContent() {
   };
 
   return (
-    <div className="bg-[#F8F5F0] min-h-screen pt-36 pb-24 px-6 flex items-center justify-center font-sans">
+    <div className="bg-[#F8F5F0] min-h-screen pt-10 sm:pt-14 md:pt-16 pb-20 px-4 sm:px-6 flex items-center justify-center font-sans">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
