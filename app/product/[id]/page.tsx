@@ -308,7 +308,7 @@ export default function ProductPage() {
                   loading={idx === 0 ? "eager" : "lazy"}
                   decoding="async"
                   sizes="(max-width: 768px) 100vw, (max-width: 1280px) 80vw, 1600px"
-                  quality={95}
+                  quality={85}
                   className="object-cover transition-transform duration-[1.5s] group-hover:scale-105 pointer-events-none" 
                 />
               </div>

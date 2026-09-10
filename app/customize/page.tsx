@@ -117,22 +117,32 @@ export function generateCustomRugSvgDataUri(
 ): string {
   const brownDark = adjustBrightness(brownColor, -24);
   const brownAccent = adjustBrightness(brownColor, 16);
+  const brownMid = adjustBrightness(brownColor, -10);
   const whiteLight = adjustBrightness(whiteColor, 8);
   const baseBg = adjustBrightness(whiteColor, -8);
+  const patternBg = adjustBrightness(whiteColor, -5);
+  const underlayColor = adjustBrightness(brownColor, 18);
 
   const defs = `
     <defs>
-      <pattern id="bm" width="32" height="18" patternUnits="userSpaceOnUse">
-        <path d="M-8 4 L8 14 M8 4 L24 14 M24 4 L40 14" fill="none" stroke="${brownColor}" stroke-width="5.5" stroke-linecap="round"/>
-        <path d="M-8 14 L8 4 M8 14 L24 4 M24 14 L40 4" fill="none" stroke="${whiteColor}" stroke-width="5.5" stroke-linecap="round"/>
-        <circle cx="5" cy="9" r="1.7" fill="${brownDark}" />
-        <circle cx="14" cy="5" r="1.4" fill="${whiteLight}" />
-        <circle cx="22" cy="12" r="1.6" fill="${brownAccent}" />
+      <!-- BRAIDED ROPE TEXTURE -->
+      <pattern id="bm" width="28" height="18" patternUnits="userSpaceOnUse">
+        <rect width="28" height="18" fill="${patternBg}"/>
+        <path d="M-8,2 L8,16 M6,2 L22,16 M20,2 L36,16" fill="none" stroke="${brownColor}" stroke-width="6" stroke-linecap="round"/>
+        <path d="M-8,16 L8,2 M6,16 L22,2 M20,16 L36,2" fill="none" stroke="${whiteColor}" stroke-width="6" stroke-linecap="round"/>
+        <path d="M1,5 L6,9 M13,11 L18,15 M23,4 L27,8" stroke="${brownDark}" stroke-width="2" stroke-linecap="round"/>
+        <path d="M2,13 L6,10 M14,5 L18,9 M25,14 L28,11" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
       </pattern>
-      <pattern id="sp" width="17" height="17" patternUnits="userSpaceOnUse">
-        <circle cx="2" cy="3" r="1.1" fill="${brownDark}" />
-        <circle cx="7" cy="5" r="1.0" fill="${whiteLight}" />
-        <circle cx="13" cy="2" r="1.1" fill="${brownAccent}" />
+
+      <!-- FINER SURFACE FIBERS -->
+      <pattern id="sp" width="19" height="19" patternUnits="userSpaceOnUse">
+        <circle cx="2" cy="3" r="1.2" fill="${brownDark}"/>
+        <circle cx="7" cy="6" r="1.0" fill="${whiteLight}"/>
+        <circle cx="14" cy="3" r="1.2" fill="${brownAccent}"/>
+        <circle cx="17" cy="9" r="1.0" fill="${whiteLight}"/>
+        <circle cx="5" cy="13" r="1.1" fill="${brownMid}"/>
+        <circle cx="12" cy="15" r="1.2" fill="${whiteLight}"/>
+        <circle cx="18" cy="17" r="1.0" fill="${brownDark}"/>
       </pattern>
     </defs>
   `;
@@ -144,78 +154,190 @@ export function generateCustomRugSvgDataUri(
     viewBox = "0 0 1000 1000";
     innerSvg = `
       ${defs}
-      <circle cx="500" cy="500" r="480" fill="${baseBg}" />
-      <circle cx="500" cy="500" r="470" fill="none" stroke="url(#bm)" stroke-width="25" />
-      <g fill="none" stroke="url(#bm)" stroke-width="27">
-        ${[442, 412, 382, 352, 322, 292, 262, 232, 202, 172, 142, 112, 82].map((r) => `<circle cx="500" cy="500" r="${r}" />`).join("")}
+      <circle cx="500" cy="500" r="482" fill="${baseBg}" />
+      <circle cx="500" cy="500" r="469" fill="none" stroke="${underlayColor}" stroke-width="34" />
+      <circle cx="500" cy="500" r="469" fill="none" stroke="url(#bm)" stroke-width="28" />
+      <g fill="none" stroke="url(#bm)" stroke-width="30" stroke-linejoin="round" stroke-linecap="round">
+        ${[433, 397, 361, 325, 289, 253, 217, 181, 145, 109, 73].map((r) => `<circle cx="500" cy="500" r="${r}" />`).join("")}
       </g>
       <circle cx="500" cy="500" r="54" fill="url(#bm)" />
-      <circle cx="500" cy="500" r="470" fill="url(#sp)" opacity="0.6" />
-      <g fill="none" stroke="${whiteLight}" stroke-width="3" opacity="0.7">
-        ${[455, 397, 337, 277, 217, 157, 97].map((r) => `<circle cx="500" cy="500" r="${r}" />`).join("")}
+      <circle cx="500" cy="500" r="469" fill="url(#sp)" opacity="0.55" />
+      <g fill="none" stroke="#FFFDF8" stroke-width="3.2" opacity="0.7" stroke-linejoin="round">
+        ${[452, 416, 344, 272, 200, 128].map((r) => `<circle cx="500" cy="500" r="${r}" />`).join("")}
+      </g>
+      <g fill="${brownDark}" opacity="0.65">
+        <circle cx="500" cy="68" r="2"/>
+        <circle cx="500" cy="932" r="2"/>
+        <circle cx="68" cy="500" r="2"/>
+        <circle cx="932" cy="500" r="2"/>
+        <circle cx="195" cy="195" r="1.8"/>
+        <circle cx="805" cy="195" r="1.8"/>
+        <circle cx="195" cy="805" r="1.8"/>
+        <circle cx="805" cy="805" r="1.8"/>
       </g>
     `;
   } else if (shape === "Square") {
     viewBox = "0 0 1000 1000";
     innerSvg = `
       ${defs}
-      <rect x="20" y="20" width="960" height="960" rx="34" fill="${baseBg}" />
-      <rect x="30" y="30" width="940" height="940" rx="29" fill="none" stroke="url(#bm)" stroke-width="25" />
-      <g fill="none" stroke="url(#bm)" stroke-width="27">
-        ${[58, 88, 118, 148, 178, 208, 238, 268, 298, 328, 358, 388, 418].map((p) => `<rect x="${p}" y="${p}" width="${1000 - 2 * p}" height="${1000 - 2 * p}" rx="12" />`).join("")}
+      <rect x="18" y="18" width="964" height="964" rx="38" fill="${baseBg}" />
+      <rect x="31" y="31" width="938" height="938" rx="31" fill="none" stroke="${underlayColor}" stroke-width="34" />
+      <rect x="31" y="31" width="938" height="938" rx="31" fill="none" stroke="url(#bm)" stroke-width="28" />
+      <g fill="none" stroke="url(#bm)" stroke-width="30" stroke-linejoin="round" stroke-linecap="round">
+        <rect x="67" y="67" width="866" height="866" rx="27" />
+        <rect x="103" y="103" width="794" height="794" rx="24" />
+        <rect x="139" y="139" width="722" height="722" rx="21" />
+        <rect x="175" y="175" width="650" height="650" rx="19" />
+        <rect x="211" y="211" width="578" height="578" rx="17" />
+        <rect x="247" y="247" width="506" height="506" rx="15" />
+        <rect x="283" y="283" width="434" height="434" rx="13" />
+        <rect x="319" y="319" width="362" height="362" rx="11" />
+        <rect x="355" y="355" width="290" height="290" rx="10" />
+        <rect x="391" y="391" width="218" height="218" rx="8" />
+        <rect x="427" y="427" width="146" height="146" rx="7" />
       </g>
-      <rect x="448" y="448" width="104" height="104" rx="5" fill="url(#bm)" />
-      <rect x="31" y="31" width="938" height="938" rx="29" fill="url(#sp)" opacity="0.6" />
+      <rect x="448" y="448" width="104" height="104" rx="6" fill="url(#bm)" />
+      <rect x="31" y="31" width="938" height="938" rx="31" fill="url(#sp)" opacity="0.55" />
+      <g fill="none" stroke="#FFFDF8" stroke-width="3.2" opacity="0.7" stroke-linejoin="round">
+        <rect x="48" y="48" width="904" height="904" rx="28" />
+        <rect x="84" y="84" width="832" height="832" rx="24" />
+        <rect x="156" y="156" width="688" height="688" rx="19" />
+        <rect x="228" y="228" width="544" height="544" rx="15" />
+        <rect x="300" y="300" width="400" height="400" rx="11" />
+        <rect x="372" y="372" width="256" height="256" rx="8" />
+      </g>
+      <g fill="${brownDark}" opacity="0.65">
+        <circle cx="82" cy="82" r="2"/>
+        <circle cx="116" cy="112" r="1.7"/>
+        <circle cx="148" cy="146" r="2"/>
+        <circle cx="914" cy="87" r="1.8"/>
+        <circle cx="882" cy="121" r="2"/>
+        <circle cx="82" cy="914" r="2"/>
+        <circle cx="914" cy="914" r="2"/>
+      </g>
     `;
   } else if (shape === "Oval") {
     // Authentic stadium: straight parallel sides + rounded ends
     const coreY1 = 470;
     const coreHeight = 460;
     const outerR = 430;
+    const concentricRadii = [394, 358, 322, 286, 250, 214, 178, 142, 106, 70, 34];
+    const highlightRadii = [412, 376, 304, 232, 160, 88];
+
     innerSvg = `
       ${defs}
-      <rect x="${500 - (outerR + 10)}" y="${coreY1 - (outerR + 10)}" width="${2 * (outerR + 10)}" height="${coreHeight + 2 * (outerR + 10)}" rx="${outerR + 10}" ry="${outerR + 10}" fill="${baseBg}" />
-      <rect x="${500 - outerR}" y="${coreY1 - outerR}" width="${2 * outerR}" height="${coreHeight + 2 * outerR}" rx="${outerR}" ry="${outerR}" fill="none" stroke="url(#bm)" stroke-width="25" />
-      <g fill="none" stroke="url(#bm)" stroke-width="27">
-        ${[402, 372, 342, 312, 282, 252, 222, 192, 162, 132, 102, 72, 42].map((r) => `<rect x="${500 - r}" y="${coreY1 - r}" width="${2 * r}" height="${coreHeight + 2 * r}" rx="${r}" ry="${r}" />`).join("")}
+      <rect x="${500 - (outerR + 18)}" y="${coreY1 - (outerR + 18)}" width="${2 * (outerR + 18)}" height="${coreHeight + 2 * (outerR + 18)}" rx="${outerR + 18}" ry="${outerR + 18}" fill="${baseBg}" />
+      <rect x="${500 - outerR}" y="${coreY1 - outerR}" width="${2 * outerR}" height="${coreHeight + 2 * outerR}" rx="${outerR}" ry="${outerR}" fill="none" stroke="${underlayColor}" stroke-width="34" />
+      <rect x="${500 - outerR}" y="${coreY1 - outerR}" width="${2 * outerR}" height="${coreHeight + 2 * outerR}" rx="${outerR}" ry="${outerR}" fill="none" stroke="url(#bm)" stroke-width="28" />
+      <g fill="none" stroke="url(#bm)" stroke-width="30" stroke-linejoin="round" stroke-linecap="round">
+        ${concentricRadii.map((r) => `<rect x="${500 - r}" y="${coreY1 - r}" width="${2 * r}" height="${coreHeight + 2 * r}" rx="${r}" ry="${r}" />`).join("")}
       </g>
-      <rect x="470" y="440" width="60" height="520" rx="30" ry="30" fill="url(#bm)" />
-      <rect x="${500 - outerR}" y="${coreY1 - outerR}" width="${2 * outerR}" height="${coreHeight + 2 * outerR}" rx="${outerR}" ry="${outerR}" fill="url(#sp)" opacity="0.6" />
+      <rect x="476" y="${coreY1 - 24}" width="48" height="${coreHeight + 48}" rx="24" ry="24" fill="url(#bm)" />
+      <rect x="${500 - outerR}" y="${coreY1 - outerR}" width="${2 * outerR}" height="${coreHeight + 2 * outerR}" rx="${outerR}" ry="${outerR}" fill="url(#sp)" opacity="0.55" />
+      <g fill="none" stroke="#FFFDF8" stroke-width="3.2" opacity="0.7" stroke-linejoin="round">
+        ${highlightRadii.map((r) => `<rect x="${500 - r}" y="${coreY1 - r}" width="${2 * r}" height="${coreHeight + 2 * r}" rx="${r}" ry="${r}" />`).join("")}
+      </g>
+      <g fill="${brownDark}" opacity="0.65">
+        <circle cx="116" cy="470" r="2"/>
+        <circle cx="884" cy="470" r="2"/>
+        <circle cx="116" cy="930" r="2"/>
+        <circle cx="884" cy="930" r="2"/>
+        <circle cx="500" cy="70" r="2"/>
+        <circle cx="500" cy="1330" r="2"/>
+      </g>
     `;
   } else if (shape === "Runner") {
     viewBox = "0 0 540 1500";
     innerSvg = `
       ${defs}
-      <rect x="15" y="15" width="510" height="1470" rx="26" fill="${baseBg}" />
-      <rect x="25" y="25" width="490" height="1450" rx="22" fill="none" stroke="url(#bm)" stroke-width="23" />
-      <g fill="none" stroke="url(#bm)" stroke-width="26">
-        ${[48, 74, 100, 126, 152, 178, 204, 230].map((p) => `<rect x="${p}" y="${p}" width="${540 - 2 * p}" height="${1500 - 2 * p}" rx="12" />`).join("")}
+      <rect x="15" y="15" width="510" height="1470" rx="36" fill="${baseBg}" />
+      <rect x="27" y="27" width="486" height="1446" rx="28" fill="none" stroke="${underlayColor}" stroke-width="32" />
+      <rect x="27" y="27" width="486" height="1446" rx="28" fill="none" stroke="url(#bm)" stroke-width="26" />
+      <g fill="none" stroke="url(#bm)" stroke-width="28" stroke-linejoin="round" stroke-linecap="round">
+        <rect x="59" y="59" width="422" height="1382" rx="20" />
+        <rect x="95" y="95" width="350" height="1310" rx="17" />
+        <rect x="131" y="131" width="278" height="1238" rx="14" />
+        <rect x="167" y="167" width="206" height="1166" rx="11" />
+        <rect x="203" y="203" width="134" height="1094" rx="8" />
       </g>
-      <rect x="245" y="245" width="50" height="1010" rx="4" fill="url(#bm)" />
-      <rect x="26" y="26" width="488" height="1448" rx="22" fill="url(#sp)" opacity="0.6" />
+      <rect x="235" y="235" width="70" height="1030" rx="6" fill="url(#bm)" />
+      <rect x="27" y="27" width="486" height="1446" rx="28" fill="url(#sp)" opacity="0.55" />
+      <g fill="none" stroke="#FFFDF8" stroke-width="3.2" opacity="0.7" stroke-linejoin="round">
+        <rect x="43" y="43" width="454" height="1414" rx="22" />
+        <rect x="79" y="79" width="382" height="1342" rx="18" />
+        <rect x="151" y="151" width="238" height="1198" rx="12" />
+      </g>
+      <g fill="${brownDark}" opacity="0.65">
+        <circle cx="60" cy="80" r="1.8"/>
+        <circle cx="480" cy="80" r="1.8"/>
+        <circle cx="60" cy="1420" r="1.8"/>
+        <circle cx="480" cy="1420" r="1.8"/>
+      </g>
     `;
   } else if (shape === "Arch") {
     viewBox = "0 0 1000 1400";
     innerSvg = `
       ${defs}
-      <path d="M 20 1380 L 20 500 A 480 480 0 0 1 980 500 L 980 1380 Z" fill="${baseBg}" />
-      <path d="M 30 1370 L 30 500 A 470 470 0 0 1 970 500 L 970 1370 Z" fill="none" stroke="url(#bm)" stroke-width="25" />
-      <g fill="none" stroke="url(#bm)" stroke-width="27">
-        ${[442, 412, 382, 352, 322, 292, 262, 232, 202, 172, 142, 112, 82].map((r, i) => `<path d="M ${500 - r} ${1370 - i * 4} L ${500 - r} 500 A ${r} ${r} 0 0 1 ${500 + r} 500 L ${500 + r} ${1370 - i * 4}" />`).join("")}
+      <path d="M 18 1382 L 18 500 A 482 482 0 0 1 982 500 L 982 1382 Z" fill="${baseBg}" />
+      <path d="M 31 1369 L 31 500 A 469 469 0 0 1 969 500 L 969 1369 Z" fill="none" stroke="${underlayColor}" stroke-width="34" />
+      <path d="M 31 1369 L 31 500 A 469 469 0 0 1 969 500 L 969 1369 Z" fill="none" stroke="url(#bm)" stroke-width="28" />
+      <g fill="none" stroke="url(#bm)" stroke-width="30" stroke-linejoin="round" stroke-linecap="round">
+        ${[433, 397, 361, 325, 289, 253, 217, 181, 145, 109, 73].map((r, i) => `<path d="M ${500 - r} ${1369 - i * 4} L ${500 - r} 500 A ${r} ${r} 0 0 1 ${500 + r} 500 L ${500 + r} ${1369 - i * 4}" />`).join("")}
       </g>
       <path d="M 450 1320 L 450 500 A 50 50 0 0 1 550 500 L 550 1320 Z" fill="url(#bm)" />
+      <path d="M 31 1369 L 31 500 A 469 469 0 0 1 969 500 L 969 1369 Z" fill="url(#sp)" opacity="0.55" />
+      <g fill="none" stroke="#FFFDF8" stroke-width="3.2" opacity="0.7" stroke-linejoin="round">
+        ${[452, 416, 344, 272, 200, 128].map((r, i) => `<path d="M ${500 - r} ${1360 - i * 4} L ${500 - r} 500 A ${r} ${r} 0 0 1 ${500 + r} 500 L ${500 + r} ${1360 - i * 4}" />`).join("")}
+      </g>
     `;
   } else {
     // Rectangular
     innerSvg = `
       ${defs}
-      <rect x="20" y="20" width="960" height="1360" rx="34" fill="${baseBg}" />
-      <rect x="30" y="30" width="940" height="1340" rx="29" fill="none" stroke="url(#bm)" stroke-width="25" />
-      <g fill="none" stroke="url(#bm)" stroke-width="27">
-        ${[58, 88, 118, 148, 178, 208, 238, 268, 298, 328, 358, 388, 418].map((p) => `<rect x="${p}" y="${p}" width="${1000 - 2 * p}" height="${1400 - 2 * p}" rx="14" />`).join("")}
+      <rect x="18" y="18" width="964" height="1364" rx="38" fill="${baseBg}" />
+      <rect x="31" y="31" width="938" height="1338" rx="31" fill="none" stroke="${underlayColor}" stroke-width="34" />
+      <rect x="31" y="31" width="938" height="1338" rx="31" fill="none" stroke="url(#bm)" stroke-width="28" />
+      <g fill="none" stroke="url(#bm)" stroke-width="30" stroke-linejoin="round" stroke-linecap="round">
+        <rect x="67" y="67" width="866" height="1266" rx="27" />
+        <rect x="103" y="103" width="794" height="1194" rx="24" />
+        <rect x="139" y="139" width="722" height="1122" rx="21" />
+        <rect x="175" y="175" width="650" height="1050" rx="19" />
+        <rect x="211" y="211" width="578" height="978" rx="17" />
+        <rect x="247" y="247" width="506" height="906" rx="15" />
+        <rect x="283" y="283" width="434" height="834" rx="13" />
+        <rect x="319" y="319" width="362" height="762" rx="11" />
+        <rect x="355" y="355" width="290" height="690" rx="10" />
+        <rect x="391" y="391" width="218" height="618" rx="8" />
+        <rect x="427" y="427" width="146" height="546" rx="7" />
       </g>
-      <rect x="448" y="448" width="104" height="504" rx="5" fill="url(#bm)" />
-      <rect x="31" y="31" width="938" height="1338" rx="29" fill="url(#sp)" opacity="0.6" />
+      <rect x="448" y="448" width="104" height="504" rx="6" fill="url(#bm)" />
+      <rect x="31" y="31" width="938" height="1338" rx="31" fill="url(#sp)" opacity="0.55" />
+      <g fill="none" stroke="#FFFDF8" stroke-width="3.2" opacity="0.7" stroke-linejoin="round">
+        <rect x="48" y="48" width="904" height="1304" rx="28" />
+        <rect x="84" y="84" width="832" height="1232" rx="24" />
+        <rect x="156" y="156" width="688" height="1088" rx="19" />
+        <rect x="228" y="228" width="544" height="944" rx="15" />
+        <rect x="300" y="300" width="400" height="800" rx="11" />
+        <rect x="372" y="372" width="256" height="656" rx="8" />
+      </g>
+      <g fill="${brownDark}" opacity="0.65">
+        <circle cx="82" cy="82" r="2"/>
+        <circle cx="116" cy="112" r="1.7"/>
+        <circle cx="148" cy="146" r="2"/>
+        <circle cx="182" cy="181" r="1.6"/>
+        <circle cx="214" cy="214" r="2"/>
+        <circle cx="914" cy="87" r="1.8"/>
+        <circle cx="882" cy="121" r="2"/>
+        <circle cx="846" cy="154" r="1.6"/>
+        <circle cx="812" cy="188" r="2"/>
+        <circle cx="82" cy="1280" r="2"/>
+        <circle cx="118" cy="1248" r="1.7"/>
+        <circle cx="154" cy="1212" r="2"/>
+        <circle cx="190" cy="1178" r="1.6"/>
+        <circle cx="914" cy="1280" r="2"/>
+        <circle cx="880" cy="1244" r="1.7"/>
+        <circle cx="846" cy="1210" r="2"/>
+      </g>
     `;
   }
 
@@ -242,6 +364,8 @@ function ConcentricBraidedRugSvg({
 
   const whiteLight = adjustBrightness(whiteColor, 8);
   const baseBg = adjustBrightness(whiteColor, -8);
+  const patternBg = adjustBrightness(whiteColor, -5);
+  const underlayColor = adjustBrightness(brownColor, 18);
 
   const uniqueId = useMemo(() => Math.random().toString(36).substring(2, 8), []);
   const patternId = `braidMix_${uniqueId}`;
@@ -250,44 +374,55 @@ function ConcentricBraidedRugSvg({
   // Common SVG Defs for mixed braid and speckles
   const renderDefs = () => (
     <defs>
-      {/* MIXED BRAID: white + brown fibers */}
-      <pattern id={patternId} width="32" height="18" patternUnits="userSpaceOnUse">
-        {/* brown fibers */}
+      {/* BRAIDED ROPE TEXTURE */}
+      <pattern id={patternId} width="28" height="18" patternUnits="userSpaceOnUse">
+        {/* base */}
+        <rect width="28" height="18" fill={patternBg} />
+
+        {/* diagonal brown rope fibers */}
         <path
-          d="M-8 4 L8 14 M8 4 L24 14 M24 4 L40 14"
+          d="M-8,2 L8,16 M6,2 L22,16 M20,2 L36,16"
           fill="none"
           stroke={brownColor}
-          strokeWidth="5.5"
+          strokeWidth="6"
           strokeLinecap="round"
         />
 
-        {/* white fibers */}
+        {/* diagonal white rope fibers */}
         <path
-          d="M-8 14 L8 4 M8 14 L24 4 M24 14 L40 4"
+          d="M-8,16 L8,2 M6,16 L22,2 M20,16 L36,2"
           fill="none"
           stroke={whiteColor}
-          strokeWidth="5.5"
+          strokeWidth="6"
           strokeLinecap="round"
         />
 
-        {/* tiny mixed fibers */}
-        <circle cx="5" cy="9" r="1.7" fill={brownDark} />
-        <circle cx="14" cy="5" r="1.4" fill={whiteLight} />
-        <circle cx="22" cy="12" r="1.6" fill={brownAccent} />
-        <circle cx="30" cy="7" r="1.4" fill={whiteLight} />
-        <circle cx="2" cy="15" r="1.2" fill={brownAccent} />
-        <circle cx="18" cy="16" r="1.2" fill={brownMid} />
+        {/* small brown fibers */}
+        <path
+          d="M1,5 L6,9 M13,11 L18,15 M23,4 L27,8"
+          stroke={brownDark}
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
+
+        {/* small white fibers */}
+        <path
+          d="M2,13 L6,10 M14,5 L18,9 M25,14 L28,11"
+          stroke="#FFFFFF"
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
       </pattern>
 
-      {/* FINE SPECKLED TEXTURE */}
-      <pattern id={specklesId} width="17" height="17" patternUnits="userSpaceOnUse">
-        <circle cx="2" cy="3" r="1.1" fill={brownDark} />
-        <circle cx="7" cy="5" r="1.0" fill={whiteLight} />
-        <circle cx="13" cy="2" r="1.1" fill={brownAccent} />
-        <circle cx="4" cy="11" r="1.1" fill={whiteLight} />
-        <circle cx="10" cy="9" r="1.0" fill={brownDark} />
-        <circle cx="15" cy="14" r="1.1" fill={whiteLight} />
-        <circle cx="7" cy="15" r="0.9" fill={brownColor} />
+      {/* FINER SURFACE FIBERS */}
+      <pattern id={specklesId} width="19" height="19" patternUnits="userSpaceOnUse">
+        <circle cx="2" cy="3" r="1.2" fill={brownDark} />
+        <circle cx="7" cy="6" r="1.0" fill={whiteLight} />
+        <circle cx="14" cy="3" r="1.2" fill={brownAccent} />
+        <circle cx="17" cy="9" r="1.0" fill={whiteLight} />
+        <circle cx="5" cy="13" r="1.1" fill={brownMid} />
+        <circle cx="12" cy="15" r="1.2" fill={whiteLight} />
+        <circle cx="18" cy="17" r="1.0" fill={brownDark} />
       </pattern>
     </defs>
   );
@@ -299,43 +434,66 @@ function ConcentricBraidedRugSvg({
         {renderDefs()}
 
         {/* BASE */}
-        <rect x="20" y="20" width="960" height="1360" rx="34" fill={baseBg} />
+        <rect x="18" y="18" width="964" height="1364" rx="38" fill={baseBg} />
 
-        {/* OUTER BRAIDED BORDER */}
-        <rect x="30" y="30" width="940" height="1340" rx="29" fill="none" stroke={`url(#${patternId})`} strokeWidth="25" />
+        {/* OUTER ROPE UNDERLAY */}
+        <rect x="31" y="31" width="938" height="1338" rx="31" fill="none" stroke={underlayColor} strokeWidth="34" />
 
-        {/* CONCENTRIC BRAID LINES */}
-        <g fill="none" stroke={`url(#${patternId})`} strokeWidth="27" strokeLinejoin="round" strokeLinecap="round">
-          <rect x="58" y="58" width="884" height="1284" rx="25" />
-          <rect x="88" y="88" width="824" height="1224" rx="22" />
-          <rect x="118" y="118" width="764" height="1164" rx="20" />
-          <rect x="148" y="148" width="704" height="1104" rx="18" />
-          <rect x="178" y="178" width="644" height="1044" rx="16" />
-          <rect x="208" y="208" width="584" height="984" rx="14" />
-          <rect x="238" y="238" width="524" height="924" rx="12" />
-          <rect x="268" y="268" width="464" height="864" rx="11" />
-          <rect x="298" y="298" width="404" height="804" rx="10" />
-          <rect x="328" y="328" width="344" height="744" rx="9" />
-          <rect x="358" y="358" width="284" height="684" rx="8" />
-          <rect x="388" y="388" width="224" height="624" rx="7" />
-          <rect x="418" y="418" width="164" height="564" rx="6" />
+        {/* OUTER ROPE BRAID */}
+        <rect x="31" y="31" width="938" height="1338" rx="31" fill="none" stroke={`url(#${patternId})`} strokeWidth="28" />
+
+        {/* CONCENTRIC BRAIDED RINGS */}
+        <g fill="none" stroke={`url(#${patternId})`} strokeWidth="30" strokeLinejoin="round" strokeLinecap="round">
+          <rect x="67" y="67" width="866" height="1266" rx="27" />
+          <rect x="103" y="103" width="794" height="1194" rx="24" />
+          <rect x="139" y="139" width="722" height="1122" rx="21" />
+          <rect x="175" y="175" width="650" height="1050" rx="19" />
+          <rect x="211" y="211" width="578" height="978" rx="17" />
+          <rect x="247" y="247" width="506" height="906" rx="15" />
+          <rect x="283" y="283" width="434" height="834" rx="13" />
+          <rect x="319" y="319" width="362" height="762" rx="11" />
+          <rect x="355" y="355" width="290" height="690" rx="10" />
+          <rect x="391" y="391" width="218" height="618" rx="8" />
+          <rect x="427" y="427" width="146" height="546" rx="7" />
         </g>
 
         {/* INNER CENTER */}
-        <rect x="448" y="448" width="104" height="504" rx="5" fill={`url(#${patternId})`} />
+        <rect x="448" y="448" width="104" height="504" rx="6" fill={`url(#${patternId})`} />
 
-        {/* FINE FIBER SPECKLES */}
-        <rect x="31" y="31" width="938" height="1338" rx="29" fill={`url(#specklesId)`} opacity="0.62" />
+        {/* FIBER SPECKLING */}
+        <rect x="31" y="31" width="938" height="1338" rx="31" fill={`url(#${specklesId})`} opacity="0.55" />
 
-        {/* BRAID HIGHLIGHTS */}
-        <g fill="none" stroke={whiteLight} strokeWidth="3" opacity="0.72" strokeLinejoin="round">
-          <rect x="45" y="45" width="910" height="1310" rx="27" />
-          <rect x="103" y="103" width="794" height="1194" rx="20" />
-          <rect x="161" y="161" width="678" height="1078" rx="16" />
-          <rect x="219" y="219" width="562" height="962" rx="12" />
-          <rect x="277" y="277" width="446" height="846" rx="10" />
-          <rect x="335" y="335" width="330" height="730" rx="8" />
-          <rect x="393" y="393" width="214" height="614" rx="6" />
+        {/* BRAID EDGE HIGHLIGHTS */}
+        <g fill="none" stroke="#FFFDF8" strokeWidth="3.2" opacity="0.7" strokeLinejoin="round">
+          <rect x="48" y="48" width="904" height="1304" rx="28" />
+          <rect x="84" y="84" width="832" height="1232" rx="24" />
+          <rect x="156" y="156" width="688" height="1088" rx="19" />
+          <rect x="228" y="228" width="544" height="944" rx="15" />
+          <rect x="300" y="300" width="400" height="800" rx="11" />
+          <rect x="372" y="372" width="256" height="656" rx="8" />
+        </g>
+
+        {/* TINY DARK/BROWN FIBER BREAKS */}
+        <g fill={brownDark} opacity="0.65">
+          <circle cx="82" cy="82" r="2" />
+          <circle cx="116" cy="112" r="1.7" />
+          <circle cx="148" cy="146" r="2" />
+          <circle cx="182" cy="181" r="1.6" />
+          <circle cx="214" cy="214" r="2" />
+
+          <circle cx="914" cy="87" r="1.8" />
+          <circle cx="882" cy="121" r="2" />
+          <circle cx="846" cy="154" r="1.6" />
+          <circle cx="812" cy="188" r="2" />
+
+          <circle cx="82" cy="1280" r="2" />
+          <circle cx="118" cy="1248" r="1.7" />
+          <circle cx="154" cy="1212" r="2" />
+          <circle cx="190" cy="1178" r="1.6" />
+
+          <circle cx="914" cy="1280" r="2" />
+          <circle cx="880" cy="1244" r="1.7" />
+          <circle cx="846" cy="1210" r="2" />
         </g>
       </svg>
     );
@@ -348,60 +506,56 @@ function ConcentricBraidedRugSvg({
         {renderDefs()}
 
         {/* BASE */}
-        <circle cx="500" cy="500" r="480" fill={baseBg} />
+        <circle cx="500" cy="500" r="482" fill={baseBg} />
 
-        {/* OUTER BORDER */}
-        <circle cx="500" cy="500" r="470" fill="none" stroke={`url(#${patternId})`} strokeWidth="25" />
+        {/* OUTER ROPE UNDERLAY */}
+        <circle cx="500" cy="500" r="469" fill="none" stroke={underlayColor} strokeWidth="34" />
+
+        {/* OUTER ROPE BRAID */}
+        <circle cx="500" cy="500" r="469" fill="none" stroke={`url(#${patternId})`} strokeWidth="28" />
 
         {/* CONCENTRIC CIRCULAR BRAID LINES */}
-        <g fill="none" stroke={`url(#${patternId})`} strokeWidth="27" strokeLinejoin="round" strokeLinecap="round">
-          <circle cx="500" cy="500" r="442" />
-          <circle cx="500" cy="500" r="412" />
-          <circle cx="500" cy="500" r="382" />
-          <circle cx="500" cy="500" r="352" />
-          <circle cx="500" cy="500" r="322" />
-          <circle cx="500" cy="500" r="292" />
-          <circle cx="500" cy="500" r="262" />
-          <circle cx="500" cy="500" r="232" />
-          <circle cx="500" cy="500" r="202" />
-          <circle cx="500" cy="500" r="172" />
-          <circle cx="500" cy="500" r="142" />
-          <circle cx="500" cy="500" r="112" />
-          <circle cx="500" cy="500" r="82" />
+        <g fill="none" stroke={`url(#${patternId})`} strokeWidth="30" strokeLinejoin="round" strokeLinecap="round">
+          {[433, 397, 361, 325, 289, 253, 217, 181, 145, 109, 73].map((r) => (
+            <circle key={r} cx="500" cy="500" r={r} />
+          ))}
         </g>
 
         {/* INNER CENTER */}
         <circle cx="500" cy="500" r="54" fill={`url(#${patternId})`} />
 
-        {/* FINE FIBER SPECKLES */}
-        <circle cx="500" cy="500" r="470" fill={`url(#${specklesId})`} opacity="0.62" />
+        {/* FIBER SPECKLING */}
+        <circle cx="500" cy="500" r="469" fill={`url(#${specklesId})`} opacity="0.55" />
 
-        {/* BRAID HIGHLIGHTS */}
-        <g fill="none" stroke={whiteLight} strokeWidth="3" opacity="0.72">
-          <circle cx="500" cy="500" r="455" />
-          <circle cx="500" cy="500" r="397" />
-          <circle cx="500" cy="500" r="337" />
-          <circle cx="500" cy="500" r="277" />
-          <circle cx="500" cy="500" r="217" />
-          <circle cx="500" cy="500" r="157" />
-          <circle cx="500" cy="500" r="97" />
+        {/* BRAID EDGE HIGHLIGHTS */}
+        <g fill="none" stroke="#FFFDF8" strokeWidth="3.2" opacity="0.7" strokeLinejoin="round">
+          {[452, 416, 344, 272, 200, 128].map((r) => (
+            <circle key={r} cx="500" cy="500" r={r} />
+          ))}
+        </g>
+
+        {/* TINY DARK/BROWN FIBER BREAKS */}
+        <g fill={brownDark} opacity="0.65">
+          <circle cx="500" cy="68" r="2" />
+          <circle cx="500" cy="932" r="2" />
+          <circle cx="68" cy="500" r="2" />
+          <circle cx="932" cy="500" r="2" />
+          <circle cx="195" cy="195" r="1.8" />
+          <circle cx="805" cy="195" r="1.8" />
+          <circle cx="195" cy="805" r="1.8" />
+          <circle cx="805" cy="805" r="1.8" />
         </g>
       </svg>
     );
   }
 
   // 3. OVAL (AUTHENTIC BRAIDED STADIUM / RECTANGULAR OVAL) SHAPE
-  // In handmade braided rugs, an oval is built on a rectangular starter core:
-  // - Left & right edges are completely straight and parallel (like a rectangle)
-  // - Top & bottom ends are smooth rounded semicircles
   if (shape === "Oval") {
     const coreY1 = 470;
-    const coreY2 = 930;
-    const coreHeight = coreY2 - coreY1; // 460px of straight rectangular sides
-    const outerR = 430; // 430px radius semicircular caps (width = 860px, height = 1320px)
-
-    const concentricRadii = [402, 372, 342, 312, 282, 252, 222, 192, 162, 132, 102, 72, 42];
-    const highlightRadii = [416, 357, 297, 237, 177, 117, 57];
+    const coreHeight = 460;
+    const outerR = 430;
+    const concentricRadii = [394, 358, 322, 286, 250, 214, 178, 142, 106, 70, 34];
+    const highlightRadii = [412, 376, 304, 232, 160, 88];
 
     return (
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1400" className="w-full h-full max-h-full">
@@ -409,16 +563,29 @@ function ConcentricBraidedRugSvg({
 
         {/* BASE BACKING */}
         <rect
-          x={500 - (outerR + 10)}
-          y={coreY1 - (outerR + 10)}
-          width={2 * (outerR + 10)}
-          height={coreHeight + 2 * (outerR + 10)}
-          rx={outerR + 10}
-          ry={outerR + 10}
+          x={500 - (outerR + 18)}
+          y={coreY1 - (outerR + 18)}
+          width={2 * (outerR + 18)}
+          height={coreHeight + 2 * (outerR + 18)}
+          rx={outerR + 18}
+          ry={outerR + 18}
           fill={baseBg}
         />
 
-        {/* OUTER BRAIDED BORDER */}
+        {/* OUTER ROPE UNDERLAY */}
+        <rect
+          x={500 - outerR}
+          y={coreY1 - outerR}
+          width={2 * outerR}
+          height={coreHeight + 2 * outerR}
+          rx={outerR}
+          ry={outerR}
+          fill="none"
+          stroke={underlayColor}
+          strokeWidth="34"
+        />
+
+        {/* OUTER ROPE BRAID */}
         <rect
           x={500 - outerR}
           y={coreY1 - outerR}
@@ -428,11 +595,11 @@ function ConcentricBraidedRugSvg({
           ry={outerR}
           fill="none"
           stroke={`url(#${patternId})`}
-          strokeWidth="25"
+          strokeWidth="28"
         />
 
-        {/* CONCENTRIC BRAID LOOPS (PARALLEL STRAIGHT SIDES + ROUNDED CAPS) */}
-        <g fill="none" stroke={`url(#${patternId})`} strokeWidth="27" strokeLinejoin="round" strokeLinecap="round">
+        {/* CONCENTRIC BRAID LOOPS */}
+        <g fill="none" stroke={`url(#${patternId})`} strokeWidth="30" strokeLinejoin="round" strokeLinecap="round">
           {concentricRadii.map((r) => (
             <rect
               key={r}
@@ -448,16 +615,16 @@ function ConcentricBraidedRugSvg({
 
         {/* INNER STRAIGHT STARTER CORE BRAID */}
         <rect
-          x={500 - 30}
-          y={coreY1 - 30}
-          width={60}
-          height={coreHeight + 60}
-          rx={30}
-          ry={30}
+          x={476}
+          y={coreY1 - 24}
+          width={48}
+          height={coreHeight + 48}
+          rx={24}
+          ry={24}
           fill={`url(#${patternId})`}
         />
 
-        {/* FINE FIBER SPECKLES */}
+        {/* FIBER SPECKLES */}
         <rect
           x={500 - outerR}
           y={coreY1 - outerR}
@@ -466,11 +633,11 @@ function ConcentricBraidedRugSvg({
           rx={outerR}
           ry={outerR}
           fill={`url(#${specklesId})`}
-          opacity="0.62"
+          opacity="0.55"
         />
 
         {/* BRAID HIGHLIGHT ACCENTS */}
-        <g fill="none" stroke={whiteLight} strokeWidth="3" opacity="0.72" strokeLinejoin="round">
+        <g fill="none" stroke="#FFFDF8" strokeWidth="3.2" opacity="0.7" strokeLinejoin="round">
           {highlightRadii.map((r) => (
             <rect
               key={r}
@@ -483,6 +650,16 @@ function ConcentricBraidedRugSvg({
             />
           ))}
         </g>
+
+        {/* FIBER BREAKS */}
+        <g fill={brownDark} opacity="0.65">
+          <circle cx="116" cy="470" r="2" />
+          <circle cx="884" cy="470" r="2" />
+          <circle cx="116" cy="930" r="2" />
+          <circle cx="884" cy="930" r="2" />
+          <circle cx="500" cy="70" r="2" />
+          <circle cx="500" cy="1330" r="2" />
+        </g>
       </svg>
     );
   }
@@ -494,35 +671,42 @@ function ConcentricBraidedRugSvg({
         {renderDefs()}
 
         {/* BASE */}
-        <rect x="15" y="15" width="510" height="1470" rx="26" fill={baseBg} />
+        <rect x="15" y="15" width="510" height="1470" rx="36" fill={baseBg} />
 
-        {/* OUTER BORDER */}
-        <rect x="25" y="25" width="490" height="1450" rx="22" fill="none" stroke={`url(#${patternId})`} strokeWidth="23" />
+        {/* OUTER ROPE UNDERLAY */}
+        <rect x="27" y="27" width="486" height="1446" rx="28" fill="none" stroke={underlayColor} strokeWidth="32" />
+
+        {/* OUTER ROPE BRAID */}
+        <rect x="27" y="27" width="486" height="1446" rx="28" fill="none" stroke={`url(#${patternId})`} strokeWidth="26" />
 
         {/* CONCENTRIC RUNNER BRAID LINES */}
-        <g fill="none" stroke={`url(#${patternId})`} strokeWidth="26" strokeLinejoin="round" strokeLinecap="round">
-          <rect x="48" y="48" width="444" height="1404" rx="19" />
-          <rect x="74" y="74" width="392" height="1352" rx="16" />
-          <rect x="100" y="100" width="340" height="1300" rx="14" />
-          <rect x="126" y="126" width="288" height="1248" rx="12" />
-          <rect x="152" y="152" width="236" height="1196" rx="10" />
-          <rect x="178" y="178" width="184" height="1144" rx="8" />
-          <rect x="204" y="204" width="132" height="1092" rx="6" />
-          <rect x="230" y="230" width="80" height="1040" rx="5" />
+        <g fill="none" stroke={`url(#${patternId})`} strokeWidth="28" strokeLinejoin="round" strokeLinecap="round">
+          <rect x="59" y="59" width="422" height="1382" rx="20" />
+          <rect x="95" y="95" width="350" height="1310" rx="17" />
+          <rect x="131" y="131" width="278" height="1238" rx="14" />
+          <rect x="167" y="167" width="206" height="1166" rx="11" />
+          <rect x="203" y="203" width="134" height="1094" rx="8" />
         </g>
 
         {/* INNER CENTER */}
-        <rect x="245" y="245" width="50" height="1010" rx="4" fill={`url(#${patternId})`} />
+        <rect x="235" y="235" width="70" height="1030" rx="6" fill={`url(#${patternId})`} />
 
         {/* SPECKLES */}
-        <rect x="26" y="26" width="488" height="1448" rx="22" fill={`url(#${specklesId})`} opacity="0.62" />
+        <rect x="27" y="27" width="486" height="1446" rx="28" fill={`url(#${specklesId})`} opacity="0.55" />
 
         {/* HIGHLIGHTS */}
-        <g fill="none" stroke={whiteLight} strokeWidth="3" opacity="0.72" strokeLinejoin="round">
-          <rect x="36" y="36" width="468" height="1428" rx="20" />
-          <rect x="87" y="87" width="366" height="1326" rx="15" />
-          <rect x="139" y="139" width="262" height="1222" rx="11" />
-          <rect x="191" y="191" width="158" height="1118" rx="7" />
+        <g fill="none" stroke="#FFFDF8" strokeWidth="3.2" opacity="0.7" strokeLinejoin="round">
+          <rect x="43" y="43" width="454" height="1414" rx="22" />
+          <rect x="79" y="79" width="382" height="1342" rx="18" />
+          <rect x="151" y="151" width="238" height="1198" rx="12" />
+        </g>
+
+        {/* FIBER BREAKS */}
+        <g fill={brownDark} opacity="0.65">
+          <circle cx="60" cy="80" r="1.8" />
+          <circle cx="480" cy="80" r="1.8" />
+          <circle cx="60" cy="1420" r="1.8" />
+          <circle cx="480" cy="1420" r="1.8" />
         </g>
       </svg>
     );
@@ -535,43 +719,54 @@ function ConcentricBraidedRugSvg({
         {renderDefs()}
 
         {/* BASE */}
-        <rect x="20" y="20" width="960" height="960" rx="34" fill={baseBg} />
+        <rect x="18" y="18" width="964" height="964" rx="38" fill={baseBg} />
 
-        {/* OUTER BORDER */}
-        <rect x="30" y="30" width="940" height="940" rx="29" fill="none" stroke={`url(#${patternId})`} strokeWidth="25" />
+        {/* OUTER ROPE UNDERLAY */}
+        <rect x="31" y="31" width="938" height="938" rx="31" fill="none" stroke={underlayColor} strokeWidth="34" />
+
+        {/* OUTER ROPE BRAID */}
+        <rect x="31" y="31" width="938" height="938" rx="31" fill="none" stroke={`url(#${patternId})`} strokeWidth="28" />
 
         {/* CONCENTRIC SQUARE RINGS */}
-        <g fill="none" stroke={`url(#${patternId})`} strokeWidth="27" strokeLinejoin="round" strokeLinecap="round">
-          <rect x="58" y="58" width="884" height="884" rx="25" />
-          <rect x="88" y="88" width="824" height="824" rx="22" />
-          <rect x="118" y="118" width="764" height="764" rx="20" />
-          <rect x="148" y="148" width="704" height="704" rx="18" />
-          <rect x="178" y="178" width="644" height="644" rx="16" />
-          <rect x="208" y="208" width="584" height="584" rx="14" />
-          <rect x="238" y="238" width="524" height="524" rx="12" />
-          <rect x="268" y="268" width="464" height="464" rx="11" />
-          <rect x="298" y="298" width="404" height="404" rx="10" />
-          <rect x="328" y="328" width="344" height="344" rx="9" />
-          <rect x="358" y="358" width="284" height="284" rx="8" />
-          <rect x="388" y="388" width="224" height="224" rx="7" />
-          <rect x="418" y="418" width="164" height="164" rx="6" />
+        <g fill="none" stroke={`url(#${patternId})`} strokeWidth="30" strokeLinejoin="round" strokeLinecap="round">
+          <rect x="67" y="67" width="866" height="866" rx="27" />
+          <rect x="103" y="103" width="794" height="794" rx="24" />
+          <rect x="139" y="139" width="722" height="722" rx="21" />
+          <rect x="175" y="175" width="650" height="650" rx="19" />
+          <rect x="211" y="211" width="578" height="578" rx="17" />
+          <rect x="247" y="247" width="506" height="506" rx="15" />
+          <rect x="283" y="283" width="434" height="434" rx="13" />
+          <rect x="319" y="319" width="362" height="362" rx="11" />
+          <rect x="355" y="355" width="290" height="290" rx="10" />
+          <rect x="391" y="391" width="218" height="218" rx="8" />
+          <rect x="427" y="427" width="146" height="146" rx="7" />
         </g>
 
         {/* INNER CENTER */}
-        <rect x="448" y="448" width="104" height="104" rx="5" fill={`url(#${patternId})`} />
+        <rect x="448" y="448" width="104" height="104" rx="6" fill={`url(#${patternId})`} />
 
         {/* SPECKLES */}
-        <rect x="31" y="31" width="938" height="938" rx="29" fill={`url(#${specklesId})`} opacity="0.62" />
+        <rect x="31" y="31" width="938" height="938" rx="31" fill={`url(#${specklesId})`} opacity="0.55" />
 
         {/* HIGHLIGHTS */}
-        <g fill="none" stroke={whiteLight} strokeWidth="3" opacity="0.72" strokeLinejoin="round">
-          <rect x="45" y="45" width="910" height="910" rx="27" />
-          <rect x="103" y="103" width="794" height="794" rx="20" />
-          <rect x="161" y="161" width="678" height="678" rx="16" />
-          <rect x="219" y="219" width="562" height="562" rx="12" />
-          <rect x="277" y="277" width="446" height="446" rx="10" />
-          <rect x="335" y="335" width="330" height="330" rx="8" />
-          <rect x="393" y="393" width="214" height="214" rx="6" />
+        <g fill="none" stroke="#FFFDF8" strokeWidth="3.2" opacity="0.7" strokeLinejoin="round">
+          <rect x="48" y="48" width="904" height="904" rx="28" />
+          <rect x="84" y="84" width="832" height="832" rx="24" />
+          <rect x="156" y="156" width="688" height="688" rx="19" />
+          <rect x="228" y="228" width="544" height="544" rx="15" />
+          <rect x="300" y="300" width="400" height="400" rx="11" />
+          <rect x="372" y="372" width="256" height="256" rx="8" />
+        </g>
+
+        {/* FIBER BREAKS */}
+        <g fill={brownDark} opacity="0.65">
+          <circle cx="82" cy="82" r="2" />
+          <circle cx="116" cy="112" r="1.7" />
+          <circle cx="148" cy="146" r="2" />
+          <circle cx="914" cy="87" r="1.8" />
+          <circle cx="882" cy="121" r="2" />
+          <circle cx="82" cy="914" r="2" />
+          <circle cx="914" cy="914" r="2" />
         </g>
       </svg>
     );
@@ -583,22 +778,30 @@ function ConcentricBraidedRugSvg({
       {renderDefs()}
 
       {/* BASE */}
-      <path d="M 20 1380 L 20 500 A 480 480 0 0 1 980 500 L 980 1380 Z" fill={baseBg} />
+      <path d="M 18 1382 L 18 500 A 482 482 0 0 1 982 500 L 982 1382 Z" fill={baseBg} />
 
-      {/* OUTER BORDER */}
+      {/* OUTER ROPE UNDERLAY */}
       <path
-        d="M 30 1370 L 30 500 A 470 470 0 0 1 970 500 L 970 1370 Z"
+        d="M 31 1369 L 31 500 A 469 469 0 0 1 969 500 L 969 1369 Z"
+        fill="none"
+        stroke={underlayColor}
+        strokeWidth="34"
+      />
+
+      {/* OUTER ROPE BRAID */}
+      <path
+        d="M 31 1369 L 31 500 A 469 469 0 0 1 969 500 L 969 1369 Z"
         fill="none"
         stroke={`url(#${patternId})`}
-        strokeWidth="25"
+        strokeWidth="28"
       />
 
       {/* CONCENTRIC ARCH BRAID LINES */}
-      <g fill="none" stroke={`url(#${patternId})`} strokeWidth="27" strokeLinejoin="round" strokeLinecap="round">
-        {[442, 412, 382, 352, 322, 292, 262, 232, 202, 172, 142, 112, 82].map((r, i) => {
+      <g fill="none" stroke={`url(#${patternId})`} strokeWidth="30" strokeLinejoin="round" strokeLinecap="round">
+        {[433, 397, 361, 325, 289, 253, 217, 181, 145, 109, 73].map((r, i) => {
           const x1 = 500 - r;
           const x2 = 500 + r;
-          const yBot = 1370 - i * 4;
+          const yBot = 1369 - i * 4;
           return (
             <path
               key={r}
@@ -611,19 +814,19 @@ function ConcentricBraidedRugSvg({
       {/* INNER CENTER ARCH */}
       <path d="M 450 1320 L 450 500 A 50 50 0 0 1 550 500 L 550 1320 Z" fill={`url(#${patternId})`} />
 
-      {/* SPECKLES */}
+      {/* FIBER SPECKLES */}
       <path
         d="M 31 1369 L 31 500 A 469 469 0 0 1 969 500 L 969 1369 Z"
         fill={`url(#${specklesId})`}
-        opacity="0.62"
+        opacity="0.55"
       />
 
       {/* HIGHLIGHTS */}
-      <g fill="none" stroke={whiteLight} strokeWidth="3" opacity="0.72" strokeLinejoin="round">
-        {[455, 397, 337, 277, 217, 157, 97].map((r, i) => {
+      <g fill="none" stroke="#FFFDF8" strokeWidth="3.2" opacity="0.7" strokeLinejoin="round">
+        {[452, 416, 344, 272, 200, 128].map((r, i) => {
           const x1 = 500 - r;
           const x2 = 500 + r;
-          const yBot = 1370 - i * 8;
+          const yBot = 1360 - i * 4;
           return (
             <path
               key={r}

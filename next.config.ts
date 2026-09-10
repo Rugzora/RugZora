@@ -2,13 +2,15 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
-    unoptimized: true, // 🌟 Serve pristine, full-resolution WebP directly from Supabase Cloudflare CDN (Zero blurriness, zero Vercel compression)
     formats: ["image/avif", "image/webp"],
-    minimumCacheTTL: 2678400, // 31 days edge CDN caching
-    deviceSizes: [640, 750, 828, 1080, 1200, 1600, 1920, 2048, 3840],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384, 512, 768],
-    qualities: [75, 80, 85, 90, 95, 100],
+    minimumCacheTTL: 31536000, // 1 year caching for maximum speed
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "qjpjltaiazwybhsmnkve.supabase.co",
+      },
       {
         protocol: "https",
         hostname: "**.supabase.co",

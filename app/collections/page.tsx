@@ -134,7 +134,7 @@ export default function Shop() {
               alt="Collections Header"
               fill
               priority
-              quality={95}
+              quality={85}
               sizes="100vw"
               className="object-cover"
             />
@@ -230,7 +230,7 @@ export default function Shop() {
                             loading={index < 2 ? "eager" : "lazy"}
                             decoding="async"
                             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1440px) 33vw, 25vw"
-                            quality={95}
+                            quality={85}
                             className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out" 
                           />
                         )}

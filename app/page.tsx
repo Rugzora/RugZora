@@ -32,7 +32,7 @@ function ScrollFadeImage({
         priority={fetchPriority === "high"}
         loading={fetchPriority === "high" ? "eager" : "lazy"}
         decoding="async"
-        quality={95}
+        quality={85}
         className={`object-cover transition-opacity duration-300 ${className}`}
       />
     </div>
@@ -196,7 +196,7 @@ export default function Home() {
                 alt="RugZora Premium Living Room"
                 fill
                 priority
-                quality={95}
+                quality={85}
                 sizes="100vw"
                 className="object-cover opacity-90"
               />

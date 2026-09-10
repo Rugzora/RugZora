@@ -62,6 +62,7 @@ export default function Navbar() {
     { name: "Home", href: "/" },
     { name: "Collections", href: "/collections" },
     { name: "Our Legacy", href: "/legacy" },
+    { name: "Journal", href: "/blog" },
     { name: "About Us", href: "/about" },
     { name: "Contact", href: "/contact" },
   ];
